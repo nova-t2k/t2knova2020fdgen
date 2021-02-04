@@ -158,46 +158,47 @@ TH1D *totxsecs;
 hblob<TH1D> *Enu;
 hblob<TH3D> *EnuPLepThetaLep;
 hblob<TH3D> *EnuPLepEAvHad;
+hblob<TH3D> *EnuQ2EAvHad;
+hblob<TH3D> *EnuPtLepEAvHad;
 
 void Fill(TTreeReader &rdr, bool ist2k) {
   Enu = new hblob<TH1D>(
       "Enu",
-      ";#it{E_{#nu}} (GeV);#it{y}; d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}", 100,
+      ";#it{E_{#nu}} (GeV);#it{y}; d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}", 200,
       0, 10);
 
   if (ist2k) {
     EnuPLepThetaLep = new hblob<TH3D>(
         "EnuPLepThetaLep",
-        ";#it{E_{#nu}} (GeV);#it{p_{lep}} (GeV/#it{c});#theta_{lep} (rad);"
-        "d^{3}#sigma/d#it{E_{#nu}}d#it{p_{lep}}d#theta_{lep} cm^{2} "
+        ";#it{E_{#nu}} (GeV);#it{p}_{lep} (GeV/#it{c});#theta_{lep} (rad)"
         "GeV^{-2} #it{c} rad^{-1}",
-        50, 0, 2, 50, 0, 2, 50, 0, M_PI);
+        100, 0, 5, 50, 0, 5, 25, 0, M_PI);
   } else {
     EnuPLepEAvHad = new hblob<TH3D>(
         "EnuPLepEAvHad",
-        ";#it{E_{#nu}} (GeV);#it{p_{lep}} (GeV/#it{c}); #it{E}_{Had}^{Vis} "
-        "(GeV)"
-        "d^{3}#sigma/d#it{E_{#nu}}d#it{p_{lep}}d#it{E}_{Had}^{Vis} cm^{2} "
-        "GeV^{-3} #it{c}",
-        50, 0, 5, 50, 0, 5, 50, 0, 5);
+        ";#it{E_{#nu}} (GeV);#it{p}_{lep} (GeV/#it{c}); #it{E}_{Had}^{Vis} "
+        "(GeV)",
+        100, 0, 5, 50, 0, 5, 40, 0, 4);
+    EnuQ2EAvHad = new hblob<TH3D>(
+        "EnuQ2EAvHad",
+        ";#it{E_{#nu}} (GeV);Q^{2} (GeV^{2}/#it{c}^{2}); #it{E}_{Had}^{Vis} "
+        "(GeV)",
+        100, 0, 5, 50, 0, 5, 40, 0, 4);
+    EnuPtLepEAvHad = new hblob<TH3D>(
+        "EnuPtLepEAvHad",
+        ";#it{E_{#nu}} (GeV);#it{p}^{T}_{lep} (GeV/#it{c}); #it{E}_{Had}^{Vis} "
+        "(GeV)",
+        100, 0, 5, 40, 0, 2, 40, 0, 4);
   }
 
   totxsecs = new TH1D("totxsecs", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
   totxsecs->SetDirectory(nullptr);
 
-  TTreeReaderValue<int> Mode(rdr, "Mode");
-  TTreeReaderValue<bool> isNN(rdr, "isNN");
-  TTreeReaderValue<bool> isNP(rdr, "isNP");
-  TTreeReaderValue<float> q0(rdr, "q0");
-  TTreeReaderValue<float> q3(rdr, "q3");
-  TTreeReaderValue<float> y(rdr, "y");
-  TTreeReaderValue<float> x(rdr, "x");
   TTreeReaderValue<float> CosLep(rdr, "CosLep");
-  TTreeReaderValue<float> Enu_QE(rdr, "Enu_QE");
   TTreeReaderValue<float> EavAlt(rdr, "EavAlt");
   TTreeReaderValue<float> Enu_true(rdr, "Enu_true");
   TTreeReaderValue<float> PLep_v(rdr, "PLep");
-  TTreeReaderValue<float> ELep_v(rdr, "ELep");
+  TTreeReaderValue<float> Q2(rdr, "Q2");
 
   TTreeReaderValue<bool> flagCCINC(rdr, "flagCCINC");
   TTreeReaderValue<bool> flagCC0pi(rdr, "flagCC0pi");
@@ -260,6 +261,9 @@ void Fill(TTreeReader &rdr, bool ist2k) {
       EnuPLepThetaLep->Fill(w, fblob, *Enu_true, *PLep_v, acos(*CosLep));
     } else {
       EnuPLepEAvHad->Fill(w, fblob, *Enu_true, *PLep_v, *EavAlt);
+      EnuQ2EAvHad->Fill(w, fblob, *Enu_true, *Q2, *EavAlt);
+      EnuPtLepEAvHad->Fill(w, fblob, *Enu_true,
+                           (*PLep_v) * sqrt(1 - pow(*CosLep, 2)), *EavAlt);
     }
     ent_it++;
   }
@@ -321,11 +325,11 @@ int main(int argc, char const *argv[]) {
   totxsecs->GetXaxis()->SetBinLabel(3, "CC1#pi^{#pm}");
   totxsecs->GetXaxis()->SetBinLabel(4, "CC1#pi^{0}");
   totxsecs->GetXaxis()->SetBinLabel(5, "CCMulti#pi + CCOther");
-  totxsecs->GetXaxis()->SetBinLabel(1, "NCInc");
-  totxsecs->GetXaxis()->SetBinLabel(2, "NC0#pi");
-  totxsecs->GetXaxis()->SetBinLabel(3, "NC1#pi^{#pm}");
-  totxsecs->GetXaxis()->SetBinLabel(4, "NC1#pi^{0}");
-  totxsecs->GetXaxis()->SetBinLabel(5, "NCMulti#pi + CCOther");
+  totxsecs->GetXaxis()->SetBinLabel(6, "NCInc");
+  totxsecs->GetXaxis()->SetBinLabel(7, "NC0#pi");
+  totxsecs->GetXaxis()->SetBinLabel(8, "NC1#pi^{#pm}");
+  totxsecs->GetXaxis()->SetBinLabel(9, "NC1#pi^{0}");
+  totxsecs->GetXaxis()->SetBinLabel(10, "NCMulti#pi + CCOther");
   dout->WriteTObject(totxsecs, "totxsecs");
 
   Enu->Write(dout);
@@ -336,15 +340,48 @@ int main(int argc, char const *argv[]) {
     h2->SetName((std::string(h.GetName()) + "_pyz").c_str());
     return TH2D(*h2.get());
   };
+  auto ProjYX = [=](TH3D const &h) -> TH2D {
+    std::unique_ptr<TH2D> h2(dynamic_cast<TH2D *>(h.Project3D("yx")));
+    h2->SetDirectory(nullptr);
+    h2->SetName((std::string(h.GetName()) + "_pyx").c_str());
+    return TH2D(*h2.get());
+  };
+  auto ProjXZ = [=](TH3D const &h) -> TH2D {
+    std::unique_ptr<TH2D> h2(dynamic_cast<TH2D *>(h.Project3D("xz")));
+    h2->SetDirectory(nullptr);
+    h2->SetName((std::string(h.GetName()) + "_pxz").c_str());
+    return TH2D(*h2.get());
+  };
 
   if (ist2k) {
     EnuPLepThetaLep->Write(dout);
     auto PLepThetaLep = EnuPLepThetaLep->Transform<TH2D>(ProjYZ);
     PLepThetaLep.Write(dout);
+    auto EnuPLep = EnuPLepThetaLep->Transform<TH2D>(ProjYX);
+    EnuPLep.Write(dout);
+    auto EnuThetaLep = EnuPLepThetaLep->Transform<TH2D>(ProjXZ);
+    EnuThetaLep.Write(dout);
+
   } else {
     EnuPLepEAvHad->Write(dout);
     auto PLepEAvHad = EnuPLepEAvHad->Transform<TH2D>(ProjYZ);
     PLepEAvHad.Write(dout);
+    auto EnuPLep = EnuPLepEAvHad->Transform<TH2D>(ProjYX);
+    EnuPLep.Write(dout);
+    auto EnuEAvHad = EnuPLepEAvHad->Transform<TH2D>(ProjXZ);
+    EnuEAvHad.Write(dout);
+
+    EnuQ2EAvHad->Write(dout);
+    auto Q2EAvHad = EnuQ2EAvHad->Transform<TH2D>(ProjYZ);
+    Q2EAvHad.Write(dout);
+    auto EnuQ2 = EnuQ2EAvHad->Transform<TH2D>(ProjYX);
+    EnuQ2.Write(dout);
+
+    EnuPtLepEAvHad->Write(dout);
+    auto PtLepEAvHad = EnuPtLepEAvHad->Transform<TH2D>(ProjYZ);
+    PtLepEAvHad.Write(dout);
+    auto EnuPtLep = EnuPtLepEAvHad->Transform<TH2D>(ProjYX);
+    EnuPtLep.Write(dout);
   }
 
   fout.Close();
