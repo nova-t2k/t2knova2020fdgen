@@ -5,7 +5,7 @@
 #include "TH3.h"
 
 #include <iostream>
-#include <map>
+#include <unordered_map>
 
 namespace t2knova {
 
@@ -32,7 +32,7 @@ double GetFakeDataWeight_SKToNOvA(int nu_pdg, int lep_pdg, double E_nu_GeV,
 
 namespace t2knova {
 
-TH1 *GetTH1(TFile *f, std::string const &name) {
+inline TH1 *GetTH1(TFile *f, std::string const &name) {
   TDirectory *odir = gDirectory;
 
   TH1 *h;
@@ -54,7 +54,7 @@ TH1 *GetTH1(TFile *f, std::string const &name) {
 enum nuspecies { kNuMu = 0, kNuMub, kNuE, kNuEb };
 const char *all_nuspecies[] = {"numu", "numub", "nue", "nueb"};
 
-nuspecies getnuspec(int pdg) {
+inline nuspecies getnuspec(int pdg) {
   switch (pdg) {
   case 14: {
     return kNuMu;
@@ -102,11 +102,13 @@ enum selection {
 const char *all_sel[] = {"CCInc", "CC0Pi", "CC1CPi", "CC1Pi0", "CCOther",
                          "NCInc", "NC0Pi", "NC1CPi", "NC1Pi0", "NCOther"};
 
-bool loaded = false;
-std::map<nuspecies, std::map<reweightconfig, std::map<selection, TH3D *>>>
+static bool loaded = false;
+static std::unordered_map<
+    nuspecies,
+    std::unordered_map<reweightconfig, std::unordered_map<selection, TH3D *>>>
     rwhists;
 
-void LoadHists() {
+inline void LoadHists() {
   TFile fin("FakeDataInputs.root");
   if (fin.IsZombie()) {
     std::cout << "Failed to read FakeDataInputs.root" << std::endl;
@@ -125,8 +127,8 @@ void LoadHists() {
         selection sel = selection(i);
         std::string sel_str = all_sel[i];
 
-        rwhists[nuspec][rwconfig][sel] = dynamic_cast<TH3D *>(
-            t2knova::GetTH1(&fin, rwconfig_str + "_" + nuspec_str + "_" + sel_str));
+        rwhists[nuspec][rwconfig][sel] = dynamic_cast<TH3D *>(t2knova::GetTH1(
+            &fin, rwconfig_str + "_" + nuspec_str + "_" + sel_str));
         if (rwhists[nuspec][rwconfig][sel]) {
           rwhists[nuspec][rwconfig][sel]->SetDirectory(nullptr);
           found++;
@@ -141,8 +143,8 @@ void LoadHists() {
   loaded = true;
 }
 
-double EvalHist(TH3D *h, double x, double y, double z,
-                bool interpolate = true) {
+inline double EvalHist(TH3D *h, double x, double y, double z,
+                       bool interpolate = true) {
 
   int xbin = h->GetXaxis()->FindFixBin(x);
   int ybin = h->GetYaxis()->FindFixBin(y);
@@ -163,10 +165,10 @@ double EvalHist(TH3D *h, double x, double y, double z,
   return 1;
 }
 
-double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg,
-                                        double E_nu_GeV, double PLep_GeV,
-                                        double EVisHadronic_GeV,
-                                        bool interpolate) {
+inline double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg,
+                                               double E_nu_GeV, double PLep_GeV,
+                                               double EVisHadronic_GeV,
+                                               bool interpolate) {
   if (!loaded) {
     LoadHists();
   }
@@ -182,9 +184,10 @@ double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg,
   return 1;
 }
 
-double GetFakeDataWeight_NOvAToT2K_Q2(int nu_pdg, int lep_pdg, double E_nu_GeV,
-                                      double Q2_GeV2, double EVisHadronic_GeV,
-                                      bool interpolate) {
+inline double GetFakeDataWeight_NOvAToT2K_Q2(int nu_pdg, int lep_pdg,
+                                             double E_nu_GeV, double Q2_GeV2,
+                                             double EVisHadronic_GeV,
+                                             bool interpolate) {
   if (!loaded) {
     LoadHists();
   }
@@ -199,10 +202,11 @@ double GetFakeDataWeight_NOvAToT2K_Q2(int nu_pdg, int lep_pdg, double E_nu_GeV,
   return 1;
 }
 
-double GetFakeDataWeight_NOvAToT2K_PtLep(int nu_pdg, int lep_pdg,
-                                         double E_nu_GeV, double PtLep_GeV,
-                                         double EVisHadronic_GeV,
-                                         bool interpolate) {
+inline double GetFakeDataWeight_NOvAToT2K_PtLep(int nu_pdg, int lep_pdg,
+                                                double E_nu_GeV,
+                                                double PtLep_GeV,
+                                                double EVisHadronic_GeV,
+                                                bool interpolate) {
   if (!loaded) {
     LoadHists();
   }
@@ -225,9 +229,9 @@ selection gett2ksel(bool iscc, int NFSCPi, int NFSPi0, int NOther) {
   } else if ((NFSCPi + NFSPi0 + NOther) == 1) {
     if (NFSCPi == 1) {
       sel = iscc ? kCC1cpi : kNC1cpi;
-    } else if (NFSCPi == 1) {
+    } else if (NFSPi0 == 1) {
       sel = iscc ? kCC1pi0 : kNC1pi0;
-    } else {
+    } else { // probably a kaon
       sel = iscc ? kCCOther : kNCOther;
     }
   } else {
@@ -236,10 +240,11 @@ selection gett2ksel(bool iscc, int NFSCPi, int NFSPi0, int NOther) {
   return sel;
 }
 
-double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg, double E_nu_GeV,
-                                     double PLep_GeV, double ThetaLep,
-                                     int NFSCPi, int NFSPi0, int NOther,
-                                     bool interpolate) {
+inline double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg,
+                                            double E_nu_GeV, double PLep_GeV,
+                                            double ThetaLep, int NFSCPi,
+                                            int NFSPi0, int NOther,
+                                            bool interpolate) {
   if (!loaded) {
     LoadHists();
   }
@@ -257,9 +262,11 @@ double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg, double E_nu_GeV,
   return 1;
 }
 
-double GetFakeDataWeight_SKToNOvA(int nu_pdg, int lep_pdg, double E_nu_GeV,
-                                  double PLep_GeV, double ThetaLep, int NFSCPi,
-                                  int NFSPi0, int NOther, bool interpolate) {
+inline double GetFakeDataWeight_SKToNOvA(int nu_pdg, int lep_pdg,
+                                         double E_nu_GeV, double PLep_GeV,
+                                         double ThetaLep, int NFSCPi,
+                                         int NFSPi0, int NOther,
+                                         bool interpolate) {
   if (!loaded) {
     LoadHists();
   }
