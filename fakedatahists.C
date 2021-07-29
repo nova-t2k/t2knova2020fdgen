@@ -161,7 +161,7 @@ hblob<TH3D> *EnuPLepEAvHad;
 hblob<TH3D> *EnuQ2EAvHad;
 hblob<TH3D> *EnuPtLepEAvHad;
 
-void Fill(TTreeReader &rdr, bool ist2k) {
+void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
   Enu = new hblob<TH1D>(
       "Enu",
       ";#it{E_{#nu}} (GeV);#it{y}; d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}", 200,
@@ -199,6 +199,7 @@ void Fill(TTreeReader &rdr, bool ist2k) {
   TTreeReaderValue<float> Enu_true(rdr, "Enu_true");
   TTreeReaderValue<float> PLep_v(rdr, "PLep");
   TTreeReaderValue<float> Q2(rdr, "Q2");
+  TTreeReaderValue<int> tgta(rdr, "tgta");
 
   TTreeReaderValue<bool> flagCCINC(rdr, "flagCCINC");
   TTreeReaderValue<bool> flagCC0pi(rdr, "flagCC0pi");
@@ -224,6 +225,11 @@ void Fill(TTreeReader &rdr, bool ist2k) {
     if (ent_it && !(ent_it % shout_it)) {
       std::cout << "[Read] " << ent_it << "/" << nents << "("
                 << (100 * ent_it / nents) << "%)" << std::endl;
+    }
+
+    if (tgta_select && (tgta != tgta_select)) {
+      ent_it++;
+      continue;
     }
 
     double w = *fScaleFactor * *RWWeight;
@@ -270,8 +276,8 @@ void Fill(TTreeReader &rdr, bool ist2k) {
 }
 
 int main(int argc, char const *argv[]) {
-  if (argc < 3) {
-    std::cout << "Expects 2 arguments." << std::endl;
+  if (argc < 4) {
+    std::cout << "Expects 3 arguments." << std::endl;
     return 1;
   }
 
@@ -287,17 +293,33 @@ int main(int argc, char const *argv[]) {
 
   bool ist2k = false;
 
-  if (std::string(argv[2]) == "NOvA") {
+  if (std::string(argv[2]) == "NOvAND") {
     ist2k = false;
-  } else if (std::string(argv[2]) == "T2K") {
+  } else if (std::string(argv[2]) == "ND280") {
     ist2k = true;
   } else {
-    std::cout << "[ERROR]: Expected option 2 to specify either T2K or NOvA."
+    std::cout << "[ERROR]: Expected option 2 to specify either NOvAND or ND280."
               << std::endl;
     return 1;
   }
 
-  Fill(rdr, ist2k);
+  int tgta_select = 0;
+  if (argc > 4) {
+    if (std::string(argv[4]) == "C") {
+      tgta_select = 12;
+    } else if (std::string(argv[4]) == "H") {
+      tgta_select = 1;
+    } else if (std::string(argv[4]) == "O") {
+      tgta_select = 6;
+    } else if (std::string(argv[4]) == "any") {
+      tgta_select = 0;
+    } else {
+      std::cout << "Invalid target selector passed: " <
+          argv[4] << ". Should be C/H/O/any." return 1;
+    }
+  }
+
+  Fill(rdr, ist2k, tgta_select);
 
   TFile fout(argv[3], "UPDATE");
   if (fin.IsZombie()) {
@@ -306,8 +328,8 @@ int main(int argc, char const *argv[]) {
   }
 
   TDirectory *dout = &fout;
-  if (argc > 4) {
-    std::string fqdir = argv[4];
+  if (argc > 5) {
+    std::string fqdir = argv[5];
     while (fqdir.find("/") != std::string::npos) {
       std::string ndir = fqdir.substr(0, fqdir.find("/"));
       if (!dout->GetDirectory(ndir.c_str())) {

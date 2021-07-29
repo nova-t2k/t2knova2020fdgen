@@ -1,43 +1,35 @@
 #!/bin/bash
 
-IDIR=/mnt/research/NuInt/generation/t2knova
+IDIR=/mnt/research/NuInt/generation/
 
-for gen in NEUT GENIE; do
+GENERATORS=( GENIE NEUT )
+SPECIES=( numu numub nue nueb )
+DETECTORS=( NOvAND ND280 )
 
-  TUNE="banffpost"
-  if [ "${gen}" == "GENIE" ]; then
-    TUNE="nova2020"
-  fi
+declare -A DET_MATS
+DET_MATS["NOvAND"]="CH"
+DET_MATS["ND280"]="H2O CH"
+
+for gen in ${GENERATORS[@]}; do
+  for spec in ${SPECIES[@]}; do
+    for det in ${DETECTORS[@]}; do
+      for mat in ${DET_MATS[${det}]}; do
 
 
-  for nuspec in numu nue numub nueb; do
+        INPAT="${IDIR}/t2knova/${gen}/${det}/${mat}/${spec}/t2knova.flattree.${gen}.${det}.${mat}.${spec}.*.root"
+        NFILES=$(ls ${INPAT} | wc -l)
 
-    HC="FHC"
-    if [ "${nuspec}" == "numub" ] || [ "${nuspec}" == "nueb" ]; then
-      HC="RHC"
-    fi
+        echo "Found ${NFILES} matching ${INPAT}"
 
-    specswap="${nuspec}"
-    if [ "${nuspec}" == "nue" ] || [ "${nuspec}" == "nueb" ]; then
-      specswap="${nuspec}swap"
-    fi
-    
+        if [ "${NFILES}" -lt 5 ]; then
+          continue
+        fi
 
-    for det in NOvAND ND280; do
-      #NEUT_ND280_RHC_nuebswap.flattree.22747639_92.root
+        nuis_flat_tree_combiner -i ${INPAT} \
+                                -o t2knova.flattree.${gen}.${det}.${mat}.${spec}.root \
+                                -t T2KNOvATruthTree -b fScaleFactor
 
-      INPAT="${IDIR}/${gen}/${det}/${nuspec}/${gen}_${det}_${HC}_${specswap}.flattree.*.root"
-      NFILES=$(ls ${INPAT} | wc -l)
-
-      echo "Found ${NFILES} matching ${INPAT}"
-
-      if [ "${NFILES}" -lt 5 ]; then
-        continue
-      fi
-
-      nuis_flat_tree_combiner -i ${INPAT} \
-                              -o flat.${TUNE}.${det}.${nuspec}.CH.${HC}.${gen}.root \
-                              -t T2KNOvATruthTree -b fScaleFactor
+      done
 
     done
 

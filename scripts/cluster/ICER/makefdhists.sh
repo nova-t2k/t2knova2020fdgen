@@ -6,27 +6,39 @@ if [[ ! "$?" == "0" ]]; then
 	exit;
 fi
 
-for gen in GENIE NEUT; do
-  for det in NOvAND ND280; do
-    for spec in numu numub nue nueb; do
 
-     TUNE="nova2020"
-     if [ ${gen} == "NEUT" ]; then
-       TUNE="banffpost"
-     fi 
+declare -A TGTEL
+TGTEL["NOvAND_CH"]="C H"
+TGTEL["ND280_CH"]="C"
+TGTEL["ND280_H2O"]="H O"
 
-     SEL="NOvA"
-     if [ ${det} == "ND280" ]; then
-       SEL="T2K"
-     fi
+GENERATORS=( GENIE NEUT )
+SPECIES=( numu numub nue nueb )
+DETECTORS=( NOvAND ND280 )
 
-     BEAMMODE="FHC"
-     if [ ${spec} == "numub" ] || [ ${spec} == "nueb" ]; then
-       BEAMMODE="RHC"
-     fi
+declare -A DET_MATS
+DET_MATS["NOvAND"]="CH"
+DET_MATS["ND280"]="H2O CH"
 
+for gen in ${GENERATORS[@]}; do
+  for spec in ${SPECIES[@]}; do
+    for det in ${DETECTORS[@]}; do
+      for mat in ${DET_MATS[${det}]}; do
 
-    echo ./fakedatahists.exe ../flat.${TUNE}.${det}.${spec}.CH.${BEAMMODE}.${gen}.root ${SEL} FakeDataHists.root ${gen}/${det}/${spec}
+        if [ ! -e "t2knova.flattree.${gen}.${det}.${mat}.${spec}.root" ]; then
+          continue
+        fi
+
+        for tgtel in ${TGTEL["${det}_${mat}"]}; do
+
+          echo ./fakedatahists.exe t2knova.flattree.${gen}.${det}.${mat}.${spec}.root \
+                                   ${det} \
+                                   FakeDataHists.root \
+                                   ${tgtel} \
+                                   ${gen}/${det}/${tgtel}/${spec}
+
+        done
+      done
     done
   done
 done

@@ -102,16 +102,19 @@ enum selection {
 const char *all_sel[] = {"CCInc", "CC0Pi", "CC1CPi", "CC1Pi0", "CCOther",
                          "NCInc", "NC0Pi", "NC1CPi", "NC1Pi0", "NCOther"};
 
+const char *all_tgta_str[] = {"H", "C", "O"};
+const int all_tgta[] = {1, 12, 16};
+
 static bool loaded = false;
 static std::unordered_map<
     nuspecies,
-    std::unordered_map<reweightconfig, std::unordered_map<selection, TH3D *>>>
+    std::unordered_map<reweightconfig, std::unordered_map<int, TH3D *>>>
     rwhists;
 
-inline void LoadHists() {
-  TFile fin("FakeDataInputs.root");
+inline void LoadHists(std::string const &inputfile = "FakeDataInputs.root") {
+  TFile fin(inputfile.c_str());
   if (fin.IsZombie()) {
-    std::cout << "Failed to read FakeDataInputs.root" << std::endl;
+    std::cout << "Failed to read \"" << inputfile << "\"" << std::endl;
     abort();
   }
   int found = 0;
@@ -119,19 +122,27 @@ inline void LoadHists() {
     nuspecies nuspec = nuspecies(i);
     std::string nuspec_str = all_nuspecies[i];
 
-    for (int i = 0; i < 5; ++i) {
-      reweightconfig rwconfig = reweightconfig(i);
-      std::string rwconfig_str = all_rwconfig[i];
+    for (int j = 0; j < 5; ++j) {
+      reweightconfig rwconfig = reweightconfig(j);
+      std::string rwconfig_str = all_rwconfig[j];
 
-      for (int i = 0; i < 10; ++i) {
-        selection sel = selection(i);
-        std::string sel_str = all_sel[i];
+      for (int k = 0; k < 10; ++k) {
+        selection sel = selection(k);
+        std::string sel_str = all_sel[k];
 
-        rwhists[nuspec][rwconfig][sel] = dynamic_cast<TH3D *>(t2knova::GetTH1(
-            &fin, rwconfig_str + "_" + nuspec_str + "_" + sel_str));
-        if (rwhists[nuspec][rwconfig][sel]) {
-          rwhists[nuspec][rwconfig][sel]->SetDirectory(nullptr);
-          found++;
+        for (int l = 0; l < 3; ++l) {
+          std::string tgta_str = all_tgta_str[l];
+          int tgta_sel_offset = all_tgta[l] * 100;
+
+          rwhists[nuspec][rwconfig][tgta_sel_offset + sel] =
+              dynamic_cast<TH3D *>(
+                  t2knova::GetTH1(&fin, rwconfig_str + "_" + tgta_str + "_" +
+                                            nuspec_str + "_" + sel_str));
+          if (rwhists[nuspec][rwconfig][tgta_sel_offset + sel]) {
+            rwhists[nuspec][rwconfig][tgta_sel_offset + sel]->SetDirectory(
+                nullptr);
+            found++;
+          }
         }
       }
     }
@@ -168,7 +179,7 @@ inline double EvalHist(TH3D *h, double x, double y, double z,
 inline double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg,
                                                double E_nu_GeV, double PLep_GeV,
                                                double EVisHadronic_GeV,
-                                               bool interpolate) {
+                                               bool interpolate, int tgta) {
   if (!loaded) {
     LoadHists();
   }
@@ -176,7 +187,8 @@ inline double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg,
 
   bool iscc = (nu_pdg != lep_pdg);
 
-  TH3D *rathist = rwhists[nuspec][kNOvA_to_T2KND_plep][iscc ? kCCINC : kNCINC];
+  TH3D *rathist = rwhists[nuspec][kNOvA_to_T2KND_plep]
+                         [(tgta * 100) + (iscc ? kCCINC : kNCINC)];
   if (rathist) {
     return EvalHist(rathist, E_nu_GeV, PLep_GeV, EVisHadronic_GeV, interpolate);
   }
@@ -187,7 +199,7 @@ inline double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg,
 inline double GetFakeDataWeight_NOvAToT2K_Q2(int nu_pdg, int lep_pdg,
                                              double E_nu_GeV, double Q2_GeV2,
                                              double EVisHadronic_GeV,
-                                             bool interpolate) {
+                                             bool interpolate, int tgta) {
   if (!loaded) {
     LoadHists();
   }
@@ -195,7 +207,8 @@ inline double GetFakeDataWeight_NOvAToT2K_Q2(int nu_pdg, int lep_pdg,
 
   bool iscc = (nu_pdg != lep_pdg);
 
-  TH3D *rathist = rwhists[nuspec][kNOvA_to_T2KND_Q2][iscc ? kCCINC : kNCINC];
+  TH3D *rathist = rwhists[nuspec][kNOvA_to_T2KND_Q2]
+                         [(tgta * 100) + (iscc ? kCCINC : kNCINC)];
   if (rathist) {
     return EvalHist(rathist, E_nu_GeV, Q2_GeV2, EVisHadronic_GeV, interpolate);
   }
@@ -206,7 +219,7 @@ inline double GetFakeDataWeight_NOvAToT2K_PtLep(int nu_pdg, int lep_pdg,
                                                 double E_nu_GeV,
                                                 double PtLep_GeV,
                                                 double EVisHadronic_GeV,
-                                                bool interpolate) {
+                                                bool interpolate, int tgta) {
   if (!loaded) {
     LoadHists();
   }
@@ -214,7 +227,8 @@ inline double GetFakeDataWeight_NOvAToT2K_PtLep(int nu_pdg, int lep_pdg,
 
   bool iscc = (nu_pdg != lep_pdg);
 
-  TH3D *rathist = rwhists[nuspec][kNOvA_to_T2KND_ptlep][iscc ? kCCINC : kNCINC];
+  TH3D *rathist = rwhists[nuspec][kNOvA_to_T2KND_ptlep]
+                         [(tgta * 100) + (iscc ? kCCINC : kNCINC)];
   if (rathist) {
     return EvalHist(rathist, E_nu_GeV, PtLep_GeV, EVisHadronic_GeV,
                     interpolate);
@@ -244,7 +258,7 @@ inline double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg,
                                             double E_nu_GeV, double PLep_GeV,
                                             double ThetaLep, int NFSCPi,
                                             int NFSPi0, int NOther,
-                                            bool interpolate) {
+                                            bool interpolate, int tgta) {
   if (!loaded) {
     LoadHists();
   }
@@ -254,7 +268,7 @@ inline double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg,
 
   selection sel = gett2ksel(iscc, NFSCPi, NFSPi0, NOther);
 
-  TH3D *rathist = rwhists[nuspec][kT2KND_to_NOvA][sel];
+  TH3D *rathist = rwhists[nuspec][kT2KND_to_NOvA][(tgta * 100) + sel];
   if (rathist) {
     return EvalHist(rathist, E_nu_GeV, PLep_GeV, ThetaLep, interpolate);
   }
@@ -266,7 +280,7 @@ inline double GetFakeDataWeight_SKToNOvA(int nu_pdg, int lep_pdg,
                                          double E_nu_GeV, double PLep_GeV,
                                          double ThetaLep, int NFSCPi,
                                          int NFSPi0, int NOther,
-                                         bool interpolate) {
+                                         bool interpolate, int tgta) {
   if (!loaded) {
     LoadHists();
   }
@@ -276,7 +290,7 @@ inline double GetFakeDataWeight_SKToNOvA(int nu_pdg, int lep_pdg,
 
   selection sel = gett2ksel(iscc, NFSCPi, NFSPi0, NOther);
 
-  TH3D *rathist = rwhists[nuspec][kSK_to_NOvA][sel];
+  TH3D *rathist = rwhists[nuspec][kSK_to_NOvA][(tgta * 100) + sel];
   if (rathist) {
     return EvalHist(rathist, E_nu_GeV, PLep_GeV, ThetaLep, interpolate);
   }
