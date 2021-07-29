@@ -10,13 +10,13 @@ while [[ ${#} -gt 0 ]]; do
 
       --nfiles)
       NTARGETFILES="$2"
-        echo "[OPT]: Submitting up to ${NTARGETFILES} jobs"
+#        echo "[OPT]: Submitting up to ${NTARGETFILES} jobs"
       shift # past argument
     ;;
 
       --out-dir)
         OUTDIR="$2"
-        echo "[OPT]: Writing outputs to: ${OUTDIR}"
+#        echo "[OPT]: Writing outputs to: ${OUTDIR}"
         OPTARRAY+=("${key}")
         OPTARRAY+=("${2}")
         shift # past argument
@@ -24,7 +24,7 @@ while [[ ${#} -gt 0 ]]; do
 
       --out-file-stub)
         OUTFILESTUB="$2"
-        echo "[OPT]: Writing file name stub: ${OUTFILESTUB}"
+#        echo "[OPT]: Writing file name stub: ${OUTFILESTUB}"
         OPTARRAY+=("${key}")
         OPTARRAY+=("${2}")
         shift # past argument
@@ -45,11 +45,10 @@ NFILES=$(find $ODIR -name "${OUTFILESTUB}.*.root" | wc -l)
 
 echo "Dir: $ODIR contains $NFILES ${OUTFILESTUB}.*.root files."
 
-JTORUN=$(( NJOBS - NFILES ))
+JTORUN=$(( NTARGETFILES - NFILES ))
 
-if [ $JTORUN -lt 1 ]; then
-  echo "Running jobs: $JTORUN"
-
+if [ $JTORUN -gt 0 ]; then
+#  echo "$JTORUN jobs to run (${NTARGETFILES} - ${NFILES})"
   CMD="--array=1-${JTORUN} $(readlink -f t2knovagen.sh) ${OPTARRAY[@]}"
   echo "sbatch ${CMD}"
   sbatch ${CMD}

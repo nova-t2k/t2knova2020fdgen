@@ -3,13 +3,13 @@
 #if one of genone.sh fails, stop trying to submit
 set -e
 
-NJOBS=1
-NEVS=100000
+NJOBS=2
+NEVS=200000
 
 DO_NEUT=1
 DO_ND280=1
 DO_SK=1
-DO_GENIE=0
+DO_GENIE=1
 DO_NOvAND=1
 
 if [[ "${DO_GENIE}" == "1" ]]; then
