@@ -196,64 +196,6 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
         fout.WriteTObject(rat, rat->GetName());
       }
 
-      TH3D *neut_sk_O = dynamic_cast<TH3D *>(
-          GetTH1(&fin, "NEUT/SK/O/" + species + "/EnuPLepThetaLep_" + mode));
-      if (neut_sk_O) { // SK
-        neut_sk_O->SetDirectory(nullptr);
-
-        TH3D *genie_sk = dynamic_cast<TH3D *>(
-            GetTH1(&fin, "GENIE/SK/O/" + species + "/EnuPLepThetaLep_" + mode));
-        genie_sk->SetDirectory(nullptr);
-
-        TH2D *genie_sk_yx = Project3DRatio(
-            genie_sk, neut_sk_O, "yx", std::string("genie_sk_EnuPLep_") + mode);
-        TH2D *genie_sk_zx =
-            Project3DRatio(genie_sk, neut_sk_O, "zx",
-                           std::string("genie_sk_EnuThetaLep_") + mode);
-        TH2D *genie_sk_yz =
-            Project3DRatio(genie_sk, neut_sk_O, "yz",
-                           std::string("genie_sk_PLepThetaLep_") + mode);
-        fout.WriteTObject(genie_sk_yx, genie_sk_yx->GetName());
-        fout.WriteTObject(genie_sk_yz, genie_sk_yz->GetName());
-        fout.WriteTObject(genie_sk_zx, genie_sk_zx->GetName());
-
-        TH3D *rat = dynamic_cast<TH3D *>(genie_sk->Clone(
-            (std::string("sk_to_nova_O_") + species + "_" + mode).c_str()));
-        rat->Divide(neut_sk_O);
-        ScrubLowStatsBins(genie_sk, neut_sk_O, rat, 1.0 / sqrt(25));
-        rat->SetDirectory(nullptr);
-        fout.WriteTObject(rat, rat->GetName());
-      }
-
-      TH3D *neut_sk_H = dynamic_cast<TH3D *>(
-          GetTH1(&fin, "NEUT/SK/H/" + species + "/EnuPLepThetaLep_" + mode));
-      if (neut_sk_H) { // SK
-        neut_sk_H->SetDirectory(nullptr);
-
-        TH3D *genie_sk = dynamic_cast<TH3D *>(
-            GetTH1(&fin, "GENIE/SK/H/" + species + "/EnuPLepThetaLep_" + mode));
-        genie_sk->SetDirectory(nullptr);
-
-        TH2D *genie_sk_yx = Project3DRatio(
-            genie_sk, neut_sk_H, "yx", std::string("genie_sk_EnuPLep_") + mode);
-        TH2D *genie_sk_zx =
-            Project3DRatio(genie_sk, neut_sk_H, "zx",
-                           std::string("genie_sk_EnuThetaLep_") + mode);
-        TH2D *genie_sk_yz =
-            Project3DRatio(genie_sk, neut_sk_H, "yz",
-                           std::string("genie_sk_PLepThetaLep_") + mode);
-        fout.WriteTObject(genie_sk_yx, genie_sk_yx->GetName());
-        fout.WriteTObject(genie_sk_yz, genie_sk_yz->GetName());
-        fout.WriteTObject(genie_sk_zx, genie_sk_zx->GetName());
-
-        TH3D *rat = dynamic_cast<TH3D *>(genie_sk->Clone(
-            (std::string("sk_to_nova_H_") + species + "_" + mode).c_str()));
-        rat->Divide(neut_sk_H);
-        ScrubLowStatsBins(genie_sk, neut_sk_H, rat, 1.0 / sqrt(25));
-        rat->SetDirectory(nullptr);
-        fout.WriteTObject(rat, rat->GetName());
-      }
-
       TH3D *neut_novand_plep_C = dynamic_cast<TH3D *>(
           GetTH1(&fin, "NEUT/NOvAND/C/" + species + "/EnuPLepEAvHad_" + mode));
       if (neut_novand_plep_C) { // NOvAND
