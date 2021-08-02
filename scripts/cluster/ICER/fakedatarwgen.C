@@ -1,3 +1,30 @@
+#include "TH2.h"
+#include "TH3.h"
+#include "TFile.h"
+
+#include <string>
+#include <iostream>
+#include <cmath>
+
+TH1 *GetTH1(TFile *f, std::string const &name) {
+  TDirectory *odir = gDirectory;
+
+  TH1 *h;
+  f->GetObject(name.c_str(), h);
+  if (!h) {
+    std::cout << "[ERROR]: Failed to find histogram named: " << name
+              << std::endl;
+  } else {
+    h->SetDirectory(nullptr);
+  }
+
+  if (odir) {
+    gDirectory->cd();
+  }
+
+  return h;
+}
+
 void ScrubLowStatsBins(TH3D *num, TH3D *denom, TH3D *ratio,
                        double frac_error_threshold) {
   for (int i = 0; i < num->GetXaxis()->GetNbins(); ++i) {
@@ -57,7 +84,7 @@ TH2D *Project3DRatio(TH3D *num, TH3D *denom, const char *projconfig,
   return rat;
 }
 
-void fakedatarwgen(std::string const &ifile, std::string const &ofile) {
+int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
 
   TFile fin(ifile.c_str());
   if (fin.IsZombie()) {
@@ -403,4 +430,9 @@ void fakedatarwgen(std::string const &ifile, std::string const &ofile) {
 
   fout.Write();
   fout.Close();
+  return 0;
+}
+
+int main(int argc, char const * argv[]){
+  return fakedatarwgen(argv[1], argv[2]);
 }

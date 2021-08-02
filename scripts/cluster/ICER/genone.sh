@@ -36,7 +36,7 @@ while [[ ${#} -gt 0 ]]; do
 done
 
 ODIR=/mnt/research/NuInt/generation/${OUTDIR}/
-# mkdir -p ${ODIR}
+mkdir -p ${ODIR}
 
 NFILES=$(find $ODIR -name "${OUTFILESTUB}.*.root" | wc -l)
 
@@ -47,7 +47,7 @@ JTORUN=$(( NTARGETFILES - NFILES ))
 if [ $JTORUN -gt 0 ]; then
   CMD="--array=1-${JTORUN} $(readlink -f t2knovagen.sh) ${OPTARRAY[@]}"
   echo "sbatch ${CMD}"
-  # sbatch ${CMD}
+  sbatch ${CMD}
 
   if [ "$?" == "1" ]; then
     echo "Failed to submit job"

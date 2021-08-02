@@ -6,6 +6,10 @@ if [[ ! "$?" == "0" ]]; then
 	exit;
 fi
 
+g++ fakedatarwgen.C -o fakedatarwgen.exe $(root-config --cflags) $(root-config --libs)
+if [[ ! "$?" == "0" ]]; then
+        exit;
+fi
 
 declare -A TGTEL
 TGTEL["NOvAND_CH"]="C H"
@@ -31,16 +35,18 @@ for gen in ${GENERATORS[@]}; do
 
         for tgtel in ${TGTEL["${det}_${mat}"]}; do
 
-          echo ./fakedatahists.exe t2knova.flattree.${gen}.${det}.${mat}.${spec}.root \
+          CMD="./fakedatahists.exe t2knova.flattree.${gen}.${det}.${mat}.${spec}.root \
                                    ${det} \
                                    FakeDataHists.root \
                                    ${tgtel} \
-                                   ${gen}/${det}/${tgtel}/${spec}
-
+                                   ${gen}/${det}/${tgtel}/${spec}"
+          echo $CMD
+	  ${CMD}
         done
       done
     done
   done
 done
 
-echo root -l -b -q "fakedatarwgen.C(\"FakeDataHists.root\",\"FakeDataInputs.root\")"
+echo ./fakedatarwgen.exe FakeDataHists.root FakeDataInputs.root
+./fakedatarwgen.exe FakeDataHists.root FakeDataInputs.root

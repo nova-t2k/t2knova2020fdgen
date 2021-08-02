@@ -2,7 +2,7 @@
 
 IDIR=/mnt/research/NuInt/generation/
 
-GENERATORS=( GENIE NEUT )
+GENERATORS=( NEUT GENIE )
 SPECIES=( numu numub nue nueb )
 DETECTORS=( NOvAND ND280 )
 
@@ -27,11 +27,12 @@ for gen in ${GENERATORS[@]}; do
 
         nuis_flat_tree_combiner -i ${INPAT} \
                                 -o t2knova.flattree.${gen}.${det}.${mat}.${spec}.root \
-                                -t T2KNOvATruthTree -b fScaleFactor
+                                -t T2KNOvATruthTree -b fScaleFactor &
 
       done
 
     done
+    wait
 
   done
 

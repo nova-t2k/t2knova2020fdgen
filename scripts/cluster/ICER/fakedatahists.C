@@ -227,7 +227,7 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
                 << (100 * ent_it / nents) << "%)" << std::endl;
     }
 
-    if (tgta_select && (tgta != tgta_select)) {
+    if (tgta_select && (*tgta != tgta_select)) {
       ent_it++;
       continue;
     }
@@ -314,8 +314,9 @@ int main(int argc, char const *argv[]) {
     } else if (std::string(argv[4]) == "any") {
       tgta_select = 0;
     } else {
-      std::cout << "Invalid target selector passed: " <
-          argv[4] << ". Should be C/H/O/any." return 1;
+      std::cout << "Invalid target selector passed: " 
+                << argv[4] << ". Should be C/H/O/any." << std::endl;
+      return 1;
     }
   }
 
