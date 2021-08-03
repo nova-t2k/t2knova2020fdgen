@@ -1,12 +1,12 @@
 #!/bin/bash
 
 rm FakeDataHists.root
-g++ fakedatahists.C $(root-config --cflags --glibs) -o fakedatahists.exe
+g++ fakedatahists.C -I ../../../ $(root-config --cflags --glibs) -o fakedatahists.exe
 if [[ ! "$?" == "0" ]]; then
 	exit;
 fi
 
-g++ fakedatarwgen.C -o fakedatarwgen.exe $(root-config --cflags) $(root-config --libs)
+g++ fakedatarwgen.C -I ../../../ -o fakedatarwgen.exe $(root-config --cflags) $(root-config --libs)
 if [[ ! "$?" == "0" ]]; then
         exit;
 fi

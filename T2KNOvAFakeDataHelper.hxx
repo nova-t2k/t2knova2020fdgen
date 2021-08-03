@@ -178,15 +178,15 @@ inline TH1 *GetTH1(TFile *f, std::string const &name) {
 
   TH1 *h;
   f->GetObject(name.c_str(), h);
-  if (h)
+  if (h) {
     h->SetDirectory(nullptr);
-}
+  }
 
-if (odir) {
-  gDirectory->cd();
-}
+  if (odir) {
+    gDirectory->cd();
+  }
 
-return h;
+  return h;
 } // namespace t2knova
 
 enum nuspecies { kNuMu = 0, kNuMub, kNuE, kNuEb };
