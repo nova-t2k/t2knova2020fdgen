@@ -12,148 +12,7 @@
 
 #include "T2KNOvAFakeDataHelper.hxx"
 
-struct FlagBlob {
-  bool flagCCINC;
-  bool flagCC0pi;
-  bool flagCC1cpi;
-  bool flagCC1pi0;
-  bool flagNCINC;
-  bool flagNC0pi;
-  bool flagNC1cpi;
-  bool flagNC1pi0;
-};
-
-template <typename TH> struct THTraits {};
-
-template <> struct THTraits<TH1D> { using Base = TH1; };
-template <> struct THTraits<TH2D> { using Base = TH1; };
-template <> struct THTraits<TH3D> { using Base = TH1; };
-
-template <> struct THTraits<THnD> { using Base = THnBase; };
-
-template <typename TH> struct hblob {
-  TH CCInc;
-  TH CC0Pi;
-  TH CC1CPi;
-  TH CC1Pi0;
-  TH CCOther;
-  TH NCInc;
-  TH NC0Pi;
-  TH NC1CPi;
-  TH NC1Pi0;
-  TH NCOther;
-
-  using THBase = typename THTraits<TH>::Base;
-
-  hblob() {}
-
-  template <typename... Args>
-  hblob(std::string const &name, std::string const &title, Args... binning)
-      : CCInc((name + "_CCInc").c_str(), title.c_str(), binning...),
-        CC0Pi((name + "_CC0Pi").c_str(), title.c_str(), binning...),
-        CC1CPi((name + "_CC1CPi").c_str(), title.c_str(), binning...),
-        CC1Pi0((name + "_CC1Pi0").c_str(), title.c_str(), binning...),
-        CCOther((name + "_CCOther").c_str(), title.c_str(), binning...),
-        NCInc((name + "_NCInc").c_str(), title.c_str(), binning...),
-        NC0Pi((name + "_NC0Pi").c_str(), title.c_str(), binning...),
-        NC1CPi((name + "_NC1CPi").c_str(), title.c_str(), binning...),
-        NC1Pi0((name + "_NC1Pi0").c_str(), title.c_str(), binning...),
-        NCOther((name + "_NCOther").c_str(), title.c_str(), binning...) {
-
-    Apply([=](TH &h) { h.SetDirectory(nullptr); });
-    Apply([=](TH &h) { h.Sumw2(true); });
-  }
-
-  void SetName(std::string const &name) {
-    CCInc.SetName((name + "_CCInc").c_str());
-    CC0Pi.SetName((name + "_CC0Pi").c_str());
-    CC1CPi.SetName((name + "_CC1CPi").c_str());
-    CC1Pi0.SetName((name + "_CC1Pi0").c_str());
-    CCOther.SetName((name + "_CCOther").c_str());
-    NCInc.SetName((name + "_NCInc").c_str());
-    NC0Pi.SetName((name + "_NC0Pi").c_str());
-    NC1CPi.SetName((name + "_NC1CPi").c_str());
-    NC1Pi0.SetName((name + "_NC1Pi0").c_str());
-    NCOther.SetName((name + "_NCOther").c_str());
-  }
-
-  void SetTitle(std::string const &title) {
-    Apply([=](TH &h) { h.SetTitle(title.c_str()); });
-  }
-
-  void Write(TDirectory *f, bool scale = false) {
-    Apply([=](TH &h) {
-      if (scale) {
-        THBase *hc = (THBase *)h.Clone();
-        hc->SetDirectory(nullptr);
-        hc->Scale(1, "width");
-        f->WriteTObject(hc, h.GetName());
-        delete hc;
-      } else {
-        f->WriteTObject(&h, h.GetName());
-      }
-    });
-  }
-
-  template <typename... XY> void Fill(double w, FlagBlob const &blb, XY... xy) {
-    if (blb.flagCCINC) {
-
-      CCInc.Fill(xy..., w);
-
-      if (blb.flagCC0pi) {
-        CC0Pi.Fill(xy..., w);
-      } else if (blb.flagCC1cpi) {
-        CC1CPi.Fill(xy..., w);
-      } else if (blb.flagCC1pi0) {
-        CC1Pi0.Fill(xy..., w);
-      } else {
-        CCOther.Fill(xy..., w);
-      }
-    } else if (blb.flagNCINC) {
-
-      NCInc.Fill(xy..., w);
-
-      if (blb.flagNC0pi) {
-        NC0Pi.Fill(xy..., w);
-      } else if (blb.flagNC1cpi) {
-        NC1CPi.Fill(xy..., w);
-      } else if (blb.flagNC1pi0) {
-        NC1Pi0.Fill(xy..., w);
-      } else {
-        NCOther.Fill(xy..., w);
-      }
-    }
-  }
-
-  template <typename THOut>
-  hblob<THOut> Transform(std::function<THOut(TH const &)> f) {
-    hblob<THOut> out;
-    out.CCInc = THOut(f(CCInc));
-    out.CC0Pi = THOut(f(CC0Pi));
-    out.CC1CPi = THOut(f(CC1CPi));
-    out.CC1Pi0 = THOut(f(CC1Pi0));
-    out.CCOther = THOut(f(CCOther));
-    out.NCInc = THOut(f(NCInc));
-    out.NC0Pi = THOut(f(NC0Pi));
-    out.NC1CPi = THOut(f(NC1CPi));
-    out.NC1Pi0 = THOut(f(NC1Pi0));
-    out.NCOther = THOut(f(NCOther));
-    return out;
-  }
-
-  void Apply(std::function<void(TH &)> f) {
-    f(CCInc);
-    f(CC0Pi);
-    f(CC1CPi);
-    f(CC1Pi0);
-    f(CCOther);
-    f(NCInc);
-    f(NC0Pi);
-    f(NC1CPi);
-    f(NC1Pi0);
-    f(NCOther);
-  }
-};
+using namespace t2knova;
 
 TH1D *totxsecs;
 
@@ -219,6 +78,7 @@ void Fill(TTreeReader &rdr,
   TTreeReaderValue<float> Q2_v(rdr, "Q2");
   TTreeReaderValue<float> q0_v(rdr, "q0");
   TTreeReaderValue<float> q3_v(rdr, "q3");
+  TTreeReaderValue<int> tgta(rdr, "tgta");
 
   TTreeReaderValue<int> NFSpip(rdr, "NFSpip");
   TTreeReaderValue<int> NFSpim(rdr, "NFSpim");
@@ -247,22 +107,18 @@ void Fill(TTreeReader &rdr,
     int NOther = (*NFSlep > 0 ? (*NFSlep - 1) : 0) + *NFSOther;
 
     if (weightconfig == t2knova::kT2KND_to_NOvA) {
-      w *= t2knova::GetFakeDataWeight_ND280ToNOvA(*PDGnu, *PDGLep, *Enu_true,
+      w *= t2knova::GetFakeDataWeight_ND280ToNOvA(*PDGnu, *PDGLep, *tgta, *Enu_true,
                                                   *PLep_v, acos(*CosLep), NCpi,
                                                   *NFSpi0, NOther);
-    } else if (weightconfig == t2knova::kSK_to_NOvA) {
-      w *= t2knova::GetFakeDataWeight_SKToNOvA(*PDGnu, *PDGLep, *Enu_true,
-                                               *PLep_v, acos(*CosLep), NCpi,
-                                               *NFSpi0, NOther);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_plep) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_PLep(*PDGnu, *PDGLep, *Enu_true,
+      w *= t2knova::GetFakeDataWeight_NOvAToT2K_PLep(*PDGnu, *PDGLep, *tgta, *Enu_true,
                                                      *PLep_v, *EavAlt);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_Q2) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_Q2(*PDGnu, *PDGLep, *Enu_true,
+      w *= t2knova::GetFakeDataWeight_NOvAToT2K_Q2(*PDGnu, *PDGLep, *tgta, *Enu_true,
                                                    *Q2_v, *EavAlt);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
       w *= t2knova::GetFakeDataWeight_NOvAToT2K_PtLep(
-          *PDGnu, *PDGLep, *Enu_true, (*PLep_v) * sqrt(1 - pow(*CosLep, 2)),
+          *PDGnu, *PDGLep, *tgta, *Enu_true, (*PLep_v) * sqrt(1 - pow(*CosLep, 2)),
           *EavAlt);
     }
 
@@ -340,8 +196,6 @@ int main(int argc, char const *argv[]) {
     weightconfig = t2knova::kNOvA_to_T2KND_ptlep;
   } else if (std::string(argv[2]) == "T2KND_To_NOvA") {
     weightconfig = t2knova::kT2KND_to_NOvA;
-  } else if (std::string(argv[2]) == "SK_To_NOvA") {
-    weightconfig = t2knova::kSK_to_NOvA;
   }
 
   Fill(rdr, weightconfig);

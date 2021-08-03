@@ -6,24 +6,9 @@
 #include <iostream>
 #include <cmath>
 
-TH1 *GetTH1(TFile *f, std::string const &name) {
-  TDirectory *odir = gDirectory;
+#include "T2KNOvAFakeDataHelper.hxx"
 
-  TH1 *h;
-  f->GetObject(name.c_str(), h);
-  if (!h) {
-    std::cout << "[ERROR]: Failed to find histogram named: " << name
-              << std::endl;
-  } else {
-    h->SetDirectory(nullptr);
-  }
-
-  if (odir) {
-    gDirectory->cd();
-  }
-
-  return h;
-}
+using namespace t2knova;
 
 void ScrubLowStatsBins(TH3D *num, TH3D *denom, TH3D *ratio,
                        double frac_error_threshold) {
