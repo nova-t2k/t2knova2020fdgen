@@ -178,7 +178,7 @@ int main(int argc, char const *argv[]) {
     } else if (std::string(argv[4]) == "H") {
       tgta_select = 1;
     } else if (std::string(argv[4]) == "O") {
-      tgta_select = 6;
+      tgta_select = 16;
     } else if (std::string(argv[4]) == "any") {
       tgta_select = 0;
     } else {
