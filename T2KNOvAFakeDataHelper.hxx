@@ -251,6 +251,8 @@ static std::unordered_map<
     std::unordered_map<reweightconfig, std::unordered_map<int, TH3D *>>>
     rwhists;
 
+template <typename T, size_t N> inline size_t arrsize(T (&arr)[N]) { return N; }
+
 inline void LoadHists(std::string const &inputfile = "FakeDataInputs.root") {
   TFile fin(inputfile.c_str());
   if (fin.IsZombie()) {
@@ -258,19 +260,19 @@ inline void LoadHists(std::string const &inputfile = "FakeDataInputs.root") {
     abort();
   }
   int found = 0;
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < arrsize(all_nuspecies); ++i) {
     nuspecies nuspec = nuspecies(i);
     std::string nuspec_str = all_nuspecies[i];
 
-    for (int j = 0; j < 5; ++j) {
+    for (int j = 0; j < arrsize(all_rwconfig); ++j) {
       reweightconfig rwconfig = reweightconfig(j);
       std::string rwconfig_str = all_rwconfig[j];
 
-      for (int k = 0; k < 10; ++k) {
+      for (int k = 0; k < arrsize(all_sel); ++k) {
         selection sel = selection(k);
         std::string sel_str = all_sel[k];
 
-        for (int l = 0; l < 3; ++l) {
+        for (int l = 0; l < arrsize(all_tgta_str); ++l) {
           std::string tgta_str = all_tgta_str[l];
           int tgta_sel_offset = all_tgta[l] * 100;
 
