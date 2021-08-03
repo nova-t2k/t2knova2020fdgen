@@ -17,7 +17,9 @@ using namespace t2knova;
 TH1D *totxsecs;
 
 hblob<TH1D> *Enu;
+hblob<TH1D> *Enu_unweighted;
 hblob<TH3D> *EnuPLepThetaLep;
+hblob<TH3D> *EnuPLepThetaLep_unweighted;
 hblob<TH3D> *EnuPLepEAvHad;
 hblob<TH3D> *EnuQ2EAvHad;
 hblob<TH3D> *EnuPtLepEAvHad;
@@ -25,6 +27,10 @@ hblob<TH3D> *EnuPtLepEAvHad;
 void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
   Enu = new hblob<TH1D>(
       "Enu",
+      ";#it{E_{#nu}} (GeV);#it{y}; d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}", 200,
+      0, 10);
+  Enu_unweighted = new hblob<TH1D>(
+      "Enu_unweighted",
       ";#it{E_{#nu}} (GeV);#it{y}; d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}", 200,
       0, 10);
 
@@ -130,6 +136,7 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
     }
 
     Enu->Fill(w, fblob, *Enu_true);
+    Enu_unweighted->Fill(1, fblob, *Enu_true);
     if (ist2k) {
       EnuPLepThetaLep->Fill(w, fblob, *Enu_true, *PLep_v, acos(*CosLep));
       EnuPLepThetaLep_unweighted->Fill(1, fblob, *Enu_true, *PLep_v, acos(*CosLep));
@@ -224,6 +231,7 @@ int main(int argc, char const *argv[]) {
   dout->WriteTObject(totxsecs, "totxsecs");
 
   Enu->Write(dout);
+  Enu_unweighted->Write(dout);
 
   auto ProjYZ = [=](TH3D const &h) -> TH2D {
     std::unique_ptr<TH2D> h2(dynamic_cast<TH2D *>(h.Project3D("yz")));
