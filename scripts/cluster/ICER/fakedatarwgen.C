@@ -1,10 +1,10 @@
+#include "TFile.h"
 #include "TH2.h"
 #include "TH3.h"
-#include "TFile.h"
 
-#include <string>
-#include <iostream>
 #include <cmath>
+#include <iostream>
+#include <string>
 
 #include "T2KNOvAFakeDataHelper.hxx"
 
@@ -97,15 +97,15 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
             &fin, "GENIE/ND280/C/" + species + "/EnuPLepThetaLep_" + mode));
         genie_nd280->SetDirectory(nullptr);
 
-        TH2D *genie_nd280_yx =
-            Project3DRatio(genie_nd280, neut_nd280_C, "yx",
-                           std::string("genie_nd280_EnuPLep_") + mode);
-        TH2D *genie_nd280_zx =
-            Project3DRatio(genie_nd280, neut_nd280_C, "zx",
-                           std::string("genie_nd280_EnuThetaLep_") + mode);
-        TH2D *genie_nd280_yz =
-            Project3DRatio(genie_nd280, neut_nd280_C, "yz",
-                           std::string("genie_nd280_PLepThetaLep_") + mode);
+        TH2D *genie_nd280_yx = Project3DRatio(
+            genie_nd280, neut_nd280_C, "yx",
+            std::string("genie_nd280_EnuPLep_C_") + species + "_" + mode);
+        TH2D *genie_nd280_zx = Project3DRatio(
+            genie_nd280, neut_nd280_C, "zx",
+            std::string("genie_nd280_EnuThetaLep_C_") + species + "_" + mode);
+        TH2D *genie_nd280_yz = Project3DRatio(
+            genie_nd280, neut_nd280_C, "yz",
+            std::string("genie_nd280_PLepThetaLep_C_") + species + "_" + mode);
 
         fout.WriteTObject(genie_nd280_yx, genie_nd280_yx->GetName());
         fout.WriteTObject(genie_nd280_yz, genie_nd280_yz->GetName());
@@ -128,15 +128,15 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
             &fin, "GENIE/ND280/O/" + species + "/EnuPLepThetaLep_" + mode));
         genie_nd280->SetDirectory(nullptr);
 
-        TH2D *genie_nd280_yx =
-            Project3DRatio(genie_nd280, neut_nd280_O, "yx",
-                           std::string("genie_nd280_EnuPLep_") + mode);
-        TH2D *genie_nd280_zx =
-            Project3DRatio(genie_nd280, neut_nd280_O, "zx",
-                           std::string("genie_nd280_EnuThetaLep_") + mode);
-        TH2D *genie_nd280_yz =
-            Project3DRatio(genie_nd280, neut_nd280_O, "yz",
-                           std::string("genie_nd280_PLepThetaLep_") + mode);
+        TH2D *genie_nd280_yx = Project3DRatio(
+            genie_nd280, neut_nd280_O, "yx",
+            std::string("genie_nd280_EnuPLep_O_") + species + "_" + mode);
+        TH2D *genie_nd280_zx = Project3DRatio(
+            genie_nd280, neut_nd280_O, "zx",
+            std::string("genie_nd280_EnuThetaLep_O_") + species + "_" + mode);
+        TH2D *genie_nd280_yz = Project3DRatio(
+            genie_nd280, neut_nd280_O, "yz",
+            std::string("genie_nd280_PLepThetaLep_O_") + species + "_" + mode);
 
         fout.WriteTObject(genie_nd280_yx, genie_nd280_yx->GetName());
         fout.WriteTObject(genie_nd280_yz, genie_nd280_yz->GetName());
@@ -159,15 +159,15 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
             &fin, "GENIE/ND280/H/" + species + "/EnuPLepThetaLep_" + mode));
         genie_nd280->SetDirectory(nullptr);
 
-        TH2D *genie_nd280_yx =
-            Project3DRatio(genie_nd280, neut_nd280_H, "yx",
-                           std::string("genie_nd280_EnuPLep_") + mode);
-        TH2D *genie_nd280_zx =
-            Project3DRatio(genie_nd280, neut_nd280_H, "zx",
-                           std::string("genie_nd280_EnuThetaLep_") + mode);
-        TH2D *genie_nd280_yz =
-            Project3DRatio(genie_nd280, neut_nd280_H, "yz",
-                           std::string("genie_nd280_PLepThetaLep_") + mode);
+        TH2D *genie_nd280_yx = Project3DRatio(
+            genie_nd280, neut_nd280_H, "yx",
+            std::string("genie_nd280_EnuPLep_H_") + species + "_" + mode);
+        TH2D *genie_nd280_zx = Project3DRatio(
+            genie_nd280, neut_nd280_H, "zx",
+            std::string("genie_nd280_EnuThetaLep_H_") + species + "_" + mode);
+        TH2D *genie_nd280_yz = Project3DRatio(
+            genie_nd280, neut_nd280_H, "yz",
+            std::string("genie_nd280_PLepThetaLep_H_") + species + "_" + mode);
 
         fout.WriteTObject(genie_nd280_yx, genie_nd280_yx->GetName());
         fout.WriteTObject(genie_nd280_yz, genie_nd280_yz->GetName());
@@ -190,15 +190,15 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
             &fin, "GENIE/NOvAND/C/" + species + "/EnuPLepEAvHad_" + mode));
         genie_novand->SetDirectory(nullptr);
 
-        TH2D *nova_to_t2k_yx =
-            Project3DRatio(neut_novand_plep_C, genie_novand, "yx",
-                           std::string("genie_novand_EnuPLep_") + mode);
-        TH2D *nova_to_t2k_zx =
-            Project3DRatio(neut_novand_plep_C, genie_novand, "zx",
-                           std::string("genie_novand_EnuEAvHad_") + mode);
-        TH2D *nova_to_t2k_yz =
-            Project3DRatio(neut_novand_plep_C, genie_novand, "yz",
-                           std::string("genie_novand_PLepEAvHad_") + mode);
+        TH2D *nova_to_t2k_yx = Project3DRatio(
+            neut_novand_plep_C, genie_novand, "yx",
+            std::string("genie_novand_EnuPLep_C_") + species + "_" + mode);
+        TH2D *nova_to_t2k_zx = Project3DRatio(
+            neut_novand_plep_C, genie_novand, "zx",
+            std::string("genie_novand_EnuEAvHad_C_") + species + "_" + mode);
+        TH2D *nova_to_t2k_yz = Project3DRatio(
+            neut_novand_plep_C, genie_novand, "yz",
+            std::string("genie_novand_PLepEAvHad_C_") + species + "_" + mode);
         fout.WriteTObject(nova_to_t2k_yx, nova_to_t2k_yx->GetName());
         fout.WriteTObject(nova_to_t2k_zx, nova_to_t2k_zx->GetName());
         fout.WriteTObject(nova_to_t2k_yz, nova_to_t2k_yz->GetName());
@@ -222,15 +222,15 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
             &fin, "GENIE/NOvAND/H/" + species + "/EnuPLepEAvHad_" + mode));
         genie_novand->SetDirectory(nullptr);
 
-        TH2D *nova_to_t2k_yx =
-            Project3DRatio(neut_novand_plep_H, genie_novand, "yx",
-                           std::string("genie_novand_EnuPLep_") + mode);
-        TH2D *nova_to_t2k_zx =
-            Project3DRatio(neut_novand_plep_H, genie_novand, "zx",
-                           std::string("genie_novand_EnuEAvHad_") + mode);
-        TH2D *nova_to_t2k_yz =
-            Project3DRatio(neut_novand_plep_H, genie_novand, "yz",
-                           std::string("genie_novand_PLepEAvHad_") + mode);
+        TH2D *nova_to_t2k_yx = Project3DRatio(
+            neut_novand_plep_H, genie_novand, "yx",
+            std::string("genie_novand_EnuPLep_H") + species + "_" + mode);
+        TH2D *nova_to_t2k_zx = Project3DRatio(
+            neut_novand_plep_H, genie_novand, "zx",
+            std::string("genie_novand_EnuEAvHad_H") + species + "_" + mode);
+        TH2D *nova_to_t2k_yz = Project3DRatio(
+            neut_novand_plep_H, genie_novand, "yz",
+            std::string("genie_novand_PLepEAvHad_H") + species + "_" + mode);
         fout.WriteTObject(nova_to_t2k_yx, nova_to_t2k_yx->GetName());
         fout.WriteTObject(nova_to_t2k_zx, nova_to_t2k_zx->GetName());
         fout.WriteTObject(nova_to_t2k_yz, nova_to_t2k_yz->GetName());
@@ -254,12 +254,12 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
             GetTH1(&fin, "GENIE/NOvAND/C/" + species + "/EnuQ2EAvHad_" + mode));
         genie_novand->SetDirectory(nullptr);
 
-        TH2D *nova_to_t2k_yx =
-            Project3DRatio(neut_novand_q2_C, genie_novand, "yx",
-                           std::string("genie_novand_EnuQ2_") + mode);
-        TH2D *nova_to_t2k_yz =
-            Project3DRatio(neut_novand_q2_C, genie_novand, "yz",
-                           std::string("genie_novand_Q2EAvHad_") + mode);
+        TH2D *nova_to_t2k_yx = Project3DRatio(
+            neut_novand_q2_C, genie_novand, "yx",
+            std::string("genie_novand_EnuQ2_C_") + species + "_" + mode);
+        TH2D *nova_to_t2k_yz = Project3DRatio(
+            neut_novand_q2_C, genie_novand, "yz",
+            std::string("genie_novand_Q2EAvHad_C_") + species + "_" + mode);
         fout.WriteTObject(nova_to_t2k_yx, nova_to_t2k_yx->GetName());
         fout.WriteTObject(nova_to_t2k_yz, nova_to_t2k_yz->GetName());
 
@@ -280,12 +280,12 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
             GetTH1(&fin, "GENIE/NOvAND/H/" + species + "/EnuQ2EAvHad_" + mode));
         genie_novand->SetDirectory(nullptr);
 
-        TH2D *nova_to_t2k_yx =
-            Project3DRatio(neut_novand_q2_H, genie_novand, "yx",
-                           std::string("genie_novand_EnuQ2_") + mode);
-        TH2D *nova_to_t2k_yz =
-            Project3DRatio(neut_novand_q2_H, genie_novand, "yz",
-                           std::string("genie_novand_Q2EAvHad_") + mode);
+        TH2D *nova_to_t2k_yx = Project3DRatio(
+            neut_novand_q2_H, genie_novand, "yx",
+            std::string("genie_novand_EnuQ2_H_") + species + "_" + mode);
+        TH2D *nova_to_t2k_yz = Project3DRatio(
+            neut_novand_q2_H, genie_novand, "yz",
+            std::string("genie_novand_Q2EAvHad_H_") + species + "_" + mode);
         fout.WriteTObject(nova_to_t2k_yx, nova_to_t2k_yx->GetName());
         fout.WriteTObject(nova_to_t2k_yz, nova_to_t2k_yz->GetName());
 
@@ -306,12 +306,12 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
             &fin, "GENIE/NOvAND/C/" + species + "/EnuPtLepEAvHad_" + mode));
         genie_novand->SetDirectory(nullptr);
 
-        TH2D *nova_to_t2k_yx =
-            Project3DRatio(neut_novand_ptlep_C, genie_novand, "yx",
-                           std::string("genie_novand_EnuPtLep_") + mode);
-        TH2D *nova_to_t2k_yz =
-            Project3DRatio(neut_novand_ptlep_C, genie_novand, "yz",
-                           std::string("genie_novand_PtLepEAvHad_") + mode);
+        TH2D *nova_to_t2k_yx = Project3DRatio(
+            neut_novand_ptlep_C, genie_novand, "yx",
+            std::string("genie_novand_EnuPtLep_C_") + species + "_" + mode);
+        TH2D *nova_to_t2k_yz = Project3DRatio(
+            neut_novand_ptlep_C, genie_novand, "yz",
+            std::string("genie_novand_PtLepEAvHad_C_") + species + "_" + mode);
         fout.WriteTObject(nova_to_t2k_yx, nova_to_t2k_yx->GetName());
         fout.WriteTObject(nova_to_t2k_yz, nova_to_t2k_yz->GetName());
 
@@ -334,12 +334,12 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
             &fin, "GENIE/NOvAND/H/" + species + "/EnuPtLepEAvHad_" + mode));
         genie_novand->SetDirectory(nullptr);
 
-        TH2D *nova_to_t2k_yx =
-            Project3DRatio(neut_novand_ptlep_H, genie_novand, "yx",
-                           std::string("genie_novand_EnuPtLep_") + mode);
-        TH2D *nova_to_t2k_yz =
-            Project3DRatio(neut_novand_ptlep_H, genie_novand, "yz",
-                           std::string("genie_novand_PtLepEAvHad_") + mode);
+        TH2D *nova_to_t2k_yx = Project3DRatio(
+            neut_novand_ptlep_H, genie_novand, "yx",
+            std::string("genie_novand_EnuPtLep_H") + species + "_" + mode);
+        TH2D *nova_to_t2k_yz = Project3DRatio(
+            neut_novand_ptlep_H, genie_novand, "yz",
+            std::string("genie_novand_PtLepEAvHad_H") + species + "_" + mode);
         fout.WriteTObject(nova_to_t2k_yx, nova_to_t2k_yx->GetName());
         fout.WriteTObject(nova_to_t2k_yz, nova_to_t2k_yz->GetName());
 
@@ -360,6 +360,6 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
   return 0;
 }
 
-int main(int argc, char const * argv[]){
+int main(int argc, char const *argv[]) {
   return fakedatarwgen(argv[1], argv[2]);
 }

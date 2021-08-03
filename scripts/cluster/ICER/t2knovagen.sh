@@ -102,6 +102,8 @@ singularity run ${IMAGE} ${OPTARRAY[@]} &> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARR
 
 date
 
+T=$(( RANDOM % 10 )).$(( RANDOM % 1000 )); echo sleep $T; sleep $T
+
 FLATFILENAME=${OUTFILESTUB}.flattree.${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.root
 
 echo "Running: singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -p ${PROBE} -T ${TUNE} -o ${FLATFILENAME}"

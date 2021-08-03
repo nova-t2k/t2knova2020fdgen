@@ -178,19 +178,16 @@ inline TH1 *GetTH1(TFile *f, std::string const &name) {
 
   TH1 *h;
   f->GetObject(name.c_str(), h);
-  if (!h) {
-    std::cout << "[ERROR]: Failed to find histogram named: " << name
-              << std::endl;
-  } else {
+  if (h)
     h->SetDirectory(nullptr);
-  }
-
-  if (odir) {
-    gDirectory->cd();
-  }
-
-  return h;
 }
+
+if (odir) {
+  gDirectory->cd();
+}
+
+return h;
+} // namespace t2knova
 
 enum nuspecies { kNuMu = 0, kNuMub, kNuE, kNuEb };
 const char *all_nuspecies[] = {"numu", "numub", "nue", "nueb"};
@@ -284,6 +281,11 @@ inline void LoadHists(std::string const &inputfile = "FakeDataInputs.root") {
             rwhists[nuspec][rwconfig][tgta_sel_offset + sel]->SetDirectory(
                 nullptr);
             found++;
+          } else {
+            std::cout << "[WARN]: Couldn't find expected histogram: "
+                      << (rwconfig_str + "_" + tgta_str + "_" + nuspec_str +
+                          "_" + sel_str)
+                      << std::endl;
           }
         }
       }

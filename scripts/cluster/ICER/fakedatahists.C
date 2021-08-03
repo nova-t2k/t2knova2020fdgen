@@ -34,6 +34,12 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
         ";#it{E_{#nu}} (GeV);#it{p}_{lep} (GeV/#it{c});#theta_{lep} (rad)"
         "GeV^{-2} #it{c} rad^{-1}",
         100, 0, 5, 50, 0, 5, 25, 0, M_PI);
+
+    EnuPLepThetaLep_unweighted = new hblob<TH3D>(
+        "EnuPLepThetaLep_unweighted",
+        ";#it{E_{#nu}} (GeV);#it{p}_{lep} (GeV/#it{c});#theta_{lep} (rad)"
+        "GeV^{-2} #it{c} rad^{-1}",
+        100, 0, 5, 50, 0, 5, 25, 0, M_PI);
   } else {
     EnuPLepEAvHad = new hblob<TH3D>(
         "EnuPLepEAvHad",
@@ -126,6 +132,7 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
     Enu->Fill(w, fblob, *Enu_true);
     if (ist2k) {
       EnuPLepThetaLep->Fill(w, fblob, *Enu_true, *PLep_v, acos(*CosLep));
+      EnuPLepThetaLep_unweighted->Fill(1, fblob, *Enu_true, *PLep_v, acos(*CosLep));
     } else {
       EnuPLepEAvHad->Fill(w, fblob, *Enu_true, *PLep_v, *EavAlt);
       EnuQ2EAvHad->Fill(w, fblob, *Enu_true, *Q2, *EavAlt);
@@ -175,8 +182,8 @@ int main(int argc, char const *argv[]) {
     } else if (std::string(argv[4]) == "any") {
       tgta_select = 0;
     } else {
-      std::cout << "Invalid target selector passed: " 
-                << argv[4] << ". Should be C/H/O/any." << std::endl;
+      std::cout << "Invalid target selector passed: " << argv[4]
+                << ". Should be C/H/O/any." << std::endl;
       return 1;
     }
   }
@@ -237,6 +244,27 @@ int main(int argc, char const *argv[]) {
     return TH2D(*h2.get());
   };
 
+  auto ProjX = [=](TH3D const &h) -> TH1D {
+    std::unique_ptr<TH1D> h1(dynamic_cast<TH1D *>(h.Project3D("x")));
+    h1->SetDirectory(nullptr);
+    h1->SetName((std::string(h.GetName()) + "_px").c_str());
+    return TH1D(*h1.get());
+  };
+
+  auto ProjY = [=](TH3D const &h) -> TH1D {
+    std::unique_ptr<TH1D> h1(dynamic_cast<TH1D *>(h.Project3D("y")));
+    h1->SetDirectory(nullptr);
+    h1->SetName((std::string(h.GetName()) + "_py").c_str());
+    return TH1D(*h1.get());
+  };
+
+  auto ProjZ = [=](TH3D const &h) -> TH1D {
+    std::unique_ptr<TH1D> h1(dynamic_cast<TH1D *>(h.Project3D("z")));
+    h1->SetDirectory(nullptr);
+    h1->SetName((std::string(h.GetName()) + "_pz").c_str());
+    return TH1D(*h1.get());
+  };
+
   if (ist2k) {
     EnuPLepThetaLep->Write(dout);
     auto PLepThetaLep = EnuPLepThetaLep->Transform<TH2D>(ProjYZ);
@@ -246,6 +274,27 @@ int main(int argc, char const *argv[]) {
     auto EnuThetaLep = EnuPLepThetaLep->Transform<TH2D>(ProjXZ);
     EnuThetaLep.Write(dout);
 
+    auto EnuProj = EnuPLepThetaLep->Transform<TH1D>(ProjX);
+    EnuProj.Write(dout);
+    auto PLep = EnuPLepThetaLep->Transform<TH1D>(ProjY);
+    PLep.Write(dout);
+    auto ThetaLep = EnuPLepThetaLep->Transform<TH1D>(ProjZ);
+    ThetaLep.Write(dout);
+
+    EnuPLepThetaLep_unweighted->Write(dout);
+    auto PLepThetaLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjYZ);
+    PLepThetaLep_unweighted.Write(dout);
+    auto EnuPLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjYX);
+    EnuPLep_unweighted.Write(dout);
+    auto EnuThetaLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjXZ);
+    EnuThetaLep_unweighted.Write(dout);
+
+    auto EnuProj_unweighted = EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjX);
+    EnuProj_unweighted.Write(dout);
+    auto PLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjY);
+    PLep_unweighted.Write(dout);
+    auto ThetaLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjZ);
+    ThetaLep_unweighted.Write(dout);
   } else {
     EnuPLepEAvHad->Write(dout);
     auto PLepEAvHad = EnuPLepEAvHad->Transform<TH2D>(ProjYZ);
