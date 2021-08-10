@@ -14,8 +14,8 @@ fi
 declare -A TGTEL
 TGTEL["NOvAND_CH"]="C H"
 TGTEL["ND280_CH"]="C"
-#TGTEL["ND280_H2O"]="H O"
-TGTEL["ND280_H2O"]="O"
+TGTEL["ND280_H2O"]="H O"
+#TGTEL["ND280_H2O"]="O"
 
 GENERATORS=( GENIE NEUT )
 SPECIES=( numu numub nue nueb )
