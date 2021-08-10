@@ -34,6 +34,14 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
       ";#it{E_{#nu}} (GeV);#it{y}; d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}", 200,
       0, 10);
 
+  Q2 = new hblob<TH1D>(
+      "Q2", ";#it{Q}^{2} (GeV^{2});#it{y}; d#sigma/d#it{Q}^{2} cm^{2} GeV^{-2}",
+      200, 0, 4);
+  Q2_unweighted = new hblob<TH1D>(
+      "Q2_unweighted",
+      ";#it{Q}^{2} (GeV^{2});#it{y}; d#sigma/d#it{Q}^{2} cm^{2} GeV^{-2}", 200,
+      0, 4);
+
   if (ist2k) {
     EnuPLepThetaLep = new hblob<TH3D>(
         "EnuPLepThetaLep",
@@ -137,9 +145,12 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
 
     Enu->Fill(w, fblob, *Enu_true);
     Enu_unweighted->Fill(1, fblob, *Enu_true);
+    Q2->Fill(w, fblob, *Q2);
+    Q2_unweighted->Fill(1, fblob, *Q2);
     if (ist2k) {
       EnuPLepThetaLep->Fill(w, fblob, *Enu_true, *PLep_v, acos(*CosLep));
-      EnuPLepThetaLep_unweighted->Fill(1, fblob, *Enu_true, *PLep_v, acos(*CosLep));
+      EnuPLepThetaLep_unweighted->Fill(1, fblob, *Enu_true, *PLep_v,
+                                       acos(*CosLep));
     } else {
       EnuPLepEAvHad->Fill(w, fblob, *Enu_true, *PLep_v, *EavAlt);
       EnuQ2EAvHad->Fill(w, fblob, *Enu_true, *Q2, *EavAlt);
@@ -233,6 +244,9 @@ int main(int argc, char const *argv[]) {
   Enu->Write(dout);
   Enu_unweighted->Write(dout);
 
+  Q2->Write(dout);
+  Q2_unweighted->Write(dout);
+
   auto ProjYZ = [=](TH3D const &h) -> TH2D {
     std::unique_ptr<TH2D> h2(dynamic_cast<TH2D *>(h.Project3D("yz")));
     h2->SetDirectory(nullptr);
@@ -290,18 +304,23 @@ int main(int argc, char const *argv[]) {
     ThetaLep.Write(dout);
 
     EnuPLepThetaLep_unweighted->Write(dout);
-    auto PLepThetaLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjYZ);
+    auto PLepThetaLep_unweighted =
+        EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjYZ);
     PLepThetaLep_unweighted.Write(dout);
-    auto EnuPLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjYX);
+    auto EnuPLep_unweighted =
+        EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjYX);
     EnuPLep_unweighted.Write(dout);
-    auto EnuThetaLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjXZ);
+    auto EnuThetaLep_unweighted =
+        EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjXZ);
     EnuThetaLep_unweighted.Write(dout);
 
-    auto EnuProj_unweighted = EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjX);
+    auto EnuProj_unweighted =
+        EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjX);
     EnuProj_unweighted.Write(dout);
     auto PLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjY);
     PLep_unweighted.Write(dout);
-    auto ThetaLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjZ);
+    auto ThetaLep_unweighted =
+        EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjZ);
     ThetaLep_unweighted.Write(dout);
   } else {
     EnuPLepEAvHad->Write(dout);

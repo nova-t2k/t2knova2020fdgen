@@ -12,10 +12,10 @@ FLUXES["NOvAND_numu"]="/var/t2k-nova/fluxes/NOvA/FHC_Flux_NOvA_ND_2017.root,flux
 FLUXES["NOvAND_numub"]="/var/t2k-nova/fluxes/NOvA/RHC_Flux_NOvA_ND_2017.root,flux_numubar"
 FLUXES["NOvAND_nue"]="/var/t2k-nova/fluxes/NOvA/FHC_Flux_NOvA_ND_2017.root,flux_numu"
 FLUXES["NOvAND_nueb"]="/var/t2k-nova/fluxes/NOvA/RHC_Flux_NOvA_ND_2017.root,flux_numubar"
-FLUXES["ND280_numu"]="/var/t2k-nova/fluxes/T2K/t2kflux_2016_minus250kA.root,enu_nd280_numu"
-FLUXES["ND280_numub"]="/var/t2k-nova/fluxes/T2K/t2kflux_2016_plus250kA.root,enu_nd280_numub"
-FLUXES["ND280_nue"]="/var/t2k-nova/fluxes/T2K/t2kflux_2016_minus250kA.root,enu_nd280_numu"
-FLUXES["ND280_nueb"]="/var/t2k-nova/fluxes/T2K/t2kflux_2016_plus250kA.root,enu_nd280_numub"
+FLUXES["ND280_numu"]="/var/t2k-nova/fluxes/T2K/t2kflux_2016_plus250kA.root,enu_nd280_numu"
+FLUXES["ND280_numub"]="/var/t2k-nova/fluxes/T2K/t2kflux_2016_minus250kA.root,enu_nd280_numub"
+FLUXES["ND280_nue"]="/var/t2k-nova/fluxes/T2K/t2kflux_2016_plus250kA.root,enu_nd280_numu"
+FLUXES["ND280_nueb"]="/var/t2k-nova/fluxes/T2K/t2kflux_2016_minus250kA.root,enu_nd280_numub"
 
 declare -A NEVS
 NEVS["GENIE_numu_NOvAND"]=200000

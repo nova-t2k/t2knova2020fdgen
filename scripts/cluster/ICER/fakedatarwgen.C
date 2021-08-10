@@ -53,6 +53,23 @@ void ScrubLowStatsBins(TH2D *num, TH2D *denom, TH2D *ratio,
   }
 }
 
+void ScrubLowStatsBins(TH1D *num, TH1D *denom, TH1D *ratio,
+                       double frac_error_threshold) {
+  for (int i = 0; i < num->GetXaxis()->GetNbins(); ++i) {
+    double num_frac_error = num->GetBinError(i + 1) / num->GetBinContent(i + 1);
+    double denom_frac_error =
+        denom->GetBinError(i + 1) / denom->GetBinContent(i + 1);
+
+    if (!std::isnormal(num_frac_error) || !std::isnormal(denom_frac_error)) {
+      ratio->SetBinContent(i + 1, 0);
+    } else if (num_frac_error > frac_error_threshold) {
+      ratio->SetBinContent(i + 1, 0);
+    } else if (denom_frac_error > frac_error_threshold) {
+      ratio->SetBinContent(i + 1, 1);
+    }
+  }
+}
+
 TH2D *Project3DRatio(TH3D *num, TH3D *denom, const char *projconfig,
                      std::string const &name) {
   TH2D *num_proj = dynamic_cast<TH2D *>(num->Project3D(projconfig));
@@ -177,6 +194,108 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
             (std::string("t2knd_to_nova_H_") + species + "_" + mode).c_str()));
         rat->Divide(neut_nd280_H);
         ScrubLowStatsBins(genie_nd280, neut_nd280_H, rat, 1.0 / sqrt(25));
+        rat->SetDirectory(nullptr);
+        fout.WriteTObject(rat, rat->GetName());
+      }
+
+      TH1D *neut_nd280_C_Enu = dynamic_cast<TH1D *>(
+          GetTH1(&fin, "NEUT/ND280/C/" + species + "/Enu_" + mode));
+      if (neut_nd280_C_Enu) { // ND280
+        neut_nd280_C_Enu->SetDirectory(nullptr);
+
+        TH1D *genie_nd280 = dynamic_cast<TH1D *>(
+            GetTH1(&fin, "GENIE/ND280/C/" + species + "/Enu_" + mode));
+        genie_nd280->SetDirectory(nullptr);
+
+        TH1D *rat = dynamic_cast<TH1D *>(genie_nd280->Clone(
+            (std::string("t2knd_to_nova_Enu_C_") + species + "_" + mode).c_str()));
+        rat->Divide(neut_nd280_C_Enu);
+        ScrubLowStatsBins(genie_nd280, neut_nd280_C_Enu, rat, 1.0 / sqrt(25));
+        rat->SetDirectory(nullptr);
+        fout.WriteTObject(rat, rat->GetName());
+      }
+
+      TH1D *neut_nd280_O_Enu = dynamic_cast<TH1D *>(
+          GetTH1(&fin, "NEUT/ND280/O/" + species + "/Enu_" + mode));
+      if (neut_nd280_O_Enu) { // ND280
+        neut_nd280_O_Enu->SetDirectory(nullptr);
+
+        TH1D *genie_nd280 = dynamic_cast<TH1D *>(
+            GetTH1(&fin, "GENIE/ND280/O/" + species + "/Enu_" + mode));
+        genie_nd280->SetDirectory(nullptr);
+
+        TH1D *rat = dynamic_cast<TH1D *>(genie_nd280->Clone(
+            (std::string("t2knd_to_nova_Enu_O_") + species + "_" + mode).c_str()));
+        rat->Divide(neut_nd280_O_Enu);
+        ScrubLowStatsBins(genie_nd280, neut_nd280_O_Enu, rat, 1.0 / sqrt(25));
+        rat->SetDirectory(nullptr);
+        fout.WriteTObject(rat, rat->GetName());
+      }
+
+      TH1D *neut_nd280_H_Enu = dynamic_cast<TH1D *>(
+          GetTH1(&fin, "NEUT/ND280/H/" + species + "/Enu_" + mode));
+      if (neut_nd280_H_Enu) { // ND280
+        neut_nd280_H_Enu->SetDirectory(nullptr);
+
+        TH1D *genie_nd280 = dynamic_cast<TH1D *>(
+            GetTH1(&fin, "GENIE/ND280/H/" + species + "/Enu_" + mode));
+        genie_nd280->SetDirectory(nullptr);
+
+        TH1D *rat = dynamic_cast<TH1D *>(genie_nd280->Clone(
+            (std::string("t2knd_to_nova_Enu_H_") + species + "_" + mode).c_str()));
+        rat->Divide(neut_nd280_H_Enu);
+        ScrubLowStatsBins(genie_nd280, neut_nd280_H_Enu, rat, 1.0 / sqrt(25));
+        rat->SetDirectory(nullptr);
+        fout.WriteTObject(rat, rat->GetName());
+      }
+
+      TH1D *neut_nd280_C_Q2 = dynamic_cast<TH1D *>(
+          GetTH1(&fin, "NEUT/ND280/C/" + species + "/Q2_" + mode));
+      if (neut_nd280_C_Q2) { // ND280
+        neut_nd280_C_Q2->SetDirectory(nullptr);
+
+        TH1D *genie_nd280 = dynamic_cast<TH1D *>(
+            GetTH1(&fin, "GENIE/ND280/C/" + species + "/Q2_" + mode));
+        genie_nd280->SetDirectory(nullptr);
+
+        TH1D *rat = dynamic_cast<TH1D *>(genie_nd280->Clone(
+            (std::string("t2knd_to_nova_Q2_C_") + species + "_" + mode).c_str()));
+        rat->Divide(neut_nd280_C_Q2);
+        ScrubLowStatsBins(genie_nd280, neut_nd280_C_Q2, rat, 1.0 / sqrt(25));
+        rat->SetDirectory(nullptr);
+        fout.WriteTObject(rat, rat->GetName());
+      }
+
+      TH1D *neut_nd280_O_Q2 = dynamic_cast<TH1D *>(
+          GetTH1(&fin, "NEUT/ND280/O/" + species + "/Q2_" + mode));
+      if (neut_nd280_O_Q2) { // ND280
+        neut_nd280_O_Q2->SetDirectory(nullptr);
+
+        TH1D *genie_nd280 = dynamic_cast<TH1D *>(
+            GetTH1(&fin, "GENIE/ND280/O/" + species + "/Q2_" + mode));
+        genie_nd280->SetDirectory(nullptr);
+
+        TH1D *rat = dynamic_cast<TH1D *>(genie_nd280->Clone(
+            (std::string("t2knd_to_nova_Q2_O_") + species + "_" + mode).c_str()));
+        rat->Divide(neut_nd280_O_Q2);
+        ScrubLowStatsBins(genie_nd280, neut_nd280_O_Q2, rat, 1.0 / sqrt(25));
+        rat->SetDirectory(nullptr);
+        fout.WriteTObject(rat, rat->GetName());
+      }
+
+      TH1D *neut_nd280_H_Q2 = dynamic_cast<TH1D *>(
+          GetTH1(&fin, "NEUT/ND280/H/" + species + "/Q2_" + mode));
+      if (neut_nd280_H_Q2) { // ND280
+        neut_nd280_H_Q2->SetDirectory(nullptr);
+
+        TH1D *genie_nd280 = dynamic_cast<TH1D *>(
+            GetTH1(&fin, "GENIE/ND280/H/" + species + "/Q2_" + mode));
+        genie_nd280->SetDirectory(nullptr);
+
+        TH1D *rat = dynamic_cast<TH1D *>(genie_nd280->Clone(
+            (std::string("t2knd_to_nova_Q2_H_") + species + "_" + mode).c_str()));
+        rat->Divide(neut_nd280_H_Q2);
+        ScrubLowStatsBins(genie_nd280, neut_nd280_H_Q2, rat, 1.0 / sqrt(25));
         rat->SetDirectory(nullptr);
         fout.WriteTObject(rat, rat->GetName());
       }
