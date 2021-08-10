@@ -18,6 +18,8 @@ TH1D *totxsecs;
 
 hblob<TH1D> *Enu;
 hblob<TH1D> *Enu_unweighted;
+hblob<TH1D> *Q2;
+hblob<TH1D> *Q2_unweighted;
 hblob<TH3D> *EnuPLepThetaLep;
 hblob<TH3D> *EnuPLepThetaLep_unweighted;
 hblob<TH3D> *EnuPLepEAvHad;
@@ -79,7 +81,7 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
   TTreeReaderValue<float> EavAlt(rdr, "EavAlt");
   TTreeReaderValue<float> Enu_true(rdr, "Enu_true");
   TTreeReaderValue<float> PLep_v(rdr, "PLep");
-  TTreeReaderValue<float> Q2(rdr, "Q2");
+  TTreeReaderValue<float> Q2var(rdr, "Q2");
   TTreeReaderValue<int> tgta(rdr, "tgta");
 
   TTreeReaderValue<bool> flagCCINC(rdr, "flagCCINC");
@@ -145,15 +147,15 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
 
     Enu->Fill(w, fblob, *Enu_true);
     Enu_unweighted->Fill(1, fblob, *Enu_true);
-    Q2->Fill(w, fblob, *Q2);
-    Q2_unweighted->Fill(1, fblob, *Q2);
+    Q2->Fill(w, fblob, *Q2var);
+    Q2_unweighted->Fill(1, fblob, *Q2var);
     if (ist2k) {
       EnuPLepThetaLep->Fill(w, fblob, *Enu_true, *PLep_v, acos(*CosLep));
       EnuPLepThetaLep_unweighted->Fill(1, fblob, *Enu_true, *PLep_v,
                                        acos(*CosLep));
     } else {
       EnuPLepEAvHad->Fill(w, fblob, *Enu_true, *PLep_v, *EavAlt);
-      EnuQ2EAvHad->Fill(w, fblob, *Enu_true, *Q2, *EavAlt);
+      EnuQ2EAvHad->Fill(w, fblob, *Enu_true, *Q2var, *EavAlt);
       EnuPtLepEAvHad->Fill(w, fblob, *Enu_true,
                            (*PLep_v) * sqrt(1 - pow(*CosLep, 2)), *EavAlt);
     }

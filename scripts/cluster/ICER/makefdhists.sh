@@ -44,7 +44,7 @@ for gen in ${GENERATORS[@]}; do
                                    ${tgtel} \
                                    ${gen}/${det}/${tgtel}/${spec}"
           echo $CMD
-	  ${CMD}
+          ${CMD}
         done
       done
     done

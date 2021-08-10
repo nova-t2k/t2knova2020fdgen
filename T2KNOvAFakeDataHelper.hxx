@@ -176,7 +176,7 @@ double GetFakeDataWeight_ND280ToNOvA_Enu(int nu_pdg, int lep_pdg, int tgta,
                                          bool interpolate = true);
 
 double GetFakeDataWeight_ND280ToNOvA_Q2(int nu_pdg, int lep_pdg, int tgta,
-                                        double Q2_GeV2 int NFSCPi, int NFSPi0,
+                                        double Q2_GeV2, int NFSCPi, int NFSPi0,
                                         int NOther, bool interpolate = true);
 } // namespace t2knova
 
@@ -234,10 +234,9 @@ enum reweightconfig {
   kNOvA_to_T2KND_ptlep,
   kNoWeight
 };
-const char *all_rwconfig[] = {
-    "t2knd_to_nova",    "t2knd_to_nova_Enu", ,
-    "t2knd_to_nova_Q2", "nova_to_t2k_plep",  "nova_to_t2k_Q2",
-    "nova_to_t2k_ptlep"};
+const char *all_rwconfig[] = {"t2knd_to_nova",    "t2knd_to_nova_Enu",
+                              "t2knd_to_nova_Q2", "nova_to_t2k_plep",
+                              "nova_to_t2k_Q2",   "nova_to_t2k_ptlep"};
 
 enum selection {
   kCCINC = 0,
@@ -343,9 +342,9 @@ inline double EvalHist1D(TH1 *h, double x, bool interpolate = true) {
   if ((xbin != 0) && (xbin != (h->GetXaxis()->GetNbins() + 1))) {
 
     if (interpolate && (xbin > 1) && (xbin < h->GetXaxis()->GetNbins())) {
-      return h->Interpolate(x, y, z);
+      return h->Interpolate(x);
     }
-    return h->GetBinContent(xbin, ybin, zbin);
+    return h->GetBinContent(xbin);
   }
 
   return 1;
@@ -476,10 +475,9 @@ inline double GetFakeDataWeight_ND280ToNOvA_Enu(int nu_pdg, int lep_pdg,
 }
 
 inline double GetFakeDataWeight_ND280ToNOvA_Q2(int nu_pdg, int lep_pdg,
-                                               int tgta,
-                                               double Q2_GeV2 int NFSCPi,
-                                               int NFSPi0, int NOther,
-                                               bool interpolate) {
+                                               int tgta, double Q2_GeV2,
+                                               int NFSCPi, int NFSPi0,
+                                               int NOther, bool interpolate) {
   if (!loaded) {
     LoadHists();
   }
