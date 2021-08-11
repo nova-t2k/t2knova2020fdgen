@@ -15,13 +15,14 @@
 using namespace t2knova;
 
 TH1D *totxsecs;
+TH1D *totxsecs_untuned;
 
 hblob<TH1D> *Enu;
-hblob<TH1D> *Enu_unweighted;
+hblob<TH1D> *Enu_untuned;
 hblob<TH1D> *Q2;
-hblob<TH1D> *Q2_unweighted;
+hblob<TH1D> *Q2_untuned;
 hblob<TH3D> *EnuPLepThetaLep;
-hblob<TH3D> *EnuPLepThetaLep_unweighted;
+hblob<TH3D> *EnuPLepThetaLep_untuned;
 hblob<TH3D> *EnuPLepEAvHad;
 hblob<TH3D> *EnuQ2EAvHad;
 hblob<TH3D> *EnuPtLepEAvHad;
@@ -31,16 +32,16 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
       "Enu",
       ";#it{E_{#nu}} (GeV);#it{y}; d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}", 200,
       0, 10);
-  Enu_unweighted = new hblob<TH1D>(
-      "Enu_unweighted",
+  Enu_untuned = new hblob<TH1D>(
+      "Enu_untuned",
       ";#it{E_{#nu}} (GeV);#it{y}; d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}", 200,
       0, 10);
 
   Q2 = new hblob<TH1D>(
       "Q2", ";#it{Q}^{2} (GeV^{2});#it{y}; d#sigma/d#it{Q}^{2} cm^{2} GeV^{-2}",
       200, 0, 4);
-  Q2_unweighted = new hblob<TH1D>(
-      "Q2_unweighted",
+  Q2_untuned = new hblob<TH1D>(
+      "Q2_untuned",
       ";#it{Q}^{2} (GeV^{2});#it{y}; d#sigma/d#it{Q}^{2} cm^{2} GeV^{-2}", 200,
       0, 4);
 
@@ -51,8 +52,8 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
         "GeV^{-2} #it{c} rad^{-1}",
         100, 0, 5, 50, 0, 5, 25, 0, M_PI);
 
-    EnuPLepThetaLep_unweighted = new hblob<TH3D>(
-        "EnuPLepThetaLep_unweighted",
+    EnuPLepThetaLep_untuned = new hblob<TH3D>(
+        "EnuPLepThetaLep_untuned",
         ";#it{E_{#nu}} (GeV);#it{p}_{lep} (GeV/#it{c});#theta_{lep} (rad)"
         "GeV^{-2} #it{c} rad^{-1}",
         100, 0, 5, 50, 0, 5, 25, 0, M_PI);
@@ -123,36 +124,46 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
 
     if (fblob.flagCCINC) {
       totxsecs->Fill(0.0, w);
+      totxsecs_untuned->Fill(0.0, *fScaleFactor);
       if (fblob.flagCC0pi) {
         totxsecs->Fill(1.0, w);
+        totxsecs_untuned->Fill(1.0, *fScaleFactor);
       } else if (fblob.flagCC1cpi) {
         totxsecs->Fill(2.0, w);
+        totxsecs_untuned->Fill(2.0, *fScaleFactor);
       } else if (fblob.flagCC1pi0) {
         totxsecs->Fill(3.0, w);
+        totxsecs_untuned->Fill(3.0, *fScaleFactor);
       } else {
         totxsecs->Fill(4.0, w);
+        totxsecs_untuned->Fill(4.0, *fScaleFactor);
       }
     } else if (fblob.flagNCINC) {
       totxsecs->Fill(5.0, w);
+      totxsecs_untuned->Fill(5.0, *fScaleFactor);
       if (fblob.flagNC0pi) {
         totxsecs->Fill(6.0, w);
+        totxsecs_untuned->Fill(6.0, *fScaleFactor);
       } else if (fblob.flagNC1cpi) {
         totxsecs->Fill(7.0, w);
+        totxsecs_untuned->Fill(7.0, *fScaleFactor);
       } else if (fblob.flagNC1pi0) {
         totxsecs->Fill(8.0, w);
+        totxsecs_untuned->Fill(8.0, *fScaleFactor);
       } else {
         totxsecs->Fill(9.0, w);
+        totxsecs_untuned->Fill(9.0, *fScaleFactor);
       }
     }
 
     Enu->Fill(w, fblob, *Enu_true);
-    Enu_unweighted->Fill(1, fblob, *Enu_true);
+    Enu_untuned->Fill(*fScaleFactor, fblob, *Enu_true);
     Q2->Fill(w, fblob, *Q2var);
-    Q2_unweighted->Fill(1, fblob, *Q2var);
+    Q2_untuned->Fill(*fScaleFactor, fblob, *Q2var);
     if (ist2k) {
       EnuPLepThetaLep->Fill(w, fblob, *Enu_true, *PLep_v, acos(*CosLep));
-      EnuPLepThetaLep_unweighted->Fill(1, fblob, *Enu_true, *PLep_v,
-                                       acos(*CosLep));
+      EnuPLepThetaLep_untuned->Fill(1, fblob, *Enu_true, *PLep_v,
+                                    acos(*CosLep));
     } else {
       EnuPLepEAvHad->Fill(w, fblob, *Enu_true, *PLep_v, *EavAlt);
       EnuQ2EAvHad->Fill(w, fblob, *Enu_true, *Q2var, *EavAlt);
@@ -243,11 +254,23 @@ int main(int argc, char const *argv[]) {
   totxsecs->GetXaxis()->SetBinLabel(10, "NCMulti#pi + CCOther");
   dout->WriteTObject(totxsecs, "totxsecs");
 
+  totxsecs_untuned->GetXaxis()->SetBinLabel(1, "CCInc");
+  totxsecs_untuned->GetXaxis()->SetBinLabel(2, "CC0#pi");
+  totxsecs_untuned->GetXaxis()->SetBinLabel(3, "CC1#pi^{#pm}");
+  totxsecs_untuned->GetXaxis()->SetBinLabel(4, "CC1#pi^{0}");
+  totxsecs_untuned->GetXaxis()->SetBinLabel(5, "CCMulti#pi + CCOther");
+  totxsecs_untuned->GetXaxis()->SetBinLabel(6, "NCInc");
+  totxsecs_untuned->GetXaxis()->SetBinLabel(7, "NC0#pi");
+  totxsecs_untuned->GetXaxis()->SetBinLabel(8, "NC1#pi^{#pm}");
+  totxsecs_untuned->GetXaxis()->SetBinLabel(9, "NC1#pi^{0}");
+  totxsecs_untuned->GetXaxis()->SetBinLabel(10, "NCMulti#pi + CCOther");
+  dout->WriteTObject(totxsecs_untuned, "totxsecs_untuned");
+
   Enu->Write(dout);
-  Enu_unweighted->Write(dout);
+  Enu_untuned->Write(dout);
 
   Q2->Write(dout);
-  Q2_unweighted->Write(dout);
+  Q2_untuned->Write(dout);
 
   auto ProjYZ = [=](TH3D const &h) -> TH2D {
     std::unique_ptr<TH2D> h2(dynamic_cast<TH2D *>(h.Project3D("yz")));
@@ -305,25 +328,21 @@ int main(int argc, char const *argv[]) {
     auto ThetaLep = EnuPLepThetaLep->Transform<TH1D>(ProjZ);
     ThetaLep.Write(dout);
 
-    EnuPLepThetaLep_unweighted->Write(dout);
-    auto PLepThetaLep_unweighted =
-        EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjYZ);
-    PLepThetaLep_unweighted.Write(dout);
-    auto EnuPLep_unweighted =
-        EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjYX);
-    EnuPLep_unweighted.Write(dout);
-    auto EnuThetaLep_unweighted =
-        EnuPLepThetaLep_unweighted->Transform<TH2D>(ProjXZ);
-    EnuThetaLep_unweighted.Write(dout);
+    EnuPLepThetaLep_untuned->Write(dout);
+    auto PLepThetaLep_untuned =
+        EnuPLepThetaLep_untuned->Transform<TH2D>(ProjYZ);
+    PLepThetaLep_untuned.Write(dout);
+    auto EnuPLep_untuned = EnuPLepThetaLep_untuned->Transform<TH2D>(ProjYX);
+    EnuPLep_untuned.Write(dout);
+    auto EnuThetaLep_untuned = EnuPLepThetaLep_untuned->Transform<TH2D>(ProjXZ);
+    EnuThetaLep_untuned.Write(dout);
 
-    auto EnuProj_unweighted =
-        EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjX);
-    EnuProj_unweighted.Write(dout);
-    auto PLep_unweighted = EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjY);
-    PLep_unweighted.Write(dout);
-    auto ThetaLep_unweighted =
-        EnuPLepThetaLep_unweighted->Transform<TH1D>(ProjZ);
-    ThetaLep_unweighted.Write(dout);
+    auto EnuProj_untuned = EnuPLepThetaLep_untuned->Transform<TH1D>(ProjX);
+    EnuProj_untuned.Write(dout);
+    auto PLep_untuned = EnuPLepThetaLep_untuned->Transform<TH1D>(ProjY);
+    PLep_untuned.Write(dout);
+    auto ThetaLep_untuned = EnuPLepThetaLep_untuned->Transform<TH1D>(ProjZ);
+    ThetaLep_untuned.Write(dout);
   } else {
     EnuPLepEAvHad->Write(dout);
     auto PLepEAvHad = EnuPLepEAvHad->Transform<TH2D>(ProjYZ);
