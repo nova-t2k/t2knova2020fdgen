@@ -78,6 +78,9 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
   totxsecs = new TH1D("totxsecs", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
   totxsecs->SetDirectory(nullptr);
 
+  totxsecs_untuned = new TH1D("totxsecs_untuned", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
+  totxsecs_untuned->SetDirectory(nullptr);
+
   TTreeReaderValue<float> CosLep(rdr, "CosLep");
   TTreeReaderValue<float> EavAlt(rdr, "EavAlt");
   TTreeReaderValue<float> Enu_true(rdr, "Enu_true");
