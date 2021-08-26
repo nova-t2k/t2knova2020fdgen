@@ -33,6 +33,14 @@ struct hblob {
           GetTH1(fin, std::string("ND280/T2KNDTune_To_NOvATune") + "/" +
                           tgtstr + "/" + t2knova::all_nuspecies[nuspec] + "/" +
                           varname + "_" + t2knova::all_sel[sel]));
+      ReWeights.push_back(
+          GetTH1(fin, std::string("ND280/T2KNDTune_To_NOvATune_Enu") + "/" +
+                          tgtstr + "/" + t2knova::all_nuspecies[nuspec] + "/" +
+                          varname + "_" + t2knova::all_sel[sel]));
+      ReWeights.push_back(
+          GetTH1(fin, std::string("ND280/T2KNDTune_To_NOvATune_Q2") + "/" +
+                          tgtstr + "/" + t2knova::all_nuspecies[nuspec] + "/" +
+                          varname + "_" + t2knova::all_sel[sel]));
     } else {
       throw;
     }
@@ -109,11 +117,15 @@ struct hblob {
     leg->AddEntry(From, ist2kbase ? "BANFF Post ND280" : "NOvA2020", "l");
     leg->AddEntry(Target, ist2kbase ? "NOvA2020" : "BANFF Post ND280", "l");
     leg->AddEntry(ReWeights[0],
-                  ist2kbase ? "Reweight to NOvA" : "ReWeight to BANFF (PLep)",
+                  ist2kbase ? "Reweight to NOvA (EnuPThetaLep)"
+                            : "ReWeight to BANFF (PLep)",
                   "l");
     if (!ist2kbase) {
       leg->AddEntry(ReWeights[1], "ReWeight to BANFF (Q^{2})", "l");
       leg->AddEntry(ReWeights[2], "ReWeight to BANFF (PtLep)", "l");
+    } else {
+      leg->AddEntry(ReWeights[1], "ReWeight to NOvA (Enu)", "l");
+      leg->AddEntry(ReWeights[2], "ReWeight to NOvA (Q^{2})", "l");
     }
 
     leg->Draw();

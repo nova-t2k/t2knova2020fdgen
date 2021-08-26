@@ -107,19 +107,25 @@ void Fill(TTreeReader &rdr,
     int NOther = (*NFSlep > 0 ? (*NFSlep - 1) : 0) + *NFSOther;
 
     if (weightconfig == t2knova::kT2KND_to_NOvA) {
-      w *= t2knova::GetFakeDataWeight_ND280ToNOvA(*PDGnu, *PDGLep, *tgta, *Enu_true,
-                                                  *PLep_v, acos(*CosLep), NCpi,
-                                                  *NFSpi0, NOther);
+      w *= t2knova::GetFakeDataWeight_ND280ToNOvA(
+          *PDGnu, *PDGLep, *tgta, *Enu_true, *PLep_v, acos(*CosLep), NCpi,
+          *NFSpi0, NOther);
+    } else if (weightconfig == t2knova::kT2KND_to_NOvA_Enu) {
+      w *= t2knova::GetFakeDataWeight_ND280ToNOvA_Enu(
+          *PDGnu, *PDGLep, *tgta, *Enu_true, NCpi, *NFSpi0, NOther);
+    } else if (weightconfig == t2knova::kT2KND_to_NOvA_Q2) {
+      w *= t2knova::GetFakeDataWeight_ND280ToNOvA_Q2(
+          *PDGnu, *PDGLep, *tgta, *Q2_v, NCpi, *NFSpi0, NOther);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_plep) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_PLep(*PDGnu, *PDGLep, *tgta, *Enu_true,
-                                                     *PLep_v, *EavAlt);
+      w *= t2knova::GetFakeDataWeight_NOvAToT2K_PLep(
+          *PDGnu, *PDGLep, *tgta, *Enu_true, *PLep_v, *EavAlt);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_Q2) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_Q2(*PDGnu, *PDGLep, *tgta, *Enu_true,
-                                                   *Q2_v, *EavAlt);
+      w *= t2knova::GetFakeDataWeight_NOvAToT2K_Q2(*PDGnu, *PDGLep, *tgta,
+                                                   *Enu_true, *Q2_v, *EavAlt);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
       w *= t2knova::GetFakeDataWeight_NOvAToT2K_PtLep(
-          *PDGnu, *PDGLep, *tgta, *Enu_true, (*PLep_v) * sqrt(1 - pow(*CosLep, 2)),
-          *EavAlt);
+          *PDGnu, *PDGLep, *tgta, *Enu_true,
+          (*PLep_v) * sqrt(1 - pow(*CosLep, 2)), *EavAlt);
     }
 
     bool iscc = (*PDGnu != *PDGLep);
@@ -196,6 +202,10 @@ int main(int argc, char const *argv[]) {
     weightconfig = t2knova::kNOvA_to_T2KND_ptlep;
   } else if (std::string(argv[2]) == "T2KND_To_NOvA") {
     weightconfig = t2knova::kT2KND_to_NOvA;
+  } else if (std::string(argv[2]) == "T2KND_To_NOvA_Enu") {
+    weightconfig = t2knova::kT2KND_to_NOvA_Enu;
+  } else if (std::string(argv[2]) == "T2KND_To_NOvA_Q2") {
+    weightconfig = t2knova::kT2KND_to_NOvA_Q2;
   }
 
   Fill(rdr, weightconfig);
