@@ -26,7 +26,8 @@ hblob<TH1D> *q0;
 hblob<TH1D> *q3;
 
 void Fill(TTreeReader &rdr,
-          t2knova::reweightconfig weightconfig = t2knova::kNoWeight) {
+          t2knova::reweightconfig weightconfig = t2knova::kNoWeight,
+          int tgta_select = 0) {
   Enu = new hblob<TH1D>(
       "Enu",
       ";#it{E_{#nu}} (GeV);#it{y}; d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}", 100,
@@ -70,6 +71,7 @@ void Fill(TTreeReader &rdr,
 
   TTreeReaderValue<int> PDGnu(rdr, "PDGnu");
   TTreeReaderValue<int> PDGLep(rdr, "PDGLep");
+  TTreeReaderValue<int> Mode(rdr, "Mode");
 
   TTreeReaderValue<float> EavAlt(rdr, "EavAlt");
   TTreeReaderValue<float> Enu_true(rdr, "Enu_true");
@@ -101,6 +103,11 @@ void Fill(TTreeReader &rdr,
                 << (100 * ent_it / nents) << "%)" << std::endl;
     }
 
+    if (tgta_select && (*tgta != tgta_select)) {
+      ent_it++;
+      continue;
+    }
+
     double w = *fScaleFactor * *RWWeight;
 
     int NCpi = *NFSpip + *NFSpim;
@@ -128,40 +135,33 @@ void Fill(TTreeReader &rdr,
           (*PLep_v) * sqrt(1 - pow(*CosLep, 2)), *EavAlt);
     }
 
-    bool iscc = (*PDGnu != *PDGLep);
+    bool iscc = (*PDGLep) % 2;
 
-    if (iscc) {
+    FlagBlob fblob = GetFlagBlob(iscc, *NFSpip, *NFSpim, *NFSpi0, *NFSgamma,
+                                 *NFSlep, *NFSOther, *Mode);
+    if (fblob.flagCCINC) {
       totxsecs->Fill(0.0, w);
-      if ((*NFSpi0 + NCpi + NOther) == 0) {
+      if (fblob.flagCC0pi) {
         totxsecs->Fill(1.0, w);
-      } else if ((NCpi == 1) && ((*NFSpi0 + NOther) == 0)) {
+      } else if (fblob.flagCC1cpi) {
         totxsecs->Fill(2.0, w);
-      } else if ((*NFSpi0 == 1) && ((NCpi + NOther) == 0)) {
+      } else if (fblob.flagCC1pi0) {
         totxsecs->Fill(3.0, w);
       } else {
         totxsecs->Fill(4.0, w);
       }
-    } else {
+    } else if (fblob.flagNCINC) {
       totxsecs->Fill(5.0, w);
-      if ((*NFSpi0 + NCpi + NOther) == 0) {
+      if (fblob.flagNC0pi) {
         totxsecs->Fill(6.0, w);
-      } else if ((NCpi == 1) && ((*NFSpi0 + NOther) == 0)) {
+      } else if (fblob.flagNC1cpi) {
         totxsecs->Fill(7.0, w);
-      } else if ((*NFSpi0 == 1) && ((NCpi + NOther) == 0)) {
+      } else if (fblob.flagNC1pi0) {
         totxsecs->Fill(8.0, w);
       } else {
         totxsecs->Fill(9.0, w);
       }
     }
-
-    FlagBlob fblob{iscc,
-                   iscc && ((*NFSpi0 + NCpi + NOther) == 0),
-                   iscc && ((NCpi == 1) && ((*NFSpi0 + NOther) == 0)),
-                   iscc && ((*NFSpi0 == 1) && ((NCpi + NOther) == 0)),
-                   (!iscc),
-                   (!iscc) && ((*NFSpi0 + NCpi + NOther) == 0),
-                   (!iscc) && ((NCpi == 1) && ((*NFSpi0 + NOther) == 0)),
-                   (!iscc) && ((*NFSpi0 == 1) && ((NCpi + NOther) == 0))};
 
     Enu->Fill(w, fblob, *Enu_true);
 
@@ -208,7 +208,24 @@ int main(int argc, char const *argv[]) {
     weightconfig = t2knova::kT2KND_to_NOvA_Q2;
   }
 
-  Fill(rdr, weightconfig);
+  int tgta_select = 0;
+  if (argc > 5) {
+    if (std::string(argv[5]) == "C") {
+      tgta_select = 12;
+    } else if (std::string(argv[5]) == "H") {
+      tgta_select = 1;
+    } else if (std::string(argv[5]) == "O") {
+      tgta_select = 16;
+    } else if (std::string(argv[5]) == "any") {
+      tgta_select = 0;
+    } else {
+      std::cout << "Invalid target selector passed: " << argv[4]
+                << ". Should be C/H/O/any." << std::endl;
+      return 1;
+    }
+  }
+
+  Fill(rdr, weightconfig, tgta_select);
 
   TFile fout(argv[3], "UPDATE");
   if (fin.IsZombie()) {

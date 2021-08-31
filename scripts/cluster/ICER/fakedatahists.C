@@ -78,8 +78,12 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
   totxsecs = new TH1D("totxsecs", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
   totxsecs->SetDirectory(nullptr);
 
-  totxsecs_untuned = new TH1D("totxsecs_untuned", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
+  totxsecs_untuned =
+      new TH1D("totxsecs_untuned", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
   totxsecs_untuned->SetDirectory(nullptr);
+
+  TTreeReaderValue<int> PDGLep(rdr, "PDGLep");
+  TTreeReaderValue<int> Mode(rdr, "Mode");
 
   TTreeReaderValue<float> CosLep(rdr, "CosLep");
   TTreeReaderValue<float> EavAlt(rdr, "EavAlt");
@@ -88,17 +92,12 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
   TTreeReaderValue<float> Q2var(rdr, "Q2");
   TTreeReaderValue<int> tgta(rdr, "tgta");
 
-  TTreeReaderValue<bool> flagCCINC(rdr, "flagCCINC");
-  TTreeReaderValue<bool> flagCC0pi(rdr, "flagCC0pi");
-  TTreeReaderValue<bool> flagCC1pip(rdr, "flagCC1pip");
-  TTreeReaderValue<bool> flagCC1pim(rdr, "flagCC1pim");
-  TTreeReaderValue<bool> flagCC1pi0(rdr, "flagCC1pi0");
-
-  TTreeReaderValue<bool> flagNCINC(rdr, "flagNCINC");
-  TTreeReaderValue<bool> flagNC0pi(rdr, "flagNC0pi");
-  TTreeReaderValue<bool> flagNC1pip(rdr, "flagNC1pip");
-  TTreeReaderValue<bool> flagNC1pim(rdr, "flagNC1pim");
-  TTreeReaderValue<bool> flagNC1pi0(rdr, "flagNC1pi0");
+  TTreeReaderValue<int> NFSpip(rdr, "NFSpip");
+  TTreeReaderValue<int> NFSpim(rdr, "NFSpim");
+  TTreeReaderValue<int> NFSpi0(rdr, "NFSpi0");
+  TTreeReaderValue<int> NFSgamma(rdr, "NFSgamma");
+  TTreeReaderValue<int> NFSlep(rdr, "NFSlep");
+  TTreeReaderValue<int> NFSOther(rdr, "NFSOther");
 
   TTreeReaderValue<double> fScaleFactor(rdr, "fScaleFactor");
   TTreeReaderValue<double> RWWeight(rdr, "RWWeight");
@@ -121,9 +120,10 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
 
     double w = *fScaleFactor * *RWWeight;
 
-    FlagBlob fblob{
-        *flagCCINC, *flagCC0pi, *flagCC1pip || *flagCC1pim, *flagCC1pi0,
-        *flagNCINC, *flagNC0pi, *flagNC1pip || *flagNC1pim, *flagNC1pi0};
+    bool iscc = (*PDGLep) % 2;
+
+    FlagBlob fblob = GetFlagBlob(iscc, *NFSpip, *NFSpim, *NFSpi0, *NFSgamma,
+                                 *NFSlep, *NFSOther, *Mode );
 
     if (fblob.flagCCINC) {
       totxsecs->Fill(0.0, w);

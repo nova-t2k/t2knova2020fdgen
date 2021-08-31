@@ -12,6 +12,7 @@ using namespace t2knova;
 
 void ScrubLowStatsBins(TH3D *num, TH3D *denom, TH3D *ratio,
                        double frac_error_threshold) {
+    return;
   for (int i = 0; i < num->GetXaxis()->GetNbins(); ++i) {
     for (int j = 0; j < num->GetYaxis()->GetNbins(); ++j) {
       for (int k = 0; k < num->GetZaxis()->GetNbins(); ++k) {
@@ -35,6 +36,7 @@ void ScrubLowStatsBins(TH3D *num, TH3D *denom, TH3D *ratio,
 
 void ScrubLowStatsBins(TH2D *num, TH2D *denom, TH2D *ratio,
                        double frac_error_threshold) {
+    return;
   for (int i = 0; i < num->GetXaxis()->GetNbins(); ++i) {
     for (int j = 0; j < num->GetYaxis()->GetNbins(); ++j) {
       double num_frac_error =
@@ -56,6 +58,7 @@ void ScrubLowStatsBins(TH2D *num, TH2D *denom, TH2D *ratio,
 void ScrubLowStatsBins(TH1D *num, TH1D *denom, TH1D *ratio,
                        double frac_error_threshold) {
   for (int i = 0; i < num->GetXaxis()->GetNbins(); ++i) {
+    return;
     double num_frac_error = num->GetBinError(i + 1) / num->GetBinContent(i + 1);
     double denom_frac_error =
         denom->GetBinError(i + 1) / denom->GetBinContent(i + 1);

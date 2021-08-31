@@ -11,6 +11,11 @@
 namespace t2knova {
 
 struct FlagBlob {
+  FlagBlob()
+      : Mode(0), flagCCINC(false), flagCC0pi(false), flagCC1cpi(false),
+        flagCC1pi0(false), flagNCINC(false), flagNC0pi(false),
+        flagNC1cpi(false), flagNC1pi0(false) {}
+  int Mode;
   bool flagCCINC;
   bool flagCC0pi;
   bool flagCC1cpi;
@@ -20,6 +25,33 @@ struct FlagBlob {
   bool flagNC1cpi;
   bool flagNC1pi0;
 };
+
+inline FlagBlob GetFlagBlob(bool iscc, int NFSpip, int NFSpim, int NFSpi0,
+                            int NFSgamma, int NFSlep, int NFSOther,
+                            int Mode = 0) {
+
+  FlagBlob fb;
+  fb.Mode = Mode;
+
+  fb.flagCCINC = iscc;
+  fb.flagNCINC = !iscc;
+
+  if ((NFSlep == 1) && (NFSOther == 0) &&
+      (NFSgamma == 0)) { // Normalish event with just nucleons and pions
+    if ((NFSpi0 + NFSpip + NFSpim) == 0) {
+      fb.flagCC0pi = iscc;
+      fb.flagNC0pi = !iscc;
+    } else if ((NFSpi0 == 0) && ((NFSpip + NFSpim) == 1)) {
+      fb.flagCC1cpi = iscc;
+      fb.flagNC1cpi = !iscc;
+    } else if ((NFSpi0 == 1) && ((NFSpip + NFSpim) == 0)) {
+      fb.flagCC1pi0 = iscc;
+      fb.flagNC1pi0 = !iscc;
+    } // else CCOther
+  }   // else CCOther
+
+  return fb;
+}
 
 template <typename TH> struct THTraits {};
 
@@ -40,6 +72,7 @@ template <typename TH> struct hblob {
   TH NC1CPi;
   TH NC1Pi0;
   TH NCOther;
+  std::unordered_map<int, TH> ModeHists;
 
   using THBase = typename THTraits<TH>::Base;
 
@@ -73,6 +106,12 @@ template <typename TH> struct hblob {
     NC1CPi.SetName((name + "_NC1CPi").c_str());
     NC1Pi0.SetName((name + "_NC1Pi0").c_str());
     NCOther.SetName((name + "_NCOther").c_str());
+
+    for (auto &h : ModeHists) {
+      h.second.SetName((name + "_Mode_" + (h.first < 0 ? "m" : "") +
+                        std::to_string(std::abs(h.first)))
+                           .c_str());
+    }
   }
 
   void SetTitle(std::string const &title) {
@@ -121,6 +160,18 @@ template <typename TH> struct hblob {
         NCOther.Fill(xy..., w);
       }
     }
+
+    if (blb.Mode != 0) {
+      if (!ModeHists.count(blb.Mode)) {
+        ModeHists.emplace(blb.Mode, CCInc);
+
+        ModeHists[blb.Mode].Reset();
+
+        ModeHists[blb.Mode].SetDirectory(nullptr);
+        ModeHists[blb.Mode].Sumw2(true);
+      }
+      ModeHists[blb.Mode].Fill(xy..., w);
+    }
   }
 
   template <typename THOut>
@@ -136,6 +187,10 @@ template <typename TH> struct hblob {
     out.NC1CPi = THOut(f(NC1CPi));
     out.NC1Pi0 = THOut(f(NC1Pi0));
     out.NCOther = THOut(f(NCOther));
+
+    for (auto const &h : ModeHists) {
+      out.ModeHists[h.first] = THOut(f(h.second));
+    }
     return out;
   }
 
@@ -150,6 +205,10 @@ template <typename TH> struct hblob {
     f(NC1CPi);
     f(NC1Pi0);
     f(NCOther);
+
+    for (auto &h : ModeHists) {
+      f(h.second);
+    }
   }
 };
 
