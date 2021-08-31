@@ -72,13 +72,16 @@ template <typename TH> struct hblob {
   TH NCOther;
   std::unordered_map<int, TH> ModeHists;
 
+  std::string fName;
+
   using THBase = typename THTraits<TH>::Base;
 
   hblob() {}
 
   template <typename... Args>
   hblob(std::string const &name, std::string const &title, Args... binning)
-      : CCInc((name + "_CCInc").c_str(), title.c_str(), binning...),
+      : fName(name),
+        CCInc((name + "_CCInc").c_str(), title.c_str(), binning...),
         CC0Pi((name + "_CC0Pi").c_str(), title.c_str(), binning...),
         CC1CPi((name + "_CC1CPi").c_str(), title.c_str(), binning...),
         CC1Pi0((name + "_CC1Pi0").c_str(), title.c_str(), binning...),
@@ -94,19 +97,21 @@ template <typename TH> struct hblob {
   }
 
   void SetName(std::string const &name) {
-    CCInc.SetName((name + "_CCInc").c_str());
-    CC0Pi.SetName((name + "_CC0Pi").c_str());
-    CC1CPi.SetName((name + "_CC1CPi").c_str());
-    CC1Pi0.SetName((name + "_CC1Pi0").c_str());
-    CCOther.SetName((name + "_CCOther").c_str());
-    NCInc.SetName((name + "_NCInc").c_str());
-    NC0Pi.SetName((name + "_NC0Pi").c_str());
-    NC1CPi.SetName((name + "_NC1CPi").c_str());
-    NC1Pi0.SetName((name + "_NC1Pi0").c_str());
-    NCOther.SetName((name + "_NCOther").c_str());
+    fName = name;
+
+    CCInc.SetName((fName + "_CCInc").c_str());
+    CC0Pi.SetName((fName + "_CC0Pi").c_str());
+    CC1CPi.SetName((fName + "_CC1CPi").c_str());
+    CC1Pi0.SetName((fName + "_CC1Pi0").c_str());
+    CCOther.SetName((fName + "_CCOther").c_str());
+    NCInc.SetName((fName + "_NCInc").c_str());
+    NC0Pi.SetName((fName + "_NC0Pi").c_str());
+    NC1CPi.SetName((fName + "_NC1CPi").c_str());
+    NC1Pi0.SetName((fName + "_NC1Pi0").c_str());
+    NCOther.SetName((fName + "_NCOther").c_str());
 
     for (auto &h : ModeHists) {
-      h.second.SetName((name + "_Mode_" + (h.first < 0 ? "m" : "") +
+      h.second.SetName((fName + "_Mode_" + (h.first < 0 ? "m" : "") +
                         std::to_string(std::abs(h.first)))
                            .c_str());
     }
@@ -164,6 +169,10 @@ template <typename TH> struct hblob {
         ModeHists.emplace(blb.Mode, CCInc);
 
         ModeHists[blb.Mode].Reset();
+        ModeHists[blb.Mode].SetName((fName + "_Mode_" +
+                                     (h.first < 0 ? "m" : "") +
+                                     std::to_string(std::abs(h.first)))
+                                        .c_str());
 
         ModeHists[blb.Mode].SetDirectory(nullptr);
       }
