@@ -26,8 +26,7 @@ struct FlagBlob {
   bool flagNC1pi0;
 };
 
-inline FlagBlob GetFlagBlob(bool iscc, int NFSpip, int NFSpim, int NFSpi0,
-                            int NFSgamma, int NFSlep, int NFSOther,
+inline FlagBlob GetFlagBlob(bool iscc, int NFSCpi, int NFSpi0, int NFSOther,
                             int Mode = 0) {
 
   FlagBlob fb;
@@ -36,15 +35,14 @@ inline FlagBlob GetFlagBlob(bool iscc, int NFSpip, int NFSpim, int NFSpi0,
   fb.flagCCINC = iscc;
   fb.flagNCINC = !iscc;
 
-  if ((NFSlep == 1) && (NFSOther == 0) &&
-      (NFSgamma == 0)) { // Normalish event with just nucleons and pions
-    if ((NFSpi0 + NFSpip + NFSpim) == 0) {
+  if (NFSOther == 0) { // Normalish event with just nucleons and pions
+    if ((NFSpi0 + NFSCPi) == 0) {
       fb.flagCC0pi = iscc;
       fb.flagNC0pi = !iscc;
-    } else if ((NFSpi0 == 0) && ((NFSpip + NFSpim) == 1)) {
+    } else if ((NFSpi0 == 0) && ((NFSCPi) == 1)) {
       fb.flagCC1cpi = iscc;
       fb.flagNC1cpi = !iscc;
-    } else if ((NFSpi0 == 1) && ((NFSpip + NFSpim) == 0)) {
+    } else if ((NFSpi0 == 1) && ((NFSCPi) == 0)) {
       fb.flagCC1pi0 = iscc;
       fb.flagNC1pi0 = !iscc;
     } // else CCOther

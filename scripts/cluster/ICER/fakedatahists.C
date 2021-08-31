@@ -122,8 +122,13 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
 
     bool iscc = (*PDGLep) % 2;
 
-    FlagBlob fblob = GetFlagBlob(iscc, *NFSpip, *NFSpim, *NFSpi0, *NFSgamma,
-                                 *NFSlep, *NFSOther, *Mode );
+    int NFSCPi = *NFSpip + *NFSpim;
+    int NFSOther_gammaextralep = *NFSOther + *NFSgamma;
+    if((*NFSle)p > 1){
+      NFSOther_gammaextralep += (*NFSlep) - 1;
+    }
+
+    FlagBlob fblob = GetFlagBlob(iscc, NFSCPi, *NFSpi0, NFSOther_gammaextralep, *Mode);
 
     if (fblob.flagCCINC) {
       totxsecs->Fill(0.0, w);
