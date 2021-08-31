@@ -36,13 +36,13 @@ inline FlagBlob GetFlagBlob(bool iscc, int NFSCpi, int NFSpi0, int NFSOther,
   fb.flagNCINC = !iscc;
 
   if (NFSOther == 0) { // Normalish event with just nucleons and pions
-    if ((NFSpi0 + NFSCPi) == 0) {
+    if ((NFSpi0 + NFSCpi) == 0) {
       fb.flagCC0pi = iscc;
       fb.flagNC0pi = !iscc;
-    } else if ((NFSpi0 == 0) && ((NFSCPi) == 1)) {
+    } else if ((NFSpi0 == 0) && ((NFSCpi) == 1)) {
       fb.flagCC1cpi = iscc;
       fb.flagNC1cpi = !iscc;
-    } else if ((NFSpi0 == 1) && ((NFSCPi) == 0)) {
+    } else if ((NFSpi0 == 1) && ((NFSCpi) == 0)) {
       fb.flagCC1pi0 = iscc;
       fb.flagNC1pi0 = !iscc;
     } // else CCOther
