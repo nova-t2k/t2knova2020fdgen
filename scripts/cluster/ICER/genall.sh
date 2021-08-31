@@ -3,6 +3,8 @@
 #if a job submission fails, stop trying to submit as we've hit our QOL quota
 set -e
 
+DO_SUBMIT=1
+
 GENERATORS=( NEUT GENIE )
 SPECIES=( numu numub nue nueb )
 DETECTORS=( NOvAND ND280 )
@@ -23,9 +25,9 @@ NEVS["GENIE_numub_NOvAND"]=200000
 NEVS["GENIE_nue_NOvAND"]=200000
 NEVS["GENIE_nueb_NOvAND"]=200000
 NEVS["GENIE_numu_ND280"]=200000
-NEVS["GENIE_numub_ND280"]=200000
-NEVS["GENIE_nue_ND280"]=200000
-NEVS["GENIE_nueb_ND280"]=200000
+NEVS["GENIE_numub_ND280"]=100000
+NEVS["GENIE_nue_ND280"]=100000
+NEVS["GENIE_nueb_ND280"]=100000
 
 NEVS["NEUT_numu_NOvAND"]=200000
 NEVS["NEUT_numub_NOvAND"]=200000
@@ -37,23 +39,23 @@ NEVS["NEUT_nue_ND280"]=200000
 NEVS["NEUT_nueb_ND280"]=200000
 
 declare -A NJOBS
-NJOBS["GENIE_numu_NOvAND"]=200
-NJOBS["GENIE_numub_NOvAND"]=200
-NJOBS["GENIE_nue_NOvAND"]=200
-NJOBS["GENIE_nueb_NOvAND"]=200
-NJOBS["GENIE_numu_ND280"]=200
-NJOBS["GENIE_numub_ND280"]=200
-NJOBS["GENIE_nue_ND280"]=200
-NJOBS["GENIE_nueb_ND280"]=200
+NJOBS["GENIE_numu_NOvAND"]=0 #200
+NJOBS["GENIE_numub_NOvAND"]=0 #200
+NJOBS["GENIE_nue_NOvAND"]=0 #200
+NJOBS["GENIE_nueb_NOvAND"]=0 #200
+NJOBS["GENIE_numu_ND280"]=0 #200
+NJOBS["GENIE_numub_ND280"]=400
+NJOBS["GENIE_nue_ND280"]=400
+NJOBS["GENIE_nueb_ND280"]=400
 
 NJOBS["NEUT_numu_NOvAND"]=200
 NJOBS["NEUT_numub_NOvAND"]=200
 NJOBS["NEUT_nue_NOvAND"]=200
 NJOBS["NEUT_nueb_NOvAND"]=200
-NJOBS["NEUT_numu_ND280"]=200
-NJOBS["NEUT_numub_ND280"]=200
-NJOBS["NEUT_nue_ND280"]=200
-NJOBS["NEUT_nueb_ND280"]=200
+NJOBS["NEUT_numu_ND280"]=200 #200
+NJOBS["NEUT_numub_ND280"]=200 #200
+NJOBS["NEUT_nue_ND280"]=200 #200
+NJOBS["NEUT_nueb_ND280"]=200 #200
 
 declare -A TUNES
 
@@ -101,6 +103,7 @@ for gen in ${GENERATORS[@]}; do
               -p ${SPEC_PDG["${spec}"]} \
               -n ${NEVS["${gen}_${spec}_${det}"]} \
               -f ${FLUXES["${det}_${spec}"]} \
+            -S ${DO_SUBMIT} \
             -T ${TUNES["${gen}_${mat}_${spec}"]} \
             --out-dir t2knova/${gen}/${det}/${mat}/${spec} \
             --out-file-stub t2knova.flattree.${gen}.${det}.${mat}.${spec}
