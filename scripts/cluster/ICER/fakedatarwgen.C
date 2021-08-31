@@ -7,6 +7,7 @@
 #include <string>
 
 #include "T2KNOvAFakeDataHelper.hxx"
+#include "hblob.h"
 
 using namespace t2knova;
 

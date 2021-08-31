@@ -10,7 +10,7 @@
 #include "TStyle.h"
 #include "TTreeReader.h"
 
-#include "T2KNOvAFakeDataHelper.hxx"
+#include "hblob.h"
 
 using namespace t2knova;
 
