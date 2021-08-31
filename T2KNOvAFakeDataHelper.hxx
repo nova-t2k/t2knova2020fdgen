@@ -168,7 +168,6 @@ template <typename TH> struct hblob {
         ModeHists[blb.Mode].Reset();
 
         ModeHists[blb.Mode].SetDirectory(nullptr);
-        ModeHists[blb.Mode].Sumw2(true);
       }
       ModeHists[blb.Mode].Fill(xy..., w);
     }

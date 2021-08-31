@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 rm FakeDataHists.root
 g++ fakedatahists.C -I ../../../ $(root-config --cflags --glibs) -o fakedatahists.exe
 if [[ ! "$?" == "0" ]]; then
@@ -13,14 +15,16 @@ fi
 
 declare -A TGTEL
 TGTEL["NOvAND_CH"]="C H"
+
 TGTEL["ND280_CH"]="C"
 TGTEL["ND280_H2O"]="H O"
-#TGTEL["ND280_H2O"]="O"
 
 GENERATORS=( GENIE NEUT )
+
 SPECIES=( numu numub nue nueb )
-SPECIES=( numu )
-DETECTORS=( NOvAND ND280 )
+#SPECIES=( numu )
+
+#DETECTORS=( NOvAND ND280 )
 DETECTORS=( ND280 )
 
 declare -A DET_MATS
@@ -33,6 +37,7 @@ for gen in ${GENERATORS[@]}; do
       for mat in ${DET_MATS[${det}]}; do
 
         if [ ! -e "t2knova.flattree.${gen}.${det}.${mat}.${spec}.root" ]; then
+          echo "Failed to find: t2knova.flattree.${gen}.${det}.${mat}.${spec}.root"
           continue
         fi
 
@@ -50,6 +55,11 @@ for gen in ${GENERATORS[@]}; do
     done
   done
 done
+
+if [ ! -e FakeDataHists.root ]; then
+  echo "Didn't produce FakeDataHists.root. Failed"
+  exit 1
+fi
 
 echo ./fakedatarwgen.exe FakeDataHists.root FakeDataInputs.root
 ./fakedatarwgen.exe FakeDataHists.root FakeDataInputs.root
