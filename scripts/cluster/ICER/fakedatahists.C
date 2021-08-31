@@ -124,7 +124,7 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
 
     int NFSCPi = *NFSpip + *NFSpim;
     int NFSOther_gammaextralep = *NFSOther + *NFSgamma;
-    if((*NFSle)p > 1){
+    if((*NFSlep) > 1){
       NFSOther_gammaextralep += (*NFSlep) - 1;
     }
 
