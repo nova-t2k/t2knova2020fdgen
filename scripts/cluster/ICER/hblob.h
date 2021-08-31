@@ -177,9 +177,6 @@ template <typename TH> struct hblob {
         NC1CPi(name + "_NC1CPi", title, binning...),
         NC1Pi0(name + "_NC1Pi0", title, binning...),
         NCOther(name + "_NCOther", title, binning...) {
-
-    Apply([=](TH &h) { h.SetDirectory(nullptr); });
-    Apply([=](TH &h) { h.Sumw2(true); });
   }
 
   void SetName(std::string const &name) {

@@ -14,8 +14,8 @@
 
 using namespace t2knova;
 
-TH1D *totxsecs;
-TH1D *totxsecs_untuned;
+modeblob<TH1D> *totxsecs;
+modeblob<TH1D> *totxsecs_untuned;
 
 hblob<TH1D> *Enu;
 hblob<TH1D> *Enu_untuned;
@@ -75,12 +75,11 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
         100, 0, 5, 40, 0, 2, 40, 0, 4);
   }
 
-  totxsecs = new TH1D("totxsecs", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
-  totxsecs->SetDirectory(nullptr);
+  totxsecs =
+      new modeblob<TH1D>("totxsecs", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
 
-  totxsecs_untuned =
-      new TH1D("totxsecs_untuned", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
-  totxsecs_untuned->SetDirectory(nullptr);
+  totxsecs_untuned = new modeblob<TH1D>(
+      "totxsecs_untuned", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
 
   TTreeReaderValue<int> PDGLep(rdr, "PDGLep");
   TTreeReaderValue<int> Mode(rdr, "Mode");
@@ -124,43 +123,44 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
 
     int NFSCPi = *NFSpip + *NFSpim;
     int NFSOther_gammaextralep = *NFSOther + *NFSgamma;
-    if((*NFSlep) > 1){
+    if ((*NFSlep) > 1) {
       NFSOther_gammaextralep += (*NFSlep) - 1;
     }
 
-    FlagBlob fblob = GetFlagBlob(iscc, NFSCPi, *NFSpi0, NFSOther_gammaextralep, *Mode);
+    FlagBlob fblob =
+        GetFlagBlob(iscc, NFSCPi, *NFSpi0, NFSOther_gammaextralep, *Mode);
 
     if (fblob.flagCCINC) {
-      totxsecs->Fill(0.0, w);
-      totxsecs_untuned->Fill(0.0, *fScaleFactor);
+      totxsecs->Fill(w, *Mode, 0.0);
+      totxsecs_untuned->Fill(*fScaleFactor, *Mode, 0.0);
       if (fblob.flagCC0pi) {
-        totxsecs->Fill(1.0, w);
-        totxsecs_untuned->Fill(1.0, *fScaleFactor);
+        totxsecs->Fill(w, *Mode, 1.0);
+        totxsecs_untuned->Fill(*fScaleFactor, *Mode, 1.0);
       } else if (fblob.flagCC1cpi) {
-        totxsecs->Fill(2.0, w);
-        totxsecs_untuned->Fill(2.0, *fScaleFactor);
+        totxsecs->Fill(w, *Mode, 2.0);
+        totxsecs_untuned->Fill(*fScaleFactor, *Mode, 2.0);
       } else if (fblob.flagCC1pi0) {
-        totxsecs->Fill(3.0, w);
-        totxsecs_untuned->Fill(3.0, *fScaleFactor);
+        totxsecs->Fill(w, *Mode, 3.0);
+        totxsecs_untuned->Fill(*fScaleFactor, *Mode, 3.0);
       } else {
-        totxsecs->Fill(4.0, w);
-        totxsecs_untuned->Fill(4.0, *fScaleFactor);
+        totxsecs->Fill(w, *Mode, 4.0);
+        totxsecs_untuned->Fill(*fScaleFactor, *Mode, 4.0);
       }
     } else if (fblob.flagNCINC) {
-      totxsecs->Fill(5.0, w);
-      totxsecs_untuned->Fill(5.0, *fScaleFactor);
+      totxsecs->Fill(w, *Mode, 5.0);
+      totxsecs_untuned->Fill(*fScaleFactor, *Mode, 5.0);
       if (fblob.flagNC0pi) {
-        totxsecs->Fill(6.0, w);
-        totxsecs_untuned->Fill(6.0, *fScaleFactor);
+        totxsecs->Fill(w, *Mode, 6.0);
+        totxsecs_untuned->Fill(*fScaleFactor, *Mode, 6.0);
       } else if (fblob.flagNC1cpi) {
-        totxsecs->Fill(7.0, w);
-        totxsecs_untuned->Fill(7.0, *fScaleFactor);
+        totxsecs->Fill(w, *Mode, 7.0);
+        totxsecs_untuned->Fill(*fScaleFactor, *Mode, 7.0);
       } else if (fblob.flagNC1pi0) {
-        totxsecs->Fill(8.0, w);
-        totxsecs_untuned->Fill(8.0, *fScaleFactor);
+        totxsecs->Fill(w, *Mode, 8.0);
+        totxsecs_untuned->Fill(*fScaleFactor, *Mode, 8.0);
       } else {
-        totxsecs->Fill(9.0, w);
-        totxsecs_untuned->Fill(9.0, *fScaleFactor);
+        totxsecs->Fill(w, *Mode, 9.0);
+        totxsecs_untuned->Fill(*fScaleFactor, *Mode, 9.0);
       }
     }
 
@@ -250,29 +250,24 @@ int main(int argc, char const *argv[]) {
     dout = dout->mkdir(fqdir.c_str());
   }
 
-  totxsecs->GetXaxis()->SetBinLabel(1, "CCInc");
-  totxsecs->GetXaxis()->SetBinLabel(2, "CC0#pi");
-  totxsecs->GetXaxis()->SetBinLabel(3, "CC1#pi^{#pm}");
-  totxsecs->GetXaxis()->SetBinLabel(4, "CC1#pi^{0}");
-  totxsecs->GetXaxis()->SetBinLabel(5, "CCMulti#pi + CCOther");
-  totxsecs->GetXaxis()->SetBinLabel(6, "NCInc");
-  totxsecs->GetXaxis()->SetBinLabel(7, "NC0#pi");
-  totxsecs->GetXaxis()->SetBinLabel(8, "NC1#pi^{#pm}");
-  totxsecs->GetXaxis()->SetBinLabel(9, "NC1#pi^{0}");
-  totxsecs->GetXaxis()->SetBinLabel(10, "NCMulti#pi + CCOther");
-  dout->WriteTObject(totxsecs, "totxsecs");
+  auto axis_labeler = [](TH1D &h) {
+    h.GetXaxis()->SetBinLabel(1, "CCInc");
+    h.GetXaxis()->SetBinLabel(2, "CC0#pi");
+    h.GetXaxis()->SetBinLabel(3, "CC1#pi^{#pm}");
+    h.GetXaxis()->SetBinLabel(4, "CC1#pi^{0}");
+    h.GetXaxis()->SetBinLabel(5, "CCMulti#pi + CCOther");
+    h.GetXaxis()->SetBinLabel(6, "NCInc");
+    h.GetXaxis()->SetBinLabel(7, "NC0#pi");
+    h.GetXaxis()->SetBinLabel(8, "NC1#pi^{#pm}");
+    h.GetXaxis()->SetBinLabel(9, "NC1#pi^{0}");
+    h.GetXaxis()->SetBinLabel(10, "NCMulti#pi + CCOther");
+  };
 
-  totxsecs_untuned->GetXaxis()->SetBinLabel(1, "CCInc");
-  totxsecs_untuned->GetXaxis()->SetBinLabel(2, "CC0#pi");
-  totxsecs_untuned->GetXaxis()->SetBinLabel(3, "CC1#pi^{#pm}");
-  totxsecs_untuned->GetXaxis()->SetBinLabel(4, "CC1#pi^{0}");
-  totxsecs_untuned->GetXaxis()->SetBinLabel(5, "CCMulti#pi + CCOther");
-  totxsecs_untuned->GetXaxis()->SetBinLabel(6, "NCInc");
-  totxsecs_untuned->GetXaxis()->SetBinLabel(7, "NC0#pi");
-  totxsecs_untuned->GetXaxis()->SetBinLabel(8, "NC1#pi^{#pm}");
-  totxsecs_untuned->GetXaxis()->SetBinLabel(9, "NC1#pi^{0}");
-  totxsecs_untuned->GetXaxis()->SetBinLabel(10, "NCMulti#pi + CCOther");
-  dout->WriteTObject(totxsecs_untuned, "totxsecs_untuned");
+  totxsecs->Apply(axis_labeler);
+  totxsecs->Write(dout);
+
+  totxsecs_untuned->Apply(axis_labeler);
+  totxsecs_untuned->Write(dout);
 
   Enu->Write(dout);
   Enu_untuned->Write(dout);
