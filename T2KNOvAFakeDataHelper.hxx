@@ -170,8 +170,8 @@ template <typename TH> struct hblob {
 
         ModeHists[blb.Mode].Reset();
         ModeHists[blb.Mode].SetName((fName + "_Mode_" +
-                                     (h.first < 0 ? "m" : "") +
-                                     std::to_string(std::abs(h.first)))
+                                     (blb.Mode < 0 ? "m" : "") +
+                                     std::to_string(std::abs(blb.Mode)))
                                         .c_str());
 
         ModeHists[blb.Mode].SetDirectory(nullptr);
