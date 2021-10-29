@@ -27,6 +27,69 @@ hblob<TH3D> *EnuPLepEAvHad;
 hblob<TH3D> *EnuQ2EAvHad;
 hblob<TH3D> *EnuPtLepEAvHad;
 
+std::string FixProjName(std::string name, std::string const &proj) {
+
+  if (name.find("EnuPLepThetaLep") != std::string::npos) {
+    if (proj == "yz") {
+      name.replace(0, std::string("EnuPLepThetaLep").size(),
+                   "PLepThetaLep_prj0");
+    } else if (proj == "yx") {
+      name.replace(0, std::string("EnuPLepThetaLep").size(), "PLepEnu_prj0");
+    } else if (proj == "xz") {
+      name.replace(0, std::string("EnuPLepThetaLep").size(),
+                   "EnuThetaLep_prj0");
+    } else if (proj == "x") {
+      name.replace(0, std::string("EnuPLepThetaLep").size(), "Enu_prj0");
+    } else if (proj == "y") {
+      name.replace(0, std::string("EnuPLepThetaLep").size(), "PLep_prj0");
+    } else if (proj == "z") {
+      name.replace(0, std::string("EnuPLepThetaLep").size(), "ThetaLep_prj0");
+    }
+  } else if (name.find("EnuPLepEAvHad") != std::string::npos) {
+    if (proj == "yz") {
+      name.replace(0, std::string("EnuPLepEAvHad").size(), "PLepEAvHad_prj1");
+    } else if (proj == "yx") {
+      name.replace(0, std::string("EnuPLepEAvHad").size(), "PLepEnu_prj1");
+    } else if (proj == "xz") {
+      name.replace(0, std::string("EnuPLepEAvHad").size(), "EnuEAvHad_prj1");
+    } else if (proj == "x") {
+      name.replace(0, std::string("EnuPLepEAvHad").size(), "Enu_prj1");
+    } else if (proj == "y") {
+      name.replace(0, std::string("EnuPLepEAvHad").size(), "PLep_prj1");
+    } else if (proj == "z") {
+      name.replace(0, std::string("EnuPLepEAvHad").size(), "EAvHad_prj1");
+    }
+  } else if (name.find("EnuQ2EAvHad") != std::string::npos) {
+    if (proj == "yz") {
+      name.replace(0, std::string("EnuQ2EAvHad").size(), "Q2EAvHad_prj2");
+    } else if (proj == "yx") {
+      name.replace(0, std::string("EnuQ2EAvHad").size(), "Q2Enu_prj2");
+    } else if (proj == "xz") {
+      name.replace(0, std::string("EnuQ2EAvHad").size(), "EnuEAvHad_prj2");
+    } else if (proj == "x") {
+      name.replace(0, std::string("EnuQ2EAvHad").size(), "Enu_prj2");
+    } else if (proj == "y") {
+      name.replace(0, std::string("EnuQ2EAvHad").size(), "Q2_prj2");
+    } else if (proj == "z") {
+      name.replace(0, std::string("EnuQ2EAvHad").size(), "EAvHad_prj2");
+    }
+  } else if (name.find("EnuPtLepEAvHad") != std::string::npos) {
+    if (proj == "yz") {
+      name.replace(0, std::string("EnuPtLepEAvHad").size(), "PtLepEAvHad_prj3");
+    } else if (proj == "yx") {
+      name.replace(0, std::string("EnuPtLepEAvHad").size(), "PtLepEnu_prj3");
+    } else if (proj == "xz") {
+      name.replace(0, std::string("EnuPtLepEAvHad").size(), "EnuEAvHad_prj3");
+    } else if (proj == "x") {
+      name.replace(0, std::string("EnuPtLepEAvHad").size(), "Enu_prj3");
+    } else if (proj == "y") {
+      name.replace(0, std::string("EnuPtLepEAvHad").size(), "PtLep_prj3");
+    } else if (proj == "z") {
+      name.replace(0, std::string("EnuPtLepEAvHad").size(), "EAvHad_prj3");
+    }
+  }
+}
+
 void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
   Enu = new hblob<TH1D>(
       "Enu",
@@ -182,6 +245,34 @@ void Fill(TTreeReader &rdr, bool ist2k, int tgta_select = 0) {
   }
 }
 
+std::string input_file, output_file;
+bool ist2k = false;
+bool bymode = false;
+int tgta_select = 0;
+
+void SayUsage(char const *argv[]) {
+  std::cout << "[USAGE]: " << argv[0]
+            << "\n"
+               "\t-i <fulldetprocess.root>             : TChain descriptor for"
+               " input tree. \n"
+            << std::endl;
+}
+
+void handleOpts(int argc, char const *argv[]) {
+  int opt = 1;
+  while (opt < argc) {
+    if ((std::string(argv[opt]) == "-?") ||
+        (std::string(argv[opt]) == "--help")) {
+      SayUsage(argv);
+      exit(0);
+    } else if (std::string(argv[opt]) == "-i") {
+      inpfile = argv[++opt];
+    } else if (std::string(argv[opt]) == "-uF") {
+      fluxthrowfile = argv[++opt];
+    }
+  }
+}
+
 int main(int argc, char const *argv[]) {
   if (argc < 4) {
     std::cout << "Expects 3 arguments." << std::endl;
@@ -278,40 +369,40 @@ int main(int argc, char const *argv[]) {
   auto ProjYZ = [=](TH3D const &h) -> TH2D {
     std::unique_ptr<TH2D> h2(dynamic_cast<TH2D *>(h.Project3D("yz")));
     h2->SetDirectory(nullptr);
-    h2->SetName((std::string(h.GetName()) + "_pyz").c_str());
+    h2->SetName(FixProjName(h.GetName(),"yz"));
     return TH2D(*h2.get());
   };
   auto ProjYX = [=](TH3D const &h) -> TH2D {
     std::unique_ptr<TH2D> h2(dynamic_cast<TH2D *>(h.Project3D("yx")));
     h2->SetDirectory(nullptr);
-    h2->SetName((std::string(h.GetName()) + "_pyx").c_str());
+    h2->SetName(FixProjName(h.GetName(),"yx"));
     return TH2D(*h2.get());
   };
   auto ProjXZ = [=](TH3D const &h) -> TH2D {
     std::unique_ptr<TH2D> h2(dynamic_cast<TH2D *>(h.Project3D("xz")));
     h2->SetDirectory(nullptr);
-    h2->SetName((std::string(h.GetName()) + "_pxz").c_str());
+    h2->SetName(FixProjName(h.GetName(),"xz"));
     return TH2D(*h2.get());
   };
 
   auto ProjX = [=](TH3D const &h) -> TH1D {
     std::unique_ptr<TH1D> h1(dynamic_cast<TH1D *>(h.Project3D("x")));
     h1->SetDirectory(nullptr);
-    h1->SetName((std::string(h.GetName()) + "_px").c_str());
+    h1->SetName(FixProjName(h.GetName(),"x"));
     return TH1D(*h1.get());
   };
 
   auto ProjY = [=](TH3D const &h) -> TH1D {
     std::unique_ptr<TH1D> h1(dynamic_cast<TH1D *>(h.Project3D("y")));
     h1->SetDirectory(nullptr);
-    h1->SetName((std::string(h.GetName()) + "_py").c_str());
+    h1->SetName(FixProjName(h.GetName(),"y"));
     return TH1D(*h1.get());
   };
 
   auto ProjZ = [=](TH3D const &h) -> TH1D {
     std::unique_ptr<TH1D> h1(dynamic_cast<TH1D *>(h.Project3D("z")));
     h1->SetDirectory(nullptr);
-    h1->SetName((std::string(h.GetName()) + "_pz").c_str());
+    h1->SetName(FixProjName(h.GetName(),"z"));
     return TH1D(*h1.get());
   };
 

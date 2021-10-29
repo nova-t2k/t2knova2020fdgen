@@ -10,7 +10,6 @@
 
 namespace t2knova {
 
-
 double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg, int tgta,
                                         double E_nu_GeV, double PLep_GeV,
                                         double EVisHadronic_GeV,
@@ -39,6 +38,132 @@ double GetFakeDataWeight_ND280ToNOvA_Q2(int nu_pdg, int lep_pdg, int tgta,
 } // namespace t2knova
 
 namespace t2knova {
+
+struct FSParticleSummary {
+  FSParticleSummary()
+      : IsCC(false), NChLep(0), NNeutralLep(0), NProton(0), NNeutron(0),
+        NAntiNucleon(0), NChPi(0), NPi0(0), NGamma(0), NKaons(0), NOther(0),
+        NNuclear(0) {}
+
+  bool IsCC;
+  int NChLep;
+  int NNeutralLep;
+  int NProton;
+  int NNeutron;
+  int NAntiNucleon;
+  int NChPi;
+  int NPi0;
+  int NGamma;
+  int NKaons;
+  int NOther;
+  int NNuclear;
+
+  int GetNNonNucleonPions() {
+    int count = 0;
+
+    int NChLep_extra = NChLep - (IsCC ? 1 : 0);
+    int NNeutralLep_extra = NNeutralLep - (IsCC ? 0 : 1);
+
+    if ((NChLep_extra < 0) || (NNeutralLep_extra < 0)) {
+      std::cout << "Found bad event: NChLep_extra = " << NChLep_extra
+                << ", NNeutralLep_extra = " << NNeutralLep_extra << std::endl;
+      abort();
+    }
+
+    count += NChLep_extra;
+    count += NNeutralLep_extra;
+    count += NAntiNucleon;
+    count += NGamma;
+    count += NKaons;
+    count += NOther;
+
+    return count;
+  }
+};
+
+inline FSParticleSummary T2KNOvAFlatTreeToFSParticleSummary(int NFSP,
+                                                            int *FSPDG) {
+
+  int PDG_FSLep = 0;
+
+  FSParticleSummary fsps;
+
+  for (int i = 0; i < NFSP; ++i) {
+    switch (FSPDG[i]) {
+    case 11:
+    case 13:
+    case 15:
+    case -11:
+    case -13:
+    case -15: {
+      if (!PDG_FSLep) {
+        PDG_FSLep = FSPDG[i];
+      }
+      fsps.NChLep++;
+      break;
+    }
+
+    case 12:
+    case 14:
+    case 16:
+    case -12:
+    case -14:
+    case -16: {
+      if (!PDG_FSLep) {
+        PDG_FSLep = FSPDG[i];
+      }
+      fsps.NNeutralLep++;
+
+      break;
+    }
+    case 2212: {
+      fsps.NProton++;
+      break;
+    }
+    case 2112: {
+      fsps.NNeutron++;
+      break;
+    }
+    case -2212:
+    case -2112: {
+      fsps.NAntiNucleon++;
+      break;
+    }
+    case 211:
+    case -211: {
+      fsps.NChPi++;
+      break;
+    }
+    case 111: {
+      fsps.NPi0++;
+      break;
+    }
+    case 22: {
+      fsps.NGamma++;
+      break;
+    }
+    case 321:
+    case 311:
+    case -321:
+    case -311: {
+      fsps.NKaons++;
+      break;
+    }
+
+    default: {
+      if (FSPDG[i] > 1000000000) {
+        fsps.NNuclear++
+      } else {
+        fsps.NOther++
+      }
+      break;
+    }
+    }
+  }
+  fsps.IsCC = PDG_FSLep % 2;
+
+  return fsps;
+}
 
 inline TH1 *GetTH1(TFile *f, std::string const &name) {
   TDirectory *odir = gDirectory;

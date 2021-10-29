@@ -26,29 +26,33 @@ struct FlagBlob {
   bool flagNC1pi0;
 };
 
-inline FlagBlob GetFlagBlob(bool iscc, int NFSCpi, int NFSpi0, int NFSOther,
+inline FlagBlob GetFlagBlob(FSParticleSummary fsps,
                             int Mode = 0) {
 
   FlagBlob fb;
   fb.Mode = Mode;
 
-  fb.flagCCINC = iscc;
-  fb.flagNCINC = !iscc;
+  fb.flagCCINC = fsps.IsCC;
+  fb.flagNCINC = !fsps.IsCC;
 
-  if (NFSOther == 0) { // Normalish event with just nucleons and pions
-    if ((NFSpi0 + NFSCpi) == 0) {
-      fb.flagCC0pi = iscc;
-      fb.flagNC0pi = !iscc;
-    } else if ((NFSpi0 == 0) && ((NFSCpi) == 1)) {
-      fb.flagCC1cpi = iscc;
-      fb.flagNC1cpi = !iscc;
-    } else if ((NFSpi0 == 1) && ((NFSCpi) == 0)) {
-      fb.flagCC1pi0 = iscc;
-      fb.flagNC1pi0 = !iscc;
+  if (fsps.GetNNonNucleonPions() == 0) { // Normalish event with just nucleons and pions
+    if ((fsps.NPi0 + fsps.NChPi) == 0) {
+      fb.flagCC0pi = fsps.IsCC;
+      fb.flagNC0pi = !fsps.IsCC;
+    } else if ((fsps.NPi0 == 0) && ((fsps.NChPi) == 1)) {
+      fb.flagCC1cpi = fsps.IsCC;
+      fb.flagNC1cpi = !fsps.IsCC;
+    } else if ((fsps.NPi0 == 1) && ((fsps.NChPi) == 0)) {
+      fb.flagCC1pi0 = fsps.IsCC;
+      fb.flagNC1pi0 = !fsps.IsCC;
     } // else CCOther
   }   // else CCOther
 
   return fb;
+}
+
+inline bool IsCCOther(FlagBlob fb){
+  return fb.flagCCINC && (!fb.flagCC0pi) && (!fb.flagCC1cpi) && (!fb.flagCC1pi0);
 }
 
 template <typename TH> struct THTraits {};

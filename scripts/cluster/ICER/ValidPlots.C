@@ -48,6 +48,10 @@ struct hblob {
 
   void Print(const char *fname, const char *title = "") {
 
+    if (!From || !Target) {
+      return;
+    }
+
     double max_gen = GetMaximumTH1s({From, Target});
     double max_rw = GetMaximumTH1s(ReWeights);
     double max = std::max(max_gen, max_rw);
@@ -161,7 +165,7 @@ void ValidPlots(std::string const &finname) {
   TCanvas c1("cdummy", "", 800, 800);
   c1.Print("validplots.pdf[");
 
-  for (auto tgtstr : {"CH", "H2O"}) {
+  for (auto tgtstr : {"C", "H", "O", "CH", "H2O"}) {
     for (auto nuspec :
          {t2knova::kNuMu, t2knova::kNuMub, t2knova::kNuE, t2knova::kNuEb}) {
       hblob::LoadAndPrint(&fin, true, "Enu", nuspec, tgtstr, t2knova::kCCINC,

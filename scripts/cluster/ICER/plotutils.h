@@ -17,8 +17,8 @@
 #include <memory>
 #include <vector>
 
-TGraph GetGraphFromTH1(TH1 *h, double min, double max,
-                       bool close_graph = false, int nsteps = 1000) {
+TGraph GetGraphFromTH1(TH1 *h, double min, double max, bool close_graph = false,
+                       int nsteps = 1000) {
   TSpline3 spl(h, 0, min, max);
 
   TGraph g = TGraph(nsteps + (close_graph ? 1 : 0));
@@ -215,6 +215,13 @@ TH1 *GetTH1(TFile *f, std::string const &name) {
   return h;
 }
 
+template <typename TH> double IntegralTH(TH *h) {
+  if (!h) {
+    return 0;
+  }
+  return h->Integral();
+}
+
 TH1 *GetTH1(std::string const &fname, std::string const &name) {
   TDirectory *odir = gDirectory;
 
@@ -278,13 +285,20 @@ void StyleAxis(TGaxis *g, TAxis *a) {
   g->SetTitleOffset(a->GetTitleOffset());
 }
 
-void StyleTH1Line(TH1 *h, int color, int width = 1, int style = 1, double alpha = 1) {
+void StyleTH1Line(TH1 *h, int color, int width = 1, int style = 1,
+                  double alpha = 1) {
+  if (!h) {
+    return;
+  }
   h->SetLineStyle(style);
   h->SetLineColorAlpha(color, alpha);
   h->SetLineWidth(width);
 }
 
 void StyleTH1Fill(TH1 *h, int color, int style = 1001, double alpha = 1) {
+  if (!h) {
+    return;
+  }
   h->SetFillStyle(style);
   h->SetFillColorAlpha(color, alpha);
 }
@@ -293,14 +307,20 @@ double GetMaximumTH1s(std::vector<TH1 *> hs) {
   double max = -std::numeric_limits<double>::max();
 
   for (auto const &h : hs) {
+    if (!h) {
+      continue;
+    }
     max = std::max(max, h->GetMaximum());
   }
 
   return max;
 }
 
-void DrawTH1s(std::vector<TH1 *> hs, std::string opts = "",  bool first = true) {
+void DrawTH1s(std::vector<TH1 *> hs, std::string opts = "", bool first = true) {
   for (auto const &h : hs) {
+    if (!h) {
+      continue;
+    }
     if (first) {
       h->GetYaxis()->SetRangeUser(0, GetMaximumTH1s(hs) * 1.05);
     }
@@ -312,6 +332,9 @@ void DrawTH1s(std::vector<TH1 *> hs, std::string opts = "",  bool first = true) 
 
 void ScaleTH1s(std::vector<TH1 *> hs, double s, std::string opts = "") {
   for (auto &h : hs) {
+    if (!h) {
+      continue;
+    }
     h->Scale(s, opts.c_str());
   }
 }
