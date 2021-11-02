@@ -1,5 +1,10 @@
 #pragma once
 
+#include <iostream>
+#include <limits>
+#include <memory>
+#include <vector>
+
 #include "TAxis.h"
 #include "TCanvas.h"
 #include "TDirectory.h"
@@ -12,246 +17,12 @@
 #include "TPad.h"
 #include "TSpline.h"
 
-#include <iostream>
-#include <limits>
-#include <memory>
-#include <vector>
-
-TGraph GetGraphFromTH1(TH1 *h, double min, double max, bool close_graph = false,
-                       int nsteps = 1000) {
-  TSpline3 spl(h, 0, min, max);
-
-  TGraph g = TGraph(nsteps + (close_graph ? 1 : 0));
-  if (close_graph) {
-    g.SetPoint(0, min, 0);
-  }
-  for (int i = (close_graph ? 1 : 0); i < nsteps; ++i) {
-    double e = min + i * ((max - min) / double(nsteps));
-    g.SetPoint(i, e, spl.Eval(e));
-  }
-  if (close_graph) {
-    g.SetPoint(nsteps, max, 0);
-  }
-
-  return g;
-}
-
-double GetMaximumTGraph(TGraph const &g) {
-  double m = -std::numeric_limits<double>::max();
-  for (int i = 0; i < g.GetN(); ++i) {
-    double x, y;
-    g.GetPoint(i, x, y);
-    m = std::max(m, y);
-  }
-  return m;
-}
-
-double GetMinimumTGraph(TGraph const &g) {
-  double m = std::numeric_limits<double>::max();
-  for (int i = 0; i < g.GetN(); ++i) {
-    double x, y;
-    g.GetPoint(i, x, y);
-    m = std::min(m, y);
-  }
-  return m;
-}
-
-double GetMaximumXTGraph(TGraph const &g) {
-  double m = -std::numeric_limits<double>::max();
-  for (int i = 0; i < g.GetN(); ++i) {
-    double x, y;
-    g.GetPoint(i, x, y);
-    m = std::max(m, x);
-  }
-  return m;
-}
-
-double GetMinimumXTGraph(TGraph const &g) {
-  double m = std::numeric_limits<double>::max();
-  for (int i = 0; i < g.GetN(); ++i) {
-    double x, y;
-    g.GetPoint(i, x, y);
-    m = std::min(m, x);
-  }
-  return m;
-}
-
-double GetMaximumTGraphs(std::vector<TGraph> gs) {
-  double max = -std::numeric_limits<double>::max();
-
-  for (auto const &g : gs) {
-    max = std::max(max, GetMaximumTGraph(g));
-  }
-
-  return max;
-}
-
-TGraph ScaleTGraph(TGraph const &g, double s) {
-  TGraph o(g.GetN());
-
-  for (int i = 0; i < g.GetN(); ++i) {
-    double x, y;
-    g.GetPoint(i, x, y);
-    o.SetPoint(i, x, y * s);
-  }
-  return o;
-}
-
-TGraph CloneTGraph(TGraph const &g) { return ScaleTGraph(g, 1); }
-
-void StyleTGraphLine(TGraph &h, int color, int width = 1, int style = 1) {
-  h.SetLineStyle(style);
-  h.SetLineColor(color);
-  h.SetLineWidth(width);
-}
-
-void StyleTGraphFill(TGraph &h, int color, int style = 1001) {
-  h.SetFillStyle(style);
-  h.SetFillColor(color);
-}
-
-void DrawTGraphs(std::vector<TGraph> gs, bool first = true,
-                 std::string opts = "") {
-  for (auto const &g : gs) {
-    if (first) {
-      g.GetYaxis()->SetRangeUser(0, GetMaximumTGraphs(gs) * 1.05);
-    }
-    std::string dopt = std::string(first ? "A" : "") + opts;
-    g.DrawClone(dopt.c_str());
-    first = false;
-  }
-}
-
-TGraph ConcatenateTGraphs(std::vector<TGraph> gs) {
-  TGraph gout;
-  int it = 0;
-  for (auto const &g : gs) {
-    for (int i = 0; i < g.GetN(); ++i) {
-      double x, y;
-      g.GetPoint(i, x, y);
-      gout.SetPoint(it++, x, y);
-    }
-  }
-  return gout;
-}
-
-TGraph SumTGraphs(std::vector<TGraph> gs) {
-  TGraph gout;
-  for (int i = 0; i < gs.front().GetN(); ++i) {
-    double yall = 0;
-    double x;
-    for (auto const &g : gs) {
-      double y;
-      g.GetPoint(i, x, y);
-      yall += y;
-    }
-    gout.SetPoint(i, x, yall);
-  }
-
-  gout.SetLineColor(gs.front().GetLineColor());
-  gout.SetLineStyle(gs.front().GetLineStyle());
-  gout.SetLineWidth(gs.front().GetLineWidth());
-  return gout;
-}
-
-TGraph PointMultiplyTGraphs(std::vector<TGraph> gs) {
-  TGraph gout;
-  for (int i = 0; i < gs.front().GetN(); ++i) {
-    double yall = 1;
-    double x;
-    for (auto const &g : gs) {
-      double y;
-      g.GetPoint(i, x, y);
-      yall *= y;
-    }
-    gout.SetPoint(i, x, yall);
-  }
-
-  gout.SetLineColor(gs.front().GetLineColor());
-  gout.SetLineStyle(gs.front().GetLineStyle());
-  gout.SetLineWidth(gs.front().GetLineWidth());
-  return gout;
-}
-
-TGraph MultiplyTGraphs(std::vector<TGraph> gs) {
-  TGraph gout;
-  for (int i = 0; i < gs.front().GetN(); ++i) {
-    double yall;
-    double x;
-    int ctr = 0;
-    for (auto const &g : gs) {
-
-      if (ctr++ == 0) {
-        g.GetPoint(i, x, yall);
-      } else {
-        yall *= g.Eval(x);
-      }
-    }
-    gout.SetPoint(i, x, yall);
-  }
-
-  gout.SetLineColor(gs.front().GetLineColor());
-  gout.SetLineStyle(gs.front().GetLineStyle());
-  gout.SetLineWidth(gs.front().GetLineWidth());
-  return gout;
-}
-
-TH1 *GetTH1(TFile *f, std::string const &name) {
-  TDirectory *odir = gDirectory;
-
-  TH1 *h;
-  f->GetObject(name.c_str(), h);
-  if (!h) {
-    std::cout << "[ERROR]: Failed to find histogram named: " << name
-              << std::endl;
-  } else {
-    h->SetDirectory(nullptr);
-  }
-
-  if (odir) {
-    gDirectory->cd();
-  }
-
-  return h;
-}
-
-template <typename TH> double IntegralTH(TH *h) {
+template <typename TH>
+double IntegralTH(std::unique_ptr<TH> &h) {
   if (!h) {
     return 0;
   }
   return h->Integral();
-}
-
-TH1 *GetTH1(std::string const &fname, std::string const &name) {
-  TDirectory *odir = gDirectory;
-
-  std::unique_ptr<TFile> f(TFile::Open(fname.c_str()));
-
-  TH1 *h = GetTH1(f.get(), name);
-
-  if (odir) {
-    gDirectory->cd();
-  }
-
-  return h;
-}
-
-TH2 *GetTH2(TFile *f, std::string const &name) {
-  TH2 *h = dynamic_cast<TH2 *>(GetTH1(f, name));
-  if (!h) {
-    std::cout << "[ERROR]: Failed to find histogram named: " << name
-              << std::endl;
-  }
-  return h;
-}
-
-TH2 *GetTH2(std::string const &fname, std::string const &name) {
-  TH2 *h = dynamic_cast<TH2 *>(GetTH1(fname, name));
-  if (!h) {
-    std::cout << "[ERROR]: Failed to find histogram named: " << name
-              << std::endl;
-  }
-  return h;
 }
 
 void StyleAxis(TAxis *a, double scale = 1, double titleoffsetscale = 1,
@@ -263,8 +34,8 @@ void StyleAxis(TAxis *a, double scale = 1, double titleoffsetscale = 1,
   a->SetTitleOffset(1.2 * titleoffsetscale);
 }
 
-void StyleAxes(TH1 *a, double scale = 1, double titleoffsetscale = 1,
-               double labeloffsetscale = 1) {
+void StyleAxes(std::unique_ptr<TH1> &a, double scale = 1,
+               double titleoffsetscale = 1, double labeloffsetscale = 1) {
   StyleAxis(a->GetYaxis(), scale, titleoffsetscale, labeloffsetscale);
   StyleAxis(a->GetXaxis(), scale, titleoffsetscale, labeloffsetscale);
 }
@@ -285,8 +56,8 @@ void StyleAxis(TGaxis *g, TAxis *a) {
   g->SetTitleOffset(a->GetTitleOffset());
 }
 
-void StyleTH1Line(TH1 *h, int color, int width = 1, int style = 1,
-                  double alpha = 1) {
+void StyleTH1Line(std::unique_ptr<TH1> &h, int color, int width = 1,
+                  int style = 1, double alpha = 1) {
   if (!h) {
     return;
   }
@@ -295,7 +66,8 @@ void StyleTH1Line(TH1 *h, int color, int width = 1, int style = 1,
   h->SetLineWidth(width);
 }
 
-void StyleTH1Fill(TH1 *h, int color, int style = 1001, double alpha = 1) {
+void StyleTH1Fill(std::unique_ptr<TH1> &h, int color, int style = 1001,
+                  double alpha = 1) {
   if (!h) {
     return;
   }
@@ -303,40 +75,69 @@ void StyleTH1Fill(TH1 *h, int color, int style = 1001, double alpha = 1) {
   h->SetFillColorAlpha(color, alpha);
 }
 
-double GetMaximumTH1s(std::vector<TH1 *> hs) {
+double GetMaximumTH1s(
+    std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs) {
   double max = -std::numeric_limits<double>::max();
 
   for (auto const &h : hs) {
-    if (!h) {
+    if (!h.get()) {
       continue;
     }
-    max = std::max(max, h->GetMaximum());
+    max = std::max(max, h.get()->GetMaximum());
   }
 
   return max;
 }
 
-void DrawTH1s(std::vector<TH1 *> hs, std::string opts = "", bool first = true) {
+void DrawTH1s(std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs,
+              std::string opts = "", bool first = true) {
   for (auto const &h : hs) {
-    if (!h) {
+    if (!h.get()) {
       continue;
     }
     if (first) {
-      h->GetYaxis()->SetRangeUser(0, GetMaximumTH1s(hs) * 1.05);
+      h.get()->GetYaxis()->SetRangeUser(0, GetMaximumTH1s(hs) * 1.05);
     }
     std::string dopt = std::string(!first ? "SAME" : "") + opts;
-    h->DrawClone(dopt.c_str());
+    h.get()->DrawClone(dopt.c_str());
     first = false;
   }
 }
 
-void ScaleTH1s(std::vector<TH1 *> hs, double s, std::string opts = "") {
+void ScaleTH1s(std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs,
+               double s, std::string opts = "") {
   for (auto &h : hs) {
-    if (!h) {
+    if (!h.get()) {
       continue;
     }
-    h->Scale(s, opts.c_str());
+    h.get()->Scale(s, opts.c_str());
   }
+}
+
+double GetMaximumTH1s(std::vector<std::unique_ptr<TH1>> &hs) {
+  std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> rhs;
+  for (auto &h : hs) {
+    rhs.push_back(h);
+  }
+  return GetMaximumTH1s(rhs);
+}
+
+void DrawTH1s(std::vector<std::unique_ptr<TH1>> &hs, std::string opts = "",
+              bool first = true) {
+  std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> rhs;
+  for (auto &h : hs) {
+    rhs.push_back(h);
+  }
+  DrawTH1s(rhs, opts, first);
+}
+
+void ScaleTH1s(std::vector<std::unique_ptr<TH1>> &hs, double s,
+               std::string opts = "") {
+  std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> rhs;
+  for (auto &h : hs) {
+    rhs.push_back(h);
+  }
+  ScaleTH1s(rhs, s, opts);
 }
 
 TCanvas *MakeCanvas(double mt = 0.03, double ml = 0.15, double mr = 0.03,

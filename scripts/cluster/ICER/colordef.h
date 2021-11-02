@@ -1,11 +1,11 @@
 #pragma once
 
+#include <array>
+
 #include "TColor.h"
-#include "TSystem.h"
 #include "TROOT.h"
 #include "TStyle.h"
-
-#include <array>
+#include "TSystem.h"
 
 void defc(int &c, std::array<int, 3> cs, std::string const &n) {
   static int currC = 51;
@@ -54,11 +54,11 @@ static int SORNVibrantWheel[nSORNVibrant];
 static size_t const nSORNMuted = 10;
 static int SORNMutedWheel[nSORNMuted];
 
-inline void DeclareColors(){
-  defc(kDUNEOrange,{242, 159, 84},"kDUNEOrange");
-  defc(kDUNEBlue,{125, 172, 213},"kDUNEBlue");
-  defc(kMSUGreen,{13, 177, 75},"kMSUGreen");
-  defc(kMSUPurple,{110, 0, 95},"kMSUPurple");
+inline void DeclareColors() {
+  defc(kDUNEOrange, {242, 159, 84}, "kDUNEOrange");
+  defc(kDUNEBlue, {125, 172, 213}, "kDUNEBlue");
+  defc(kMSUGreen, {13, 177, 75}, "kMSUGreen");
+  defc(kMSUPurple, {110, 0, 95}, "kMSUPurple");
 
   defc(kNOvABlue, {34, 62, 145}, "kNOvABlue");
   defc(kT2KGreen, {0, 128, 0}, "kT2KGreen");
@@ -104,10 +104,12 @@ inline void DeclareColors(){
   defc(SORNMutedWheel[9], 0xDDDDDD, "SORNMutedWheel_9");
 }
 
-inline void SetBirdPalette() {
+Int_t BirdPalette[100];
+Int_t W2RPalette[100];
+Int_t BWRPalette[100];
 
+int *GetBirdPalette() {
   static bool first = true;
-  static Int_t MyPalette[100];
   if (first) {
     first = false;
     Double_t Red[] = {0., 1.0};
@@ -117,18 +119,19 @@ inline void SetBirdPalette() {
     Int_t FI =
         TColor::CreateGradientColorTable(2, Length, Red, Green, Blue, 100);
     for (int i = 0; i < 100; i++) {
-      MyPalette[i] = FI + i;
+      BirdPalette[i] = FI + i;
     }
   }
+  return BirdPalette;
+}
 
-  gStyle->SetPalette(100, MyPalette);
+void SetBirdPalette() {
+  gStyle->SetPalette(100, GetBirdPalette());
   gStyle->SetNumberContours(100);
 }
 
-inline void SetW2RPalette(double maxpoint=1) {
-
+int *GetW2RPalette(double maxpoint = 1) {
   static bool first = true;
-  static Int_t MyPalette[100];
   if (first) {
     first = false;
     Double_t Red[] = {1., 1.0, 1.0};
@@ -138,10 +141,35 @@ inline void SetW2RPalette(double maxpoint=1) {
     Int_t FI =
         TColor::CreateGradientColorTable(3, Length, Red, Green, Blue, 100);
     for (int i = 0; i < 100; i++) {
-      MyPalette[i] = FI + i;
+      W2RPalette[i] = FI + i;
     }
   }
+  return W2RPalette;
+}
 
-  gStyle->SetPalette(100, MyPalette);
+void SetW2RPalette(double maxpoint = 1) {
+  gStyle->SetPalette(100, GetW2RPalette(maxpoint));
+  gStyle->SetNumberContours(100);
+}
+
+int *GetBWRPalette() {
+  static bool first = true;
+  if (first) {
+    first = false;
+    Double_t Red[] = {0., 1.0, 1.0};
+    Double_t Green[] = {0., 1.0, 0.0};
+    Double_t Blue[] = {1., 1.0, 0.0};
+    Double_t Length[] = {0., 0.5, 1.0};
+    Int_t FI =
+        TColor::CreateGradientColorTable(3, Length, Red, Green, Blue, 100);
+    for (int i = 0; i < 100; i++) {
+      BWRPalette[i] = FI + i;
+    }
+  }
+  return BWRPalette;
+}
+
+void SetBWRPalette() {
+  gStyle->SetPalette(100, GetBWRPalette());
   gStyle->SetNumberContours(100);
 }

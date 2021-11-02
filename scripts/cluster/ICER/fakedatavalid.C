@@ -1,3 +1,6 @@
+#include "ChannelHistCollections.h"
+#include "T2KNOvATrueSelectionHelper.hxx"
+#include "T2KNOvATruthTreeReader.h"
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TH1.h"
@@ -10,261 +13,228 @@
 #include "TStyle.h"
 #include "TTreeReader.h"
 
-#include "T2KNOvAFakeDataHelper.hxx"
-#include "hblob.h"
-
 using namespace t2knova;
 
-TH1D *totxsecs;
+bool bymode = false;
 
-hblob<TH1D> *Enu;
-hblob<TH1D> *PLep;
-hblob<TH1D> *ThetaLep;
-hblob<TH1D> *EAvHad;
-hblob<TH1D> *PtLep;
-hblob<TH1D> *Q2;
-hblob<TH1D> *q0;
-hblob<TH1D> *q3;
+TH1F *totxsecs;
 
-void Fill(TTreeReader &rdr,
-          t2knova::reweightconfig weightconfig = t2knova::kNoWeight,
-          int tgta_select = 0) {
-  Enu = new hblob<TH1D>(
-      "Enu",
-      ";#it{E_{#nu}} (GeV);#it{y}; d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}", 100,
-      0, 5);
+SelectionHists<TH1F> *Enu;
+SelectionHists<TH1F> *PLep;
+SelectionHists<TH1F> *ThetaLep;
+SelectionHists<TH1F> *EAvHad;
+SelectionHists<TH1F> *PtLep;
+SelectionHists<TH1F> *Q2;
+SelectionHists<TH1F> *q0;
+SelectionHists<TH1F> *q3;
 
-  PLep = new hblob<TH1D>(
-      "PLep",
-      ";#it{p}_{lep} (GeV/#it{c});#it{y}; d#sigma/d#it{p}_{lep} "
-      "cm^{2} GeV^{-1} #it{c}",
-      100, 0, 5);
-  Q2 = new hblob<TH1D>("Q2",
-                       ";#Q^{2} (GeV^{2});#it{y}; d#sigma/d#Q^{2} "
-                       "cm^{2} GeV^{-2}",
-                       100, 0, 5);
-  q0 = new hblob<TH1D>("q0",
-                       ";q_{0} (GeV);#it{y}; d#sigma/dq_{0} "
-                       "cm^{2} GeV^{-1} #it{c}",
-                       100, 0, 3);
-  q3 = new hblob<TH1D>("q3",
-                       ";q_{3} (GeV/#it{c});#it{y}; d#sigma/dq_{3} "
-                       "cm^{2} GeV^{-1} #it{c}",
-                       100, 0, 3);
+void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
+          t2knova::reweightconfig weightconfig, int tgta_select = 0) {
+  Enu = SelectionHistsFromTOML<TH1F>("Enu", toml::find(plots_config, "Enu"));
 
-  ThetaLep = new hblob<TH1D>(
-      "ThetaLep",
-      ";#theta_{lep} (GeV);#it{y}; d#sigma/d#theta_{lep} cm^{2} rad^{-1}", 100,
-      0, M_PI);
+  PLep = SelectionHistsFromTOML<TH1F>("PLep", toml::find(plots_config, "PLep"));
+  Q2 = SelectionHistsFromTOML<TH1F>("Q2", toml::find(plots_config, "Q2"));
+  q0 = SelectionHistsFromTOML<TH1F>("q0", toml::find(plots_config, "q0"));
+  q3 = SelectionHistsFromTOML<TH1F>("q3", toml::find(plots_config, "q3"));
 
-  EAvHad = new hblob<TH1D>("EAvHad",
-                           ";#it{E}_{had}^{vis} (GeV);#it{y}; "
-                           "d#sigma/d#it{E}_{had}^{vis} cm^{2} GeV^{-1}",
-                           100, 0, 5);
+  ThetaLep = SelectionHistsFromTOML<TH1F>("ThetaLep",
+                                          toml::find(plots_config, "ThetaLep"));
 
-  PtLep = new hblob<TH1D>("PtLep",
-                          ";#{p}^{T}_{lep} (GeV);#it{y}; "
-                          "d#sigma/d#{p}^{T}_{lep} cm^{2} GeV^{-1} #it{c}",
-                          100, 0, 2);
+  EAvHad = SelectionHistsFromTOML<TH1F>("EAvHad",
+                                        toml::find(plots_config, "EAvHad"));
 
-  totxsecs = new TH1D("totxsecs", ";;#sigma^{#int#Phi} cm^{2}", 10, 0, 10);
+  PtLep =
+      SelectionHistsFromTOML<TH1F>("PtLep", toml::find(plots_config, "PtLep"));
+
+  totxsecs = new TH1F("totxsecs", ";;#sigma^{#int#Phi} cm^{2}",
+                      SelectionList.size(), 0, SelectionList.size());
   totxsecs->SetDirectory(nullptr);
 
-  TTreeReaderValue<int> PDGnu(rdr, "PDGnu");
-  TTreeReaderValue<int> PDGLep(rdr, "PDGLep");
-  TTreeReaderValue<int> Mode(rdr, "Mode");
+  T2KNOvATruthTreeReader rdr(ttrdr);
+  if (!bymode) {
+    rdr.SetNoModeInfo();
+  }
 
-  TTreeReaderValue<float> EavAlt(rdr, "EavAlt");
-  TTreeReaderValue<float> Enu_true(rdr, "Enu_true");
-  TTreeReaderValue<float> PLep_v(rdr, "PLep");
-  TTreeReaderValue<float> CosLep(rdr, "CosLep");
-  TTreeReaderValue<float> Q2_v(rdr, "Q2");
-  TTreeReaderValue<float> q0_v(rdr, "q0");
-  TTreeReaderValue<float> q3_v(rdr, "q3");
-  TTreeReaderValue<int> tgta(rdr, "tgta");
-
-  TTreeReaderValue<int> NFSpip(rdr, "NFSpip");
-  TTreeReaderValue<int> NFSpim(rdr, "NFSpim");
-  TTreeReaderValue<int> NFSpi0(rdr, "NFSpi0");
-  TTreeReaderValue<int> NFSgamma(rdr, "NFSgamma");
-  TTreeReaderValue<int> NFSlep(rdr, "NFSlep");
-  TTreeReaderValue<int> NFSOther(rdr, "NFSOther");
-
-  TTreeReaderValue<double> fScaleFactor(rdr, "fScaleFactor");
-  TTreeReaderValue<double> RWWeight(rdr, "RWWeight");
-
-  size_t nents = rdr.GetEntries(true);
+  size_t nents = ttrdr.GetEntries(true);
   size_t ent_it = 0;
   size_t shout_it = nents / 25;
 
-  while (rdr.Next()) {
-
+  while (ttrdr.Next()) {
     if (ent_it && !(ent_it % shout_it)) {
       std::cout << "[Read] " << ent_it << "/" << nents << "("
                 << (100 * ent_it / nents) << "%)" << std::endl;
     }
 
-    if (tgta_select && (*tgta != tgta_select)) {
+    if (tgta_select && (rdr.tgta() != tgta_select)) {
       ent_it++;
       continue;
     }
 
-    double w = *fScaleFactor * *RWWeight;
+    double w = rdr.fScaleFactor() * rdr.RWWeight();
 
-    int NCpi = *NFSpip + *NFSpim;
-    int NOther = (*NFSlep > 0 ? (*NFSlep - 1) : 0) + *NFSOther;
+    int primary_selection = rdr.GetPrimarySelection();
 
     if (weightconfig == t2knova::kT2KND_to_NOvA) {
       w *= t2knova::GetFakeDataWeight_ND280ToNOvA(
-          *PDGnu, *PDGLep, *tgta, *Enu_true, *PLep_v, acos(*CosLep), NCpi,
-          *NFSpi0, NOther);
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
+          acos(rdr.CosLep()), primary_selection);
     } else if (weightconfig == t2knova::kT2KND_to_NOvA_Enu) {
       w *= t2knova::GetFakeDataWeight_ND280ToNOvA_Enu(
-          *PDGnu, *PDGLep, *tgta, *Enu_true, NCpi, *NFSpi0, NOther);
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
+          primary_selection);
     } else if (weightconfig == t2knova::kT2KND_to_NOvA_Q2) {
       w *= t2knova::GetFakeDataWeight_ND280ToNOvA_Q2(
-          *PDGnu, *PDGLep, *tgta, *Q2_v, NCpi, *NFSpi0, NOther);
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Q2(), primary_selection);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_plep) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_PLep(
-          *PDGnu, *PDGLep, *tgta, *Enu_true, *PLep_v, *EavAlt);
+      w *= t2knova::GetFakeDataWeight_NOvAToT2K_PLep(rdr.PDGNu(), rdr.PDGLep(),
+                                                     rdr.tgta(), rdr.Enu_true(),
+                                                     rdr.PLep(), rdr.EavAlt());
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_Q2) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_Q2(*PDGnu, *PDGLep, *tgta,
-                                                   *Enu_true, *Q2_v, *EavAlt);
+      w *= t2knova::GetFakeDataWeight_NOvAToT2K_Q2(rdr.PDGNu(), rdr.PDGLep(),
+                                                   rdr.tgta(), rdr.Enu_true(),
+                                                   rdr.Q2(), rdr.EavAlt());
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
       w *= t2knova::GetFakeDataWeight_NOvAToT2K_PtLep(
-          *PDGnu, *PDGLep, *tgta, *Enu_true,
-          (*PLep_v) * sqrt(1 - pow(*CosLep, 2)), *EavAlt);
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
+          (rdr.PLep()) * sqrt(1 - pow(rdr.CosLep(), 2)), rdr.EavAlt());
     }
 
-    bool iscc = (*PDGLep) % 2;
+    std::vector<int> sels = rdr.GetSelections();
 
-    int NFSCPi = *NFSpip + *NFSpim;
-    int NFSOther_gammaextralep = *NFSOther + *NFSgamma;
-    if((*NFSlep) > 1){
-      NFSOther_gammaextralep += (*NFSlep) - 1;
+    if (!sels.size()) {
+      ent_it++;
+      continue;
     }
 
-    FlagBlob fblob = GetFlagBlob(iscc, NFSCPi, *NFSpi0, NFSOther_gammaextralep, *Mode);
+    Enu->Fill(w, sels, rdr.Mode(), rdr.Enu_true());
+    PLep->Fill(w, sels, rdr.Mode(), rdr.PLep());
+    ThetaLep->Fill(w, sels, rdr.Mode(), acos(rdr.CosLep()));
+    EAvHad->Fill(w, sels, rdr.Mode(), rdr.EavAlt());
+    PtLep->Fill(w, sels, rdr.Mode(),
+                rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)));
+    Q2->Fill(w, sels, rdr.Mode(), rdr.Q2());
+    q0->Fill(w, sels, rdr.Mode(), rdr.q0());
+    q3->Fill(w, sels, rdr.Mode(), rdr.q3());
 
-    if (fblob.flagCCINC) {
-      totxsecs->Fill(0.0, w);
-      if (fblob.flagCC0pi) {
-        totxsecs->Fill(1.0, w);
-      } else if (fblob.flagCC1cpi) {
-        totxsecs->Fill(2.0, w);
-      } else if (fblob.flagCC1pi0) {
-        totxsecs->Fill(3.0, w);
-      } else {
-        totxsecs->Fill(4.0, w);
-      }
-    } else if (fblob.flagNCINC) {
-      totxsecs->Fill(5.0, w);
-      if (fblob.flagNC0pi) {
-        totxsecs->Fill(6.0, w);
-      } else if (fblob.flagNC1cpi) {
-        totxsecs->Fill(7.0, w);
-      } else if (fblob.flagNC1pi0) {
-        totxsecs->Fill(8.0, w);
-      } else {
-        totxsecs->Fill(9.0, w);
-      }
-    }
-
-    Enu->Fill(w, fblob, *Enu_true);
-
-    PLep->Fill(w, fblob, *PLep_v);
-    ThetaLep->Fill(w, fblob, acos(*CosLep));
-    EAvHad->Fill(w, fblob, *EavAlt);
-    PtLep->Fill(w, fblob, *PLep_v * sqrt(1 - pow(*CosLep, 2)));
-    Q2->Fill(w, fblob, *Q2_v);
-    q0->Fill(w, fblob, *q0_v);
-    q3->Fill(w, fblob, *q3_v);
     ent_it++;
   }
 }
 
-int main(int argc, char const *argv[]) {
-  if (argc < 3) {
-    std::cout << "Expects 2 arguments." << std::endl;
-    return 1;
-  }
+std::string input_file, output_file, output_dir;
+std::string hist_config_file;
 
+t2knova::reweightconfig wconfig = t2knova::kNoWeight;
+int tgta_select = 0;
+
+void SayUsage(char const *argv[]) {
+  std::cout << "[USAGE]: " << argv[0]
+            << "\n"
+               "\t-i <inp.root>          : Input file"
+               "\t-H <config.toml>       : RWHist config file"
+               "\t-o <out.root>          : Output file"
+               "\t-M                     : Separate by Mode"
+               "\t-a <[C|H|O|any]>       : Target descriptor"
+               "\t-W <Config>            : ReWeight Config"
+               "\t         Configs:"
+               "\t              * T2KND_to_NOvA_Enu"
+               "\t              * T2KND_to_NOvA_Q2"
+               "\t              * NOvA_to_T2KND_plep"
+               "\t              * NOvA_to_T2KND_Q2"
+               "\t              * NOvA_to_T2KND_ptlep"
+               "\t-d </sub/dir/to/use>   : Output sub directory"
+               " input tree. \n"
+            << std::endl;
+}
+
+void handleOpts(int argc, char const *argv[]) {
+  int opt = 1;
+  while (opt < argc) {
+    if ((std::string(argv[opt]) == "-?") ||
+        (std::string(argv[opt]) == "--help")) {
+      SayUsage(argv);
+      exit(0);
+    } else if (std::string(argv[opt]) == "-i") {
+      input_file = argv[++opt];
+    } else if (std::string(argv[opt]) == "-H") {
+      hist_config_file = argv[++opt];
+    } else if (std::string(argv[opt]) == "-o") {
+      output_file = argv[++opt];
+    } else if (std::string(argv[opt]) == "-a") {
+      std::string arg = std::string(argv[++opt]);
+      if (arg == "C") {
+        tgta_select = 12;
+      } else if (arg == "H") {
+        tgta_select = 1;
+      } else if (arg == "O") {
+        tgta_select = 16;
+      } else if (arg == "any") {
+        tgta_select = 0;
+      } else {
+        std::cout << "Invalid target selector passed: " << arg
+                  << ". Should be C/H/O/any." << std::endl;
+        SayUsage(argv);
+        exit(1);
+      }
+    } else if (std::string(argv[opt]) == "-W") {
+      std::string arg = std::string(argv[++opt]);
+      if (arg == "T2KND_to_NOvA") {
+        wconfig = t2knova::kT2KND_to_NOvA;
+      } else if (arg == "T2KND_to_NOvA_Enu") {
+        wconfig = t2knova::kT2KND_to_NOvA_Enu;
+      } else if (arg == "T2KND_to_NOvA_Q2") {
+        wconfig = t2knova::kT2KND_to_NOvA_Q2;
+      } else if (arg == "NOvA_to_T2KND_plep") {
+        wconfig = t2knova::kNOvA_to_T2KND_plep;
+      } else if (arg == "NOvA_to_T2KND_Q2") {
+        wconfig = t2knova::kNOvA_to_T2KND_Q2;
+      } else if (arg == "NOvA_to_T2KND_ptlep") {
+        wconfig = t2knova::kNOvA_to_T2KND_ptlep;
+      } else {
+        std::cout << "Invalid weight config selector passed: " << arg
+                  << ". Should be ND280/NOvAND." << std::endl;
+        SayUsage(argv);
+        exit(1);
+      }
+    } else if (std::string(argv[opt]) == "-d") {
+      output_dir = argv[++opt];
+    } else if (std::string(argv[opt]) == "-M") {
+      bymode = true;
+    }
+    opt++;
+  }
+}
+
+int main(int argc, char const *argv[]) {
   gStyle->SetOptStat(false);
 
-  TFile fin(argv[1]);
+  handleOpts(argc, argv);
+
+  toml::value const &plots_config_file = toml_h::parse_card(hist_config_file);
+  toml::value const &plots_config =
+      toml::find(plots_config_file, "FakeDataValidConfig");
+
+  TFile fin(input_file.c_str());
   if (fin.IsZombie()) {
-    std::cout << "Failed to read " << argv[1] << std::endl;
+    std::cout << "Failed to read " << input_file << std::endl;
     return 2;
   }
 
-  TTreeReader rdr("T2KNOvATruthTree", &fin);
+  TTreeReader ttrdr("T2KNOvATruthTree", &fin);
 
-  t2knova::reweightconfig weightconfig = t2knova::kNoWeight;
+  Fill(ttrdr, plots_config, wconfig, tgta_select);
 
-  if (std::string(argv[2]) == "NOvA_to_T2KND_plep") {
-    weightconfig = t2knova::kNOvA_to_T2KND_plep;
-  } else if (std::string(argv[2]) == "NOvA_to_T2KND_Q2") {
-    weightconfig = t2knova::kNOvA_to_T2KND_Q2;
-  } else if (std::string(argv[2]) == "NOvA_to_T2KND_ptlep") {
-    weightconfig = t2knova::kNOvA_to_T2KND_ptlep;
-  } else if (std::string(argv[2]) == "T2KND_To_NOvA") {
-    weightconfig = t2knova::kT2KND_to_NOvA;
-  } else if (std::string(argv[2]) == "T2KND_To_NOvA_Enu") {
-    weightconfig = t2knova::kT2KND_to_NOvA_Enu;
-  } else if (std::string(argv[2]) == "T2KND_To_NOvA_Q2") {
-    weightconfig = t2knova::kT2KND_to_NOvA_Q2;
-  }
-
-  int tgta_select = 0;
-  if (argc > 5) {
-    if (std::string(argv[5]) == "C") {
-      tgta_select = 12;
-    } else if (std::string(argv[5]) == "H") {
-      tgta_select = 1;
-    } else if (std::string(argv[5]) == "O") {
-      tgta_select = 16;
-    } else if (std::string(argv[5]) == "any") {
-      tgta_select = 0;
-    } else {
-      std::cout << "Invalid target selector passed: " << argv[4]
-                << ". Should be C/H/O/any." << std::endl;
-      return 1;
-    }
-  }
-
-  Fill(rdr, weightconfig, tgta_select);
-
-  TFile fout(argv[3], "UPDATE");
+  TFile fout(output_file.c_str(), "UPDATE");
   if (fin.IsZombie()) {
-    std::cout << "Failed to write " << argv[3] << std::endl;
+    std::cout << "Failed to write " << output_file.c_str() << std::endl;
     return 2;
   }
 
-  TDirectory *dout = &fout;
-  if (argc > 4) {
-    std::string fqdir = argv[4];
-    while (fqdir.find("/") != std::string::npos) {
-      std::string ndir = fqdir.substr(0, fqdir.find("/"));
-      if (!dout->GetDirectory(ndir.c_str())) {
-        dout = dout->mkdir(ndir.c_str());
-      } else {
-        dout = dout->GetDirectory(ndir.c_str());
-      }
-      fqdir = fqdir.substr(fqdir.find("/") + 1);
-    }
-    dout = dout->mkdir(fqdir.c_str());
+  TDirectory *dout = MakeDirectoryStructure(&fout, output_dir);
+
+  for (int i = 0; i < SelectionList.size(); ++i) {
+    totxsecs->GetXaxis()->SetBinLabel(i + 1, SelectionList[i].c_str());
   }
 
-  totxsecs->GetXaxis()->SetBinLabel(1, "CCInc");
-  totxsecs->GetXaxis()->SetBinLabel(2, "CC0#pi");
-  totxsecs->GetXaxis()->SetBinLabel(3, "CC1#pi^{#pm}");
-  totxsecs->GetXaxis()->SetBinLabel(4, "CC1#pi^{0}");
-  totxsecs->GetXaxis()->SetBinLabel(5, "CCMulti#pi + CCOther");
-  totxsecs->GetXaxis()->SetBinLabel(6, "NCInc");
-  totxsecs->GetXaxis()->SetBinLabel(7, "NC0#pi");
-  totxsecs->GetXaxis()->SetBinLabel(8, "NC1#pi^{#pm}");
-  totxsecs->GetXaxis()->SetBinLabel(9, "NC1#pi^{0}");
-  totxsecs->GetXaxis()->SetBinLabel(10, "NCMulti#pi + CCOther");
   dout->WriteTObject(totxsecs, "totxsecs");
 
   Enu->Write(dout);

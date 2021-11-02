@@ -1,0 +1,146 @@
+[FakeDataConfig]
+
+[FakeDataConfig.Enu] 
+
+title = "Enu"
+selections = [ 
+      "CCInc",
+      "CC0pi",
+      "CC1Gamma",
+      "CCNGamma",
+      "CC1cpi",
+      "CC1pi0",
+      "CCmultipi",
+      "CCOther",
+      "NCInc",
+      "NC0pi",
+      "NC1Gamma",
+      "NCNGamma",
+      "NC1cpi",
+      "NC1pi0",
+      "NCmultipi",
+      "NCOther",
+]
+
+x_binning = [ 
+      "uniform", 
+      [100, 0, 10]
+]
+
+axis_titles = [ 
+      "#it{E_{#nu}} (GeV)",
+      "d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}"
+]
+
+[FakeDataConfig.Q2] 
+
+title = "Q2"
+selections = [ 
+      "CCInc",
+      "CC0pi",
+      "CC1Gamma",
+      "CCNGamma",
+      "CC1cpi",
+      "CC1pi0",
+      "CCmultipi",
+      "CCOther",
+      "NCInc",
+      "NC0pi",
+      "NC1Gamma",
+      "NCNGamma",
+      "NC1cpi",
+      "NC1pi0",
+      "NCmultipi",
+      "NCOther",
+]
+
+x_binning = [ 
+      "uniform", 
+      [100, 0, 4]
+]
+
+axis_titles = [ 
+      "#it{Q}^{2} (GeV^{2})",
+      "d#sigma/d#it{Q}^{2} cm^{2} GeV^{-2}"
+]
+
+[FakeDataConfig.EGamma] 
+
+name = "EGamma"
+title = "EGamma"
+selections = [ 
+      "CC1Gamma",
+      "CCNGamma",
+      "NC1Gamma",
+      "NCNGamma",
+]
+
+x_binning = [ 
+      "uniform", 
+      [50, 1E-8, 4]
+]
+
+axis_titles = [ 
+      "#it{E}_{#gamma} (GeV)",
+      "d#sigma/d#it{E}_{#gamma} cm^{2} GeV^{-1}"
+]
+
+[FakeDataConfig.EnuPLepThetaLep] 
+
+title = "EnuPLepThetaLep"
+selections = [ 
+      "CCInc",
+      "CC0pi",
+      "CC1Gamma",
+      "CCNGamma",
+      "CC1cpi",
+      "CC1pi0",
+      "CCmultipi",
+      "CCOther",
+      "NCInc",
+      "NC0pi",
+      "NC1Gamma",
+      "NCNGamma",
+      "NC1cpi",
+      "NC1pi0",
+      "NCmultipi",
+      "NCOther",
+]
+
+x_binning = [ 
+      "uniform", 
+      [50, 0, 10]
+]
+
+y_binning = [ 
+      "uniform", 
+      [100, 0, 10]
+]
+
+z_binning = [ 
+      "uniform", 
+      [50, 0, 3.1415927]
+]
+
+axis_titles = [ 
+      "#it{E_{#nu}} (GeV)",
+      "#it{p}_{lep} (GeV/#it{c})",
+      "#theta_{lep} (rad)",
+      "GeV^{-2} #it{c} rad^{-1}"
+]
+
+# NOvA Variables
+# "EnuPLepEAvHad",
+#         ";#it{E_{#nu}} (GeV);#it{p}_{lep} (GeV/#it{c}); #it{E}_{Had}^{Vis} "
+#         "(GeV)",
+#         SelectionList, 100, 0, 5, 50, 0, 5, 40, 0, 4
+# 
+# "EnuQ2EAvHad",
+#         ";#it{E_{#nu}} (GeV);Q^{2} (GeV^{2}/#it{c}^{2}); #it{E}_{Had}^{Vis} "
+#         "(GeV)",
+#         SelectionList, 100, 0, 5, 50, 0, 5, 40, 0, 4
+# 
+# "EnuPtLepEAvHad",
+#         ";#it{E_{#nu}} (GeV);#it{p}^{T}_{lep} (GeV/#it{c}); #it{E}_{Had}^{Vis} "
+#         "(GeV)",
+#         SelectionList, 100, 0, 5, 40, 0, 2, 40, 0, 4

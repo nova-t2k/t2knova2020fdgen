@@ -1,17 +1,12 @@
 #!/bin/bash
 
-set -x
+# set -x
+set -e
 
-rm FakeDataHists.root
-g++ fakedatahists.C -I ../../../ $(root-config --cflags --glibs) -o fakedatahists.exe
-if [[ ! "$?" == "0" ]]; then
-	exit;
-fi
+rm -f FDSInputs/FakeDataHists.root FDSInputs/FakeDataHists_*.root FDSInputs/FakeDataInputs.root
 
-g++ fakedatarwgen.C -I ../../../ -o fakedatarwgen.exe $(root-config --cflags) $(root-config --libs)
-if [[ ! "$?" == "0" ]]; then
-        exit;
-fi
+#build the apps and quit if you have a problem
+# source buildall.sh
 
 declare -A TGTEL
 TGTEL["NOvAND_CH"]="C H"
@@ -22,44 +17,56 @@ TGTEL["ND280_H2O"]="H O"
 GENERATORS=( GENIE NEUT )
 
 SPECIES=( numu numub nue nueb )
-#SPECIES=( numu )
+SPECIES=( numu numub )
 
-#DETECTORS=( NOvAND ND280 )
+DETECTORS=( NOvAND ND280 )
 DETECTORS=( ND280 )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
 DET_MATS["ND280"]="H2O CH"
+DET_MATS["ND280"]="CH"
 
 for gen in ${GENERATORS[@]}; do
-  for spec in ${SPECIES[@]}; do
-    for det in ${DETECTORS[@]}; do
-      for mat in ${DET_MATS[${det}]}; do
+  for det in ${DETECTORS[@]}; do
+    for mat in ${DET_MATS[${det}]}; do
+      for tgtel in ${TGTEL["${det}_${mat}"]}; do
+        for spec in ${SPECIES[@]}; do
 
-        if [ ! -e "t2knova.flattree.${gen}.${det}.${mat}.${spec}.root" ]; then
-          echo "Failed to find: t2knova.flattree.${gen}.${det}.${mat}.${spec}.root"
-          continue
-        fi
+          if [ ! -e "flattrees/t2knova.flattree.${gen}.${det}.${mat}.${spec}.root" ]; then
+            echo "Failed to find: flattrees/t2knova.flattree.${gen}.${det}.${mat}.${spec}.root"
+            continue
+          fi
 
-        for tgtel in ${TGTEL["${det}_${mat}"]}; do
-
-          CMD="./fakedatahists.exe t2knova.flattree.${gen}.${det}.${mat}.${spec}.root \
-                                   ${det} \
-                                   FakeDataHists.root \
-                                   ${tgtel} \
-                                   ${gen}/${det}/${tgtel}/${spec}"
+          CMD="./fakedatahists.exe -i flattrees/t2knova.flattree.${gen}.${det}.${mat}.${spec}.root \
+                                   -H FakeDataConfig.toml \
+                                   -e ${det} \
+                                   -o FDSInputs/FakeDataHists_${spec}.root \
+                                   -M \
+                                   -a ${tgtel} \
+                                   -d ${gen}/${det}/${tgtel}/${spec}"
           echo $CMD
           ${CMD}
+
         done
+        wait
       done
     done
   done
 done
 
-if [ ! -e FakeDataHists.root ]; then
+HADD_CMD="hadd -j 4"
+for spec in ${SPECIES[@]}; do
+  HADD_CMD="${HADD_CMD} FDSInputs/FakeDataHists_${spec}.root"
+done
+HADD_CMD="${HADD_CMD} FDSInputs/FakeDataHists.root"
+echo $HADD_CMD
+${HADD_CMD}
+
+if [ ! -e FDSInputs/FakeDataHists.root ]; then
   echo "Didn't produce FakeDataHists.root. Failed"
   exit 1
 fi
 
-echo ./fakedatarwgen.exe FakeDataHists.root FakeDataInputs.root
-./fakedatarwgen.exe FakeDataHists.root FakeDataInputs.root
+echo ./fakedatarwgen.exe FDSInputs/FakeDataHists.root FDSInputs/FakeDataInputs.root
+./fakedatarwgen.exe FDSInputs/FakeDataHists.root FDSInputs/FakeDataInputs.root
