@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# set -x
+set -x
 set -e
 
-rm -f FDSInputs/FakeDataHists.root FDSInputs/FakeDataHists_*.root FDSInputs/FakeDataInputs.root
-
-#build the apps and quit if you have a problem
-# source buildall.sh
+rm -rf FDSInputs
+mkdir -p FDSInputs
 
 declare -A TGTEL
 TGTEL["NOvAND_CH"]="C H"
@@ -20,7 +18,7 @@ SPECIES=( numu numub nue nueb )
 SPECIES=( numu numub )
 
 DETECTORS=( NOvAND ND280 )
-DETECTORS=( ND280 )
+# DETECTORS=( ND280 )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
@@ -38,15 +36,14 @@ for gen in ${GENERATORS[@]}; do
             continue
           fi
 
-          CMD="./fakedatahists.exe -i flattrees/t2knova.flattree.${gen}.${det}.${mat}.${spec}.root \
-                                   -H FakeDataConfig.toml \
-                                   -e ${det} \
-                                   -o FDSInputs/FakeDataHists_${spec}.root \
-                                   -M \
-                                   -a ${tgtel} \
-                                   -d ${gen}/${det}/${tgtel}/${spec}"
+          CMD="bin/fakedatahists.exe -i flattrees/t2knova.flattree.${gen}.${det}.${mat}.${spec}.root \
+                                     -H config/FakeDataConfig.toml \
+                                     -e ${det} \
+                                     -o FDSInputs/FakeDataHists_${spec}.root \
+                                     -a ${tgtel} \
+                                     -d ${gen}/${det}/${tgtel}/${spec}"
           echo $CMD
-          ${CMD}
+          ${CMD} &
 
         done
         wait
@@ -55,11 +52,10 @@ for gen in ${GENERATORS[@]}; do
   done
 done
 
-HADD_CMD="hadd -j 4"
+HADD_CMD="hadd -j 4 FDSInputs/FakeDataHists.root"
 for spec in ${SPECIES[@]}; do
   HADD_CMD="${HADD_CMD} FDSInputs/FakeDataHists_${spec}.root"
 done
-HADD_CMD="${HADD_CMD} FDSInputs/FakeDataHists.root"
 echo $HADD_CMD
 ${HADD_CMD}
 
@@ -68,5 +64,6 @@ if [ ! -e FDSInputs/FakeDataHists.root ]; then
   exit 1
 fi
 
-echo ./fakedatarwgen.exe FDSInputs/FakeDataHists.root FDSInputs/FakeDataInputs.root
-./fakedatarwgen.exe FDSInputs/FakeDataHists.root FDSInputs/FakeDataInputs.root
+echo bin/fakedatarwgen.exe FDSInputs/FakeDataHists.root FDSInputs/FakeDataInputs.root
+bin/fakedatarwgen.exe FDSInputs/FakeDataHists.root FDSInputs/FakeDataInputs.root
+ 

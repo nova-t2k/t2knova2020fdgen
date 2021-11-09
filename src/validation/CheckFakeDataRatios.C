@@ -1,5 +1,5 @@
-#include "T2KNOvAFakeDataHelper.hxx"
-#include "T2KNOvATrueSelectionHelper.hxx"
+#include "T2KNOvA/FakeDataHelper.hxx"
+#include "T2KNOvA/TrueSelectionHelper.hxx"
 #include "TLatex.h"
 #include "colordef.h"
 #include "plotutils.h"
@@ -30,8 +30,10 @@ int main(int argc, char const *argv[]) {
   for (auto detstr : {"ND280"}) {
     for (auto selstr : selstrs) {
       for (auto tgtstr : {"C", "O", "H"}) {
-        for (auto nuspec :
-             {t2knova::kNuMu, t2knova::kNuMub, t2knova::kNuE, t2knova::kNuEb}) {
+        for (auto nuspec : {
+                 t2knova::kNuMu, t2knova::kNuMub,
+                 // t2knova::kNuE, t2knova::kNuEb
+             }) {
           for (auto _projstr : {
                    "Enu",
                    "Q2",
@@ -93,7 +95,11 @@ int main(int argc, char const *argv[]) {
 
                 std::unique_ptr<TH1> &first = NEUT ? NEUT : GENIE;
 
-                c1->cd();
+                if (domodes && (lmode != 0)) {
+                  c2->cd();
+                } else {
+                  c1->cd();
+                }
 
                 first->GetYaxis()->SetTitle("#sigma_{tot.}");
                 StyleTH1Line(NEUT, kT2KRed, 2, 1);
@@ -121,14 +127,61 @@ int main(int argc, char const *argv[]) {
 
                 TLatex ltx;
                 ltx.SetTextAlign(31);
-                ltx.DrawLatexNDC(0.9, 0.75,
+                ltx.SetTextSize(0.04);
+                ltx.DrawLatexNDC(0.9, 0.8,
                                  (std::string(detstr) + " " + selstr + " " +
                                   tgtstr + " " + t2knova::all_nuspecies[nuspec])
                                      .c_str());
 
-                c1->Print("T2KNOvATunePreds.pdf");
+                if (lmode != 0) {
+                  std::string mode_nice_str = " Mode == ";
+                  mode_nice_str = mode_nice_str + std::to_string(lmode);
 
-              } else {
+                  ltx.DrawLatexNDC(0.9, 0.65, mode_nice_str.c_str());
+                }
+
+                if (domodes && (lmode != 0)) {
+                  c2->Print("T2KNOvATunePreds_modes.pdf");
+                  NEUT->GetYaxis()->SetRangeUser(NEUT->GetMaximum() * 1E-6,
+                                                 NEUT->GetMaximum() * 5);
+                  c2->Clear();
+                  c2->SetLogy();
+                  NEUT->Draw("EHIST");
+                  DrawTH1s(
+                      std::vector<std::reference_wrapper<std::unique_ptr<TH1>>>{
+                          NEUT_untuned, GENIE, GENIE_untuned},
+                      "EHIST", false);
+                  leg->Draw();
+                  ltx.DrawLatexNDC(0.9, 0.8,
+                                   (std::string(detstr) + " " + selstr + " " +
+                                    tgtstr + " " +
+                                    t2knova::all_nuspecies[nuspec])
+                                       .c_str());
+
+                  c2->Print("T2KNOvATunePreds_modes.pdf");
+                  c2->SetLogy(false);
+                } else {
+                  c1->Print("T2KNOvATunePreds.pdf");
+                  NEUT->GetYaxis()->SetRangeUser(NEUT->GetMaximum() * 1E-6,
+                                                 NEUT->GetMaximum() * 5);
+                  c1->Clear();
+                  c1->SetLogy();
+                  NEUT->Draw("EHIST");
+                  DrawTH1s(
+                      std::vector<std::reference_wrapper<std::unique_ptr<TH1>>>{
+                          NEUT_untuned, GENIE, GENIE_untuned},
+                      "EHIST", false);
+                  leg->Draw();
+                  ltx.DrawLatexNDC(0.9, 0.8,
+                                   (std::string(detstr) + " " + selstr + " " +
+                                    tgtstr + " " +
+                                    t2knova::all_nuspecies[nuspec])
+                                       .c_str());
+
+                  c1->Print("T2KNOvATunePreds.pdf");
+                  c1->SetLogy(false);
+                }
+              } else { // Not totxsec
                 std::string mode_str = "";
                 std::string projstr = _projstr;
 
@@ -152,16 +205,6 @@ int main(int argc, char const *argv[]) {
                                       "/" + t2knova::all_nuspecies[nuspec] +
                                       "/" + projstr + "_" + selstr + mode_str);
 
-                if (NEUT) {
-                  std::cout << "Read: "
-                            << std::string("NEUT/") + detstr + "/" + tgtstr +
-                                   "/" + t2knova::all_nuspecies[nuspec] + "/" +
-                                   projstr + "_" + selstr + mode_str
-                            << std::endl;
-                } else {
-                  continue;
-                }
-
                 std::unique_ptr<TH1> NEUT_untuned = GetTH1(
                     F_FDH, std::string("NEUT/") + detstr + "/" + tgtstr + "/" +
                                t2knova::all_nuspecies[nuspec] + "/" + projstr +
@@ -177,7 +220,7 @@ int main(int argc, char const *argv[]) {
                                t2knova::all_nuspecies[nuspec] + "/" + projstr +
                                "_untuned_" + selstr + mode_str);
 
-                if (!NEUT || !NEUT_untuned || !GENIE || !GENIE_untuned) {
+                if (!NEUT && !NEUT_untuned && !GENIE && !GENIE_untuned) {
                   continue;
                 }
 
@@ -185,42 +228,61 @@ int main(int argc, char const *argv[]) {
                   std::unique_ptr<TH1> NEUT_incsel = GetTH1(
                       F_FDH, std::string("NEUT/") + detstr + "/" + tgtstr +
                                  "/" + t2knova::all_nuspecies[nuspec] + "/" +
-                                 projstr + "_" + incsel + mode_str);
+                                 projstr + "_" + incsel);
                   std::unique_ptr<TH1> NEUT_untuned_incsel = GetTH1(
                       F_FDH, std::string("NEUT/") + detstr + "/" + tgtstr +
                                  "/" + t2knova::all_nuspecies[nuspec] + "/" +
-                                 projstr + "_untuned_" + incsel + mode_str);
+                                 projstr + "_untuned_" + incsel);
 
                   std::unique_ptr<TH1> GENIE_incsel = GetTH1(
                       F_FDH, std::string("GENIE/") + detstr + "/" + tgtstr +
                                  "/" + t2knova::all_nuspecies[nuspec] + "/" +
-                                 projstr + "_" + incsel + mode_str);
+                                 projstr + "_" + incsel);
 
                   std::unique_ptr<TH1> GENIE_untuned_incsel = GetTH1(
                       F_FDH, std::string("GENIE/") + detstr + "/" + tgtstr +
                                  "/" + t2knova::all_nuspecies[nuspec] + "/" +
-                                 projstr + "_untuned_" + incsel + mode_str);
+                                 projstr + "_untuned_" + incsel);
 
-                  if (!NEUT_incsel || !NEUT_untuned_incsel || !GENIE_incsel ||
+                  if (!NEUT_incsel && !NEUT_untuned_incsel && !GENIE_incsel &&
                       !GENIE_untuned_incsel) {
                     continue;
                   }
 
-                  NEUT->Divide(NEUT_incsel.get());
-                  NEUT_untuned->Divide(NEUT_untuned_incsel.get());
-                  GENIE->Divide(GENIE_incsel.get());
-                  GENIE_untuned->Divide(GENIE_untuned_incsel.get());
+                  if (NEUT && NEUT_incsel) {
+                    NEUT->Divide(NEUT_incsel.get());
+                    NEUT->Scale(100);
+                  }
+                  if (NEUT_untuned && NEUT_untuned_incsel) {
+                    NEUT_untuned->Divide(NEUT_untuned_incsel.get());
+                    NEUT_untuned->Scale(100);
+                  }
+                  if (GENIE && GENIE_incsel) {
+                    GENIE->Divide(GENIE_incsel.get());
+                    GENIE->Scale(100);
+                  }
+                  if (GENIE_untuned && GENIE_untuned_incsel) {
+                    GENIE_untuned->Divide(GENIE_untuned_incsel.get());
+                    GENIE_untuned->Scale(100);
+                  }
 
-                  NEUT->Scale(100);
-                  NEUT_untuned->Scale(100);
-                  GENIE->Scale(100);
-                  GENIE_untuned->Scale(100);
-                  for (int x = 0; x < NEUT->GetXaxis()->GetNbins(); ++x) {
-                    for (int y = 0; y < NEUT->GetYaxis()->GetNbins(); ++y) {
-                      NEUT->SetBinError(x + 1, y + 1, 0);
-                      NEUT_untuned->SetBinError(x + 1, y + 1, 0);
-                      GENIE->SetBinError(x + 1, y + 1, 0);
-                      GENIE_untuned->SetBinError(x + 1, y + 1, 0);
+                  for (int x = 0;
+                       x < (NEUT ? NEUT : GENIE)->GetXaxis()->GetNbins(); ++x) {
+                    for (int y = 0;
+                         y < (NEUT ? NEUT : GENIE)->GetYaxis()->GetNbins();
+                         ++y) {
+                      if (NEUT) {
+                        NEUT->SetBinError(x + 1, y + 1, 0);
+                      }
+                      if (NEUT_untuned) {
+                        NEUT_untuned->SetBinError(x + 1, y + 1, 0);
+                      }
+                      if (GENIE) {
+                        GENIE->SetBinError(x + 1, y + 1, 0);
+                      }
+                      if (GENIE_untuned) {
+                        GENIE_untuned->SetBinError(x + 1, y + 1, 0);
+                      }
                     }
                   }
                 }
@@ -243,9 +305,11 @@ int main(int argc, char const *argv[]) {
                 ptop->cd();
 
                 std::unique_ptr<TH1> &first =
-                    NEUT ? NEUT_untuned : GENIE_untuned;
+                    NEUT_untuned ? NEUT_untuned : GENIE_untuned;
                 std::unique_ptr<TH1> &other =
-                    NEUT ? GENIE_untuned : NEUT_untuned;
+                    NEUT_untuned ? GENIE_untuned : NEUT_untuned;
+                TH1 *other_ptr =
+                    NEUT_untuned ? GENIE_untuned.get() : NEUT_untuned.get();
 
                 if ((_projstr == "Enu_Frac")) {
                   first->GetYaxis()->SetTitle(
@@ -285,17 +349,22 @@ int main(int argc, char const *argv[]) {
                   }
                   h.get()->Divide(first.get());
                 }
-                other->GetYaxis()->SetTitle("Ratio to NEUT");
-                if (!NEUT) {
-                  other->GetYaxis()->SetTitle("Ratio to GENIE");
+
+                if (!other_ptr) {
+                  other_ptr = NEUT_untuned ? NEUT.get() : GENIE.get();
                 }
-                other->SetTitle("");
-                other->GetYaxis()->SetLabelSize(0.06);
-                other->GetYaxis()->SetTitleSize(0.06);
-                other->GetXaxis()->SetLabelSize(0.06);
-                other->GetXaxis()->SetTitleSize(0.06);
-                other->GetYaxis()->SetNdivisions(505);
-                other->GetXaxis()->SetNdivisions(505);
+
+                other_ptr->GetYaxis()->SetTitle("Ratio to NEUT");
+                if (!NEUT_untuned) {
+                  other_ptr->GetYaxis()->SetTitle("Ratio to GENIE");
+                }
+                other_ptr->SetTitle("");
+                other_ptr->GetYaxis()->SetLabelSize(0.06);
+                other_ptr->GetYaxis()->SetTitleSize(0.06);
+                other_ptr->GetXaxis()->SetLabelSize(0.06);
+                other_ptr->GetXaxis()->SetTitleSize(0.06);
+                other_ptr->GetYaxis()->SetNdivisions(505);
+                other_ptr->GetXaxis()->SetNdivisions(505);
 
                 DrawTH1s(
                     std::vector<std::reference_wrapper<std::unique_ptr<TH1>>>{
@@ -323,11 +392,11 @@ int main(int argc, char const *argv[]) {
                 TLatex ltx;
                 ltx.SetTextAlign(31);
                 ltx.SetTextSize(0.04);
-                ltx.DrawLatexNDC(
-                    0.9, 0.8,
-                    (std::string(detstr) + " " + selstr + " " + _projstr + " " +
-                     tgtstr + " " + t2knova::all_nuspecies[nuspec])
-                        .c_str());
+                ltx.DrawLatexNDC(0.9, 0.8,
+                                 (std::string(detstr) + " " + selstr + " " +
+                                  _projstr + " " + tgtstr + " " +
+                                  t2knova::all_nuspecies[nuspec])
+                                     .c_str());
                 if (lmode != 0) {
                   std::string mode_nice_str = " Mode == ";
                   mode_nice_str = mode_nice_str + std::to_string(lmode);
@@ -342,8 +411,8 @@ int main(int argc, char const *argv[]) {
                 }
               }
             }
-            if (selstr == "totxsecs") {  // don't duplicate for multiple
-                                         // projections for the totxsec plot
+            if (selstr == "totxsecs") { // don't duplicate for multiple
+                                        // projections for the totxsec plot
               break;
             }
           }

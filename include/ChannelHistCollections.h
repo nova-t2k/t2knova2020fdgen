@@ -1,21 +1,22 @@
 #pragma once
 
+#include "T2KNOvA/FakeDataHelper.hxx"
+
+#include "toml/toml_helper.h"
+
+#include "TDirectory.h"
+#include "TFile.h"
+#include "TH3.h"
+#include "THn.h"
+
 #include <iostream>
 #include <sstream>
 #include <type_traits>
 #include <unordered_map>
 
-#include "T2KNOvAFakeDataHelper.hxx"
-#include "TDirectory.h"
-#include "TFile.h"
-#include "TH3.h"
-#include "THn.h"
-#include "toml/toml_helper.h"
-
 namespace t2knova {
 
-template <typename TH>
-struct TrueChannelHist {
+template <typename TH> struct TrueChannelHist {
   std::unordered_map<int, TH> Hists;
   std::string fName;
   using THBase = typename THTraits<TH>::Base;
@@ -89,8 +90,7 @@ struct TrueChannelHist {
     }
   }
 
-  template <typename... XY>
-  void Fill(double w, int TrueChannel, XY... xy) {
+  template <typename... XY> void Fill(double w, int TrueChannel, XY... xy) {
     Hists[kInclusive].Fill(xy..., w);
 
     if (TrueChannel != kInclusive) {
@@ -102,6 +102,7 @@ struct TrueChannelHist {
   template <typename THOut>
   TrueChannelHist<THOut> Transform(std::function<THOut(TH const &)> f) {
     TrueChannelHist<THOut> out;
+    out.fName = fName;
     for (auto const &h : Hists) {
       out.Hists[h.first] = THOut(f(h.second));
     }
@@ -109,10 +110,10 @@ struct TrueChannelHist {
   }
 };
 
-template <typename TH>
-struct SelectionHists {
+template <typename TH> struct SelectionHists {
   std::vector<std::string> fSelections;
-  std::vector<TrueChannelHist<TH>> Hists;
+  std::vector<int> fSelectionsIds;
+  std::unordered_map<int, TrueChannelHist<TH>> Hists;
   std::string fName;
   using THBase = typename THTraits<TH>::Base;
 
@@ -123,8 +124,24 @@ struct SelectionHists {
                  std::vector<std::string> const &Selections, Args... binning)
       : fName(name), fSelections(Selections) {
     for (int i = 0; i < fSelections.size(); ++i) {
-      Hists.emplace_back((fName + "_" + fSelections[i]).c_str(), title.c_str(),
-                         binning...);
+
+      int sel = -1;
+      for (int s = 0; s < t2knova::SelectionList.size(); ++s) {
+        if (fSelections[i] == t2knova::SelectionList[s]) {
+          sel = s;
+          break;
+        }
+      }
+      if (sel == -1) {
+        std::cout << "{ERROR} Failed to parse selection: " << fSelections[i]
+                  << std::endl;
+        abort();
+      }
+
+      fSelectionsIds.push_back(sel);
+      Hists.emplace(sel,
+                    TrueChannelHist<TH>((fName + "_" + fSelections[i]).c_str(),
+                                        title.c_str(), binning...));
     }
   }
 
@@ -132,7 +149,7 @@ struct SelectionHists {
     fName = name;
 
     for (int i = 0; i < fSelections.size(); ++i) {
-      Hists[i].SetName((fName + "_" + fSelections[i]).c_str());
+      Hists[fSelectionsIds[i]].SetName((fName + "_" + fSelections[i]).c_str());
     }
   }
 
@@ -142,13 +159,13 @@ struct SelectionHists {
 
   void Apply(std::function<void(TH &)> f) {
     for (auto &h : Hists) {
-      h.Apply(f);
+      h.second.Apply(f);
     }
   }
 
   void Write(TDirectory *f, bool scale = false) {
     for (auto &h : Hists) {
-      h.Write(f, scale);
+      h.second.Write(f, scale);
     }
   }
 
@@ -156,7 +173,7 @@ struct SelectionHists {
   void Fill(double w, std::vector<int> const &Selections, int TrueChannel,
             XY... xy) {
     for (int sel : Selections) {
-      if (sel < Hists.size()) {
+      if (Hists.count(sel)) {
         Hists[sel].Fill(w, TrueChannel, xy...);
       }
     }
@@ -165,8 +182,11 @@ struct SelectionHists {
   template <typename THOut>
   SelectionHists<THOut> Transform(std::function<THOut(TH const &)> f) {
     SelectionHists<THOut> out;
+    out.fSelections = fSelections;
+    out.fSelectionsIds = fSelectionsIds;
+    out.fName = fName;
     for (auto &h : Hists) {
-      out.Hists.emplace_back(h.Transform(f));
+      out.Hists.emplace(h.first, h.second.Transform(f));
     }
     return out;
   }
@@ -273,4 +293,4 @@ SelectionHists<TN> *SelectionHistsFromTOML(
       y_binning.data(), z_binning.size() - 1, z_binning.data());
 }
 
-}  // namespace t2knova
+} // namespace t2knova

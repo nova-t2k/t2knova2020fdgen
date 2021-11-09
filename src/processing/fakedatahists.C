@@ -1,7 +1,9 @@
 #include "ChannelHistCollections.h"
-#include "T2KNOvAROOTHelper.hxx"
-#include "T2KNOvATrueSelectionHelper.hxx"
+
+#include "T2KNOvA/ROOTHelper.hxx"
+#include "T2KNOvA/TrueSelectionHelper.hxx"
 #include "T2KNOvATruthTreeReader.h"
+
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TH1.h"
@@ -112,13 +114,14 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
     Q2->Fill(w, sels, rdr.Mode(), rdr.Q2());
     Q2_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(), rdr.Q2());
     EGamma->Fill(w, sels, rdr.Mode(), rdr.EGamma());
+
     EGamma_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(), rdr.EGamma());
     if (ist2k) {
       EnuPLepThetaLep->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.PLep(),
-                            acos(rdr.CosLep()));
+                            rdr.AngLep_deg());
       EnuPLepThetaLep_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(),
                                     rdr.Enu_true(), rdr.PLep(),
-                                    acos(rdr.CosLep()));
+                                    rdr.AngLep_deg());
     } else {
       EnuPLepEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.PLep(),
                           rdr.EavAlt());
@@ -238,14 +241,14 @@ int main(int argc, char const *argv[]) {
   totxsecs_untuned->Apply(axis_labeler);
   totxsecs_untuned->Write(dout);
 
-  Enu->Write(dout);
-  Enu_untuned->Write(dout);
+  Enu->Write(dout, true);
+  Enu_untuned->Write(dout, true);
 
-  Q2->Write(dout);
-  Q2_untuned->Write(dout);
+  Q2->Write(dout, true);
+  Q2_untuned->Write(dout, true);
 
-  EGamma->Write(dout);
-  EGamma_untuned->Write(dout);
+  EGamma->Write(dout, true);
+  EGamma_untuned->Write(dout, true);
 
   auto ProjYZ = [=](TH3F const &h) -> TH2F {
     std::unique_ptr<TH2F> h2 = dynamic_cast_uptr<TH2F>(Project3D(h, "yz"));
@@ -288,56 +291,56 @@ int main(int argc, char const *argv[]) {
   };
 
   if (ist2k) {
-    EnuPLepThetaLep->Write(dout);
+    EnuPLepThetaLep->Write(dout, true);
     auto PLepThetaLep = EnuPLepThetaLep->Transform<TH2F>(ProjYZ);
-    PLepThetaLep.Write(dout);
+    PLepThetaLep.Write(dout, true);
     auto EnuPLep = EnuPLepThetaLep->Transform<TH2F>(ProjYX);
-    EnuPLep.Write(dout);
+    EnuPLep.Write(dout, true);
     auto EnuThetaLep = EnuPLepThetaLep->Transform<TH2F>(ProjXZ);
-    EnuThetaLep.Write(dout);
+    EnuThetaLep.Write(dout, true);
 
     auto EnuProj = EnuPLepThetaLep->Transform<TH1F>(ProjX);
-    EnuProj.Write(dout);
+    EnuProj.Write(dout, true);
     auto PLep = EnuPLepThetaLep->Transform<TH1F>(ProjY);
-    PLep.Write(dout);
+    PLep.Write(dout, true);
     auto ThetaLep = EnuPLepThetaLep->Transform<TH1F>(ProjZ);
-    ThetaLep.Write(dout);
+    ThetaLep.Write(dout, true);
 
-    EnuPLepThetaLep_untuned->Write(dout);
+    EnuPLepThetaLep_untuned->Write(dout, true);
     auto PLepThetaLep_untuned =
         EnuPLepThetaLep_untuned->Transform<TH2F>(ProjYZ);
-    PLepThetaLep_untuned.Write(dout);
+    PLepThetaLep_untuned.Write(dout, true);
     auto EnuPLep_untuned = EnuPLepThetaLep_untuned->Transform<TH2F>(ProjYX);
-    EnuPLep_untuned.Write(dout);
+    EnuPLep_untuned.Write(dout, true);
     auto EnuThetaLep_untuned = EnuPLepThetaLep_untuned->Transform<TH2F>(ProjXZ);
-    EnuThetaLep_untuned.Write(dout);
+    EnuThetaLep_untuned.Write(dout, true);
 
     auto EnuProj_untuned = EnuPLepThetaLep_untuned->Transform<TH1F>(ProjX);
-    EnuProj_untuned.Write(dout);
+    EnuProj_untuned.Write(dout, true);
     auto PLep_untuned = EnuPLepThetaLep_untuned->Transform<TH1F>(ProjY);
-    PLep_untuned.Write(dout);
+    PLep_untuned.Write(dout, true);
     auto ThetaLep_untuned = EnuPLepThetaLep_untuned->Transform<TH1F>(ProjZ);
-    ThetaLep_untuned.Write(dout);
+    ThetaLep_untuned.Write(dout, true);
   } else {
-    EnuPLepEAvHad->Write(dout);
+    EnuPLepEAvHad->Write(dout, true);
     auto PLepEAvHad = EnuPLepEAvHad->Transform<TH2F>(ProjYZ);
-    PLepEAvHad.Write(dout);
+    PLepEAvHad.Write(dout, true);
     auto EnuPLep = EnuPLepEAvHad->Transform<TH2F>(ProjYX);
-    EnuPLep.Write(dout);
+    EnuPLep.Write(dout, true);
     auto EnuEAvHad = EnuPLepEAvHad->Transform<TH2F>(ProjXZ);
-    EnuEAvHad.Write(dout);
+    EnuEAvHad.Write(dout, true);
 
-    EnuQ2EAvHad->Write(dout);
+    EnuQ2EAvHad->Write(dout, true);
     auto Q2EAvHad = EnuQ2EAvHad->Transform<TH2F>(ProjYZ);
-    Q2EAvHad.Write(dout);
+    Q2EAvHad.Write(dout, true);
     auto EnuQ2 = EnuQ2EAvHad->Transform<TH2F>(ProjYX);
-    EnuQ2.Write(dout);
+    EnuQ2.Write(dout, true);
 
-    EnuPtLepEAvHad->Write(dout);
+    EnuPtLepEAvHad->Write(dout, true);
     auto PtLepEAvHad = EnuPtLepEAvHad->Transform<TH2F>(ProjYZ);
-    PtLepEAvHad.Write(dout);
+    PtLepEAvHad.Write(dout, true);
     auto EnuPtLep = EnuPtLepEAvHad->Transform<TH2F>(ProjYX);
-    EnuPtLep.Write(dout);
+    EnuPtLep.Write(dout, true);
   }
 
   fout.Close();

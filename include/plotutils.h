@@ -1,10 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <limits>
-#include <memory>
-#include <vector>
-
 #include "TAxis.h"
 #include "TCanvas.h"
 #include "TDirectory.h"
@@ -16,6 +11,11 @@
 #include "TLegend.h"
 #include "TPad.h"
 #include "TSpline.h"
+
+#include <iostream>
+#include <limits>
+#include <memory>
+#include <vector>
 
 template <typename TH>
 double IntegralTH(std::unique_ptr<TH> &h) {

@@ -1,5 +1,7 @@
 #include "ChannelHistCollections.h"
-#include "T2KNOvATrueSelectionHelper.hxx"
+
+#include "T2KNOvA/TrueSelectionHelper.hxx"
+
 #include "TTreeReader.h"
 #include "TTreeReaderArray.h"
 #include "TTreeReaderValue.h"
@@ -7,11 +9,12 @@
 namespace t2knova {
 
 class T2KNOvATruthTreeReader {
- public:
+public:
   int PDGLep() { return *_PDGLep; }
   int PDGNu() { return *_PDGNu; }
   int Mode() { return fModeInfo ? *_Mode : 0; }
   float CosLep() { return *_CosLep; }
+  float AngLep_deg() { return acos(*_CosLep) * (180.0/M_PI); }
   float EavAlt() { return *_EavAlt; }
   float Enu_true() { return *_Enu_true; }
   float PLep() { return *_PLep; }
@@ -21,6 +24,7 @@ class T2KNOvATruthTreeReader {
   int tgta() { return *_tgta; }
   float fScaleFactor() { return *_fScaleFactor; }
   float RWWeight() { return *_RWWeight; }
+
   float EGamma() {
     float Esum = 0;
     for (int i = 0; i < *_nfsp; ++i) {
@@ -31,26 +35,25 @@ class T2KNOvATruthTreeReader {
     return Esum;
   }
 
+  std::string PrintStack() {
+    std::stringstream ss;
+    ss << "NFSP: " << (*_nfsp) << "\n";
+
+    for (int i = 0; i < (*_nfsp); ++i) {
+      ss << "\t" << i << ", PDG: " << _pdg[i] << ", E: " << _E[i] << "\n";
+    }
+    return ss.str();
+  }
+
   void SetNoModeInfo() { fModeInfo = false; }
 
-  T2KNOvATruthTreeReader(TTreeReader& rdr)
-      : _PDGLep(rdr, "PDGLep"),
-        _PDGNu(rdr, "PDGnu"),
-        _Mode(rdr, "Mode"),
-        _CosLep(rdr, "CosLep"),
-        _EavAlt(rdr, "EavAlt"),
-        _Enu_true(rdr, "Enu_true"),
-        _PLep(rdr, "PLep"),
-        _Q2(rdr, "Q2"),
-        _q0(rdr, "q0"),
-        _q3(rdr, "q3"),
-        _tgta(rdr, "tgta"),
-        _nfsp(rdr, "nfsp"),
-        _pdg(rdr, "pdg"),
-        _E(rdr, "E"),
-        _fScaleFactor(rdr, "fScaleFactor"),
-        _RWWeight(rdr, "RWWeight"),
-        fModeInfo(true) {
+  T2KNOvATruthTreeReader(TTreeReader &rdr)
+      : _PDGLep(rdr, "PDGLep"), _PDGNu(rdr, "PDGnu"), _Mode(rdr, "Mode"),
+        _CosLep(rdr, "CosLep"), _EavAlt(rdr, "EavAlt"),
+        _Enu_true(rdr, "Enu_true"), _PLep(rdr, "PLep"), _Q2(rdr, "Q2"),
+        _q0(rdr, "q0"), _q3(rdr, "q3"), _tgta(rdr, "tgta"), _nfsp(rdr, "nfsp"),
+        _pdg(rdr, "pdg"), _E(rdr, "E"), _fScaleFactor(rdr, "fScaleFactor"),
+        _RWWeight(rdr, "RWWeight"), fModeInfo(true) {
     rdr.Restart();
     (void)rdr.Next();
     CheckValue(_PDGLep);
@@ -74,15 +77,15 @@ class T2KNOvATruthTreeReader {
 
   std::vector<int> GetSelections() {
     return t2knova::GetSelections(
-        T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int*)_pdg.GetAddress()));
+        T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress()));
   }
 
   int GetPrimarySelection() {
     return t2knova::GetPrimarySelection(
-        T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int*)_pdg.GetAddress()));
+        T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress()));
   }
 
- private:
+private:
   // I know, we all hate it, but because of design of TTreeReader I really think
   // having getters is easier
   TTreeReaderValue<int> _PDGLep;
@@ -107,7 +110,7 @@ class T2KNOvATruthTreeReader {
 
   bool fModeInfo;
 
-  bool CheckValue(ROOT::Internal::TTreeReaderValueBase& value) {
+  bool CheckValue(ROOT::Internal::TTreeReaderValueBase &value) {
     if (value.GetSetupStatus() < 0) {
       std::cerr << "Error " << value.GetSetupStatus()
                 << "setting up reader for " << value.GetBranchName() << '\n';
@@ -121,4 +124,4 @@ class T2KNOvATruthTreeReader {
   }
 };
 
-}  // namespace t2knova
+} // namespace t2knova

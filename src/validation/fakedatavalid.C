@@ -1,5 +1,5 @@
 #include "ChannelHistCollections.h"
-#include "T2KNOvATrueSelectionHelper.hxx"
+#include "T2KNOvA/TrueSelectionHelper.hxx"
 #include "T2KNOvATruthTreeReader.h"
 #include "TCanvas.h"
 #include "TFile.h"
@@ -19,6 +19,8 @@ bool bymode = false;
 
 TH1F *totxsecs;
 
+SelectionHists<TH3F> *EnuPLepThetaLep;
+SelectionHists<TH3F> *EnuPtLepEAvHad;
 SelectionHists<TH1F> *Enu;
 SelectionHists<TH1F> *PLep;
 SelectionHists<TH1F> *ThetaLep;
@@ -30,6 +32,10 @@ SelectionHists<TH1F> *q3;
 
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
           t2knova::reweightconfig weightconfig, int tgta_select = 0) {
+  EnuPLepThetaLep = SelectionHistsFromTOML<TH3F>(
+      "EnuPLepThetaLep", toml::find(plots_config, "EnuPLepThetaLep"));
+  EnuPtLepEAvHad = SelectionHistsFromTOML<TH3F>(
+      "EnuPtLepEAvHad", toml::find(plots_config, "EnuPtLepEAvHad"));
   Enu = SelectionHistsFromTOML<TH1F>("Enu", toml::find(plots_config, "Enu"));
 
   PLep = SelectionHistsFromTOML<TH1F>("PLep", toml::find(plots_config, "PLep"));
@@ -59,6 +65,8 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   size_t ent_it = 0;
   size_t shout_it = nents / 25;
 
+  double EnuCut = toml::find<double>(plots_config, "EnuCut");
+
   while (ttrdr.Next()) {
     if (ent_it && !(ent_it % shout_it)) {
       std::cout << "[Read] " << ent_it << "/" << nents << "("
@@ -70,6 +78,10 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
       continue;
     }
 
+    if (rdr.Enu_true() > EnuCut) {
+      continue;
+    }
+
     double w = rdr.fScaleFactor() * rdr.RWWeight();
 
     int primary_selection = rdr.GetPrimarySelection();
@@ -77,26 +89,31 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     if (weightconfig == t2knova::kT2KND_to_NOvA) {
       w *= t2knova::GetFakeDataWeight_ND280ToNOvA(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
-          acos(rdr.CosLep()), primary_selection);
+          rdr.AngLep_deg(), primary_selection, false);
+    } else if (weightconfig == t2knova::kT2KND_to_NOvA_EnuKludge) {
+      w *= t2knova::GetFakeDataWeight_ND280ToNOvA_EnuKludge(
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
+          rdr.AngLep_deg(), primary_selection, false);
     } else if (weightconfig == t2knova::kT2KND_to_NOvA_Enu) {
       w *= t2knova::GetFakeDataWeight_ND280ToNOvA_Enu(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
-          primary_selection);
+          primary_selection, false);
     } else if (weightconfig == t2knova::kT2KND_to_NOvA_Q2) {
-      w *= t2knova::GetFakeDataWeight_ND280ToNOvA_Q2(
-          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Q2(), primary_selection);
+      w *= t2knova::GetFakeDataWeight_ND280ToNOvA_Q2(rdr.PDGNu(), rdr.PDGLep(),
+                                                     rdr.tgta(), rdr.Q2(),
+                                                     primary_selection, false);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_plep) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_PLep(rdr.PDGNu(), rdr.PDGLep(),
-                                                     rdr.tgta(), rdr.Enu_true(),
-                                                     rdr.PLep(), rdr.EavAlt());
+      w *= t2knova::GetFakeDataWeight_NOvAToT2K_PLep(
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
+          rdr.EavAlt(), false);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_Q2) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_Q2(rdr.PDGNu(), rdr.PDGLep(),
-                                                   rdr.tgta(), rdr.Enu_true(),
-                                                   rdr.Q2(), rdr.EavAlt());
+      w *= t2knova::GetFakeDataWeight_NOvAToT2K_Q2(
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.Q2(),
+          rdr.EavAlt(), false);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
       w *= t2knova::GetFakeDataWeight_NOvAToT2K_PtLep(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
-          (rdr.PLep()) * sqrt(1 - pow(rdr.CosLep(), 2)), rdr.EavAlt());
+          (rdr.PLep()) * sqrt(1 - pow(rdr.CosLep(), 2)), rdr.EavAlt(), false);
     }
 
     std::vector<int> sels = rdr.GetSelections();
@@ -106,9 +123,14 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
       continue;
     }
 
+    EnuPLepThetaLep->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.PLep(),
+                          rdr.AngLep_deg());
+    EnuPtLepEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(),
+                         rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)),
+                         rdr.EavAlt());
     Enu->Fill(w, sels, rdr.Mode(), rdr.Enu_true());
     PLep->Fill(w, sels, rdr.Mode(), rdr.PLep());
-    ThetaLep->Fill(w, sels, rdr.Mode(), acos(rdr.CosLep()));
+    ThetaLep->Fill(w, sels, rdr.Mode(), rdr.AngLep_deg());
     EAvHad->Fill(w, sels, rdr.Mode(), rdr.EavAlt());
     PtLep->Fill(w, sels, rdr.Mode(),
                 rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)));
@@ -122,6 +144,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
 
 std::string input_file, output_file, output_dir;
 std::string hist_config_file;
+std::string FDSInputs;
 
 t2knova::reweightconfig wconfig = t2knova::kNoWeight;
 int tgta_select = 0;
@@ -129,19 +152,21 @@ int tgta_select = 0;
 void SayUsage(char const *argv[]) {
   std::cout << "[USAGE]: " << argv[0]
             << "\n"
-               "\t-i <inp.root>          : Input file"
-               "\t-H <config.toml>       : RWHist config file"
-               "\t-o <out.root>          : Output file"
-               "\t-M                     : Separate by Mode"
-               "\t-a <[C|H|O|any]>       : Target descriptor"
-               "\t-W <Config>            : ReWeight Config"
-               "\t         Configs:"
-               "\t              * T2KND_to_NOvA_Enu"
-               "\t              * T2KND_to_NOvA_Q2"
-               "\t              * NOvA_to_T2KND_plep"
-               "\t              * NOvA_to_T2KND_Q2"
-               "\t              * NOvA_to_T2KND_ptlep"
-               "\t-d </sub/dir/to/use>   : Output sub directory"
+               "\n\t-i <inp.root>          : Input file"
+               "\n\t-F <FDSInputs.root>    : FDS Weighting file"
+               "\n\t-H <config.toml>       : RWHist config file"
+               "\n\t-o <out.root>          : Output file"
+               "\n\t-M                     : Separate by Mode"
+               "\n\t-a <[C|H|O|any]>       : Target descriptor"
+               "\n\t-W <Config>            : ReWeight Config"
+               "\n\t         Configs:"
+               "\n\t              * T2KND_to_NOvA"
+               "\n\t              * T2KND_to_NOvA_Enu"
+               "\n\t              * T2KND_to_NOvA_Q2"
+               "\n\t              * NOvA_to_T2KND_plep"
+               "\n\t              * NOvA_to_T2KND_Q2"
+               "\n\t              * NOvA_to_T2KND_ptlep"
+               "\n\t-d </sub/dir/to/use>   : Output sub directory"
                " input tree. \n"
             << std::endl;
 }
@@ -155,6 +180,8 @@ void handleOpts(int argc, char const *argv[]) {
       exit(0);
     } else if (std::string(argv[opt]) == "-i") {
       input_file = argv[++opt];
+    } else if (std::string(argv[opt]) == "-F") {
+      FDSInputs = argv[++opt];
     } else if (std::string(argv[opt]) == "-H") {
       hist_config_file = argv[++opt];
     } else if (std::string(argv[opt]) == "-o") {
@@ -179,6 +206,8 @@ void handleOpts(int argc, char const *argv[]) {
       std::string arg = std::string(argv[++opt]);
       if (arg == "T2KND_to_NOvA") {
         wconfig = t2knova::kT2KND_to_NOvA;
+      } else if (arg == "T2KND_to_NOvA_EnuKludge") {
+        wconfig = t2knova::kT2KND_to_NOvA_EnuKludge;
       } else if (arg == "T2KND_to_NOvA_Enu") {
         wconfig = t2knova::kT2KND_to_NOvA_Enu;
       } else if (arg == "T2KND_to_NOvA_Q2") {
@@ -191,7 +220,7 @@ void handleOpts(int argc, char const *argv[]) {
         wconfig = t2knova::kNOvA_to_T2KND_ptlep;
       } else {
         std::cout << "Invalid weight config selector passed: " << arg
-                  << ". Should be ND280/NOvAND." << std::endl;
+                  << std::endl;
         SayUsage(argv);
         exit(1);
       }
@@ -208,6 +237,8 @@ int main(int argc, char const *argv[]) {
   gStyle->SetOptStat(false);
 
   handleOpts(argc, argv);
+
+  t2knova::LoadHists(FDSInputs);
 
   toml::value const &plots_config_file = toml_h::parse_card(hist_config_file);
   toml::value const &plots_config =
@@ -236,15 +267,16 @@ int main(int argc, char const *argv[]) {
   }
 
   dout->WriteTObject(totxsecs, "totxsecs");
-
-  Enu->Write(dout);
-  PLep->Write(dout);
-  ThetaLep->Write(dout);
-  EAvHad->Write(dout);
-  PtLep->Write(dout);
-  Q2->Write(dout);
-  q0->Write(dout);
-  q3->Write(dout);
+  EnuPLepThetaLep->Write(dout, true);
+  EnuPtLepEAvHad->Write(dout, true);
+  Enu->Write(dout, true);
+  PLep->Write(dout, true);
+  ThetaLep->Write(dout, true);
+  EAvHad->Write(dout, true);
+  PtLep->Write(dout, true);
+  Q2->Write(dout, true);
+  q0->Write(dout, true);
+  q3->Write(dout, true);
 
   fout.Close();
 }

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <array>
-
 #include "TColor.h"
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TSystem.h"
+
+#include <array>
 
 void defc(int &c, std::array<int, 3> cs, std::string const &n) {
   static int currC = 51;

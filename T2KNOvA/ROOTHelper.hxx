@@ -1,17 +1,17 @@
 #pragma once
 
-#include <iostream>
-#include <string>
-
 #include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
 
+#include <iostream>
+#include <string>
+
 template <typename TOut, typename TIn>
 std::unique_ptr<TOut> dynamic_cast_uptr(std::unique_ptr<TIn> &&in) {
   TOut *optr = dynamic_cast<TOut *>(in.get());
-  if (optr) {  // take the pointer if its a good one
+  if (optr) { // take the pointer if its a good one
     in.release();
   }
   return std::unique_ptr<TOut>(optr);
@@ -22,61 +22,51 @@ std::unique_ptr<T> make_unique(args... a) {
   return std::unique_ptr<T>(new T(a...));
 }
 
-template <typename TH>
-struct THTraits {};
+template <typename TH> struct THTraits {};
 
-template <>
-struct THTraits<TH1> {
+template <> struct THTraits<TH1> {
   using Base = TH1;
   using FloatType = TH1F;
   static size_t const NDims = 1;
 };
-template <>
-struct THTraits<TH1D> {
+template <> struct THTraits<TH1D> {
   using Base = TH1;
   using FloatType = TH1F;
   static size_t const NDims = 1;
 };
-template <>
-struct THTraits<TH1F> {
+template <> struct THTraits<TH1F> {
   using Base = TH1;
   using FloatType = TH1F;
   static size_t const NDims = 1;
 };
 
-template <>
-struct THTraits<TH2> {
+template <> struct THTraits<TH2> {
   using Base = TH2;
   using FloatType = TH2F;
   static size_t const NDims = 2;
 };
-template <>
-struct THTraits<TH2D> {
+template <> struct THTraits<TH2D> {
   using Base = TH2;
   using FloatType = TH2F;
   static size_t const NDims = 2;
 };
-template <>
-struct THTraits<TH2F> {
+template <> struct THTraits<TH2F> {
   using Base = TH2;
   using FloatType = TH2F;
   static size_t const NDims = 2;
 };
 
-template <>
-struct THTraits<TH3> {
+template <> struct THTraits<TH3> {
   using Base = TH3;
   using FloatType = TH3F;
   static size_t const NDims = 3;
 };
-template <>
-struct THTraits<TH3D> {
+template <> struct THTraits<TH3D> {
   using Base = TH3;
   using FloatType = TH3F;
   static size_t const NDims = 3;
 };
-template <>
-struct THTraits<TH3F> {
+template <> struct THTraits<TH3F> {
   using Base = TH3;
   using FloatType = TH3F;
   static size_t const NDims = 3;
@@ -93,9 +83,9 @@ inline std::vector<double> GetTAxisBinning(TAxis *const ax) {
 }
 
 template <typename TN>
-std::unique_ptr<typename THTraits<TN>::FloatType> EnsureTHF(
-    typename std::enable_if<THTraits<TN>::NDims == 1,
-                            std::unique_ptr<TN>>::type const &hin) {
+std::unique_ptr<typename THTraits<TN>::FloatType>
+EnsureTHF(typename std::enable_if<THTraits<TN>::NDims == 1,
+                                  std::unique_ptr<TN>>::type const &hin) {
   std::vector<double> xbin = GetTAxisBinning(hin->GetXaxis());
 
   std::unique_ptr<typename THTraits<TN>::FloatType> ret(
@@ -111,9 +101,9 @@ std::unique_ptr<typename THTraits<TN>::FloatType> EnsureTHF(
 }
 
 template <typename TN>
-std::unique_ptr<typename THTraits<TN>::FloatType> EnsureTHF(
-    typename std::enable_if<THTraits<TN>::NDims == 2,
-                            std::unique_ptr<TN>>::type const &hin) {
+std::unique_ptr<typename THTraits<TN>::FloatType>
+EnsureTHF(typename std::enable_if<THTraits<TN>::NDims == 2,
+                                  std::unique_ptr<TN>>::type const &hin) {
   std::vector<double> xbin = GetTAxisBinning(hin->GetXaxis());
   std::vector<double> ybin = GetTAxisBinning(hin->GetYaxis());
 
@@ -197,9 +187,12 @@ inline std::unique_ptr<TH1> GetTH1(std::string const &fname,
   return h;
 }
 
-inline std::unique_ptr<TH2> GetTH2(std::unique_ptr<TFile> &f,
-                                   std::string const &name, bool quiet = true) {
-  std::unique_ptr<TH2> h = dynamic_cast_uptr<TH2>(GetTH1(f, name, quiet));
+template <typename TH>
+std::unique_ptr<TH>
+GetTH(typename std::enable_if<std::is_base_of<TH1, TH>::value,
+                              std::unique_ptr<TFile>>::type &f,
+      std::string const &name, bool quiet = true) {
+  std::unique_ptr<TH> h = dynamic_cast_uptr<TH>(GetTH1(f, name, quiet));
   if (!h) {
     if (!quiet) {
       std::cout << "[ERROR]: Failed to find histogram named: " << name
@@ -209,33 +202,12 @@ inline std::unique_ptr<TH2> GetTH2(std::unique_ptr<TFile> &f,
   return h;
 }
 
-inline std::unique_ptr<TH2> GetTH2(std::string const &fname,
-                                   std::string const &name, bool quiet = true) {
-  std::unique_ptr<TH2> h = dynamic_cast_uptr<TH2>(GetTH1(fname, name, quiet));
-  if (!h) {
-    if (!quiet) {
-      std::cout << "[ERROR]: Failed to find histogram named: " << name
-                << std::endl;
-    }
-  }
-  return h;
-}
-
-inline std::unique_ptr<TH3> GetTH3(std::unique_ptr<TFile> &f,
-                                   std::string const &name, bool quiet = true) {
-  std::unique_ptr<TH3> h = dynamic_cast_uptr<TH3>(GetTH1(f, name, quiet));
-  if (!h) {
-    if (!quiet) {
-      std::cout << "[ERROR]: Failed to find histogram named: " << name
-                << std::endl;
-    }
-  }
-  return h;
-}
-
-inline std::unique_ptr<TH3> GetTH3(std::string const &fname,
-                                   std::string const &name, bool quiet = true) {
-  std::unique_ptr<TH3> h = dynamic_cast_uptr<TH3>(GetTH1(fname, name, quiet));
+template <typename TH>
+inline std::unique_ptr<TH>
+GetTH(typename std::enable_if<std::is_base_of<TH1, TH>::value,
+                              std::string const>::type &fname,
+      std::string const &name, bool quiet = true) {
+  std::unique_ptr<TH> h = dynamic_cast_uptr<TH>(GetTH1(fname, name, quiet));
   if (!h) {
     if (!quiet) {
       std::cout << "[ERROR]: Failed to find histogram named: " << name
@@ -283,18 +255,62 @@ inline double EvalHist1D(std::unique_ptr<TH1> const &h, double x,
 
 TDirectory *MakeDirectoryStructure(TDirectory *din, std::string path = "") {
   if (path.size()) {
+    std::string tab = "";
     while (path.find("/") != std::string::npos) {
       std::string ndir = path.substr(0, path.find("/"));
+      std::cout << tab << "Next Dir: " << ndir << std::endl;
       if (!din->GetDirectory(ndir.c_str())) {
+        std::cout << tab << "Need to make it" << std::endl;
         din = din->mkdir(ndir.c_str());
       } else {
+        std::cout << tab << "--Have it!" << std::endl;
         din = din->GetDirectory(ndir.c_str());
       }
       path = path.substr(path.find("/") + 1);
+      std::cout << tab << "Remaining path: " << path << std::endl;
+      tab = tab + "  ";
     }
-    din = din->mkdir(path.c_str());
+    if (path.size()) {
+      std::cout << tab << "Next Dir: " << path << std::endl;
+      if (!din->GetDirectory(path.c_str())) {
+        std::cout << tab << "Need to make it" << std::endl;
+        din = din->mkdir(path.c_str());
+      } else {
+        std::cout << tab << "--Have it!" << std::endl;
+        din = din->GetDirectory(path.c_str());
+      }
+    }
   }
   return din;
+}
+
+double IntegralTH2(std::unique_ptr<TH2> const &H,
+                   double frac_error_threshold = 1,
+                   std::string const &opt = "width") {
+  if (!H) {
+    return 0;
+  }
+
+  bool dowidth = (opt == "width");
+  double sum = 0;
+
+  for (int i = 0; i < H->GetXaxis()->GetNbins(); ++i) {
+    double bw_x = H->GetXaxis()->GetBinUpEdge(i + 1) -
+                  H->GetXaxis()->GetBinLowEdge(i + 1);
+    for (int j = 0; j < H->GetYaxis()->GetNbins(); ++j) {
+      double bw_y = H->GetYaxis()->GetBinUpEdge(i + 1) -
+                    H->GetYaxis()->GetBinLowEdge(i + 1);
+
+      double bc = H->GetBinContent(i + 1, j + 1);
+      double bin_frac_error = H->GetBinError(i + 1, j + 1) / bc;
+
+      if ((std::isnormal(bin_frac_error)) &&
+          (bin_frac_error < frac_error_threshold)) {
+        sum += dowidth ? (bw_x * bw_y * bc) : (bc);
+      }
+    }
+  }
+  return sum;
 }
 
 void ScrubLowStatsBins(std::unique_ptr<TH3> const &num,
@@ -412,11 +428,82 @@ std::unique_ptr<TH2> ProjectYZSlice(std::unique_ptr<TH3> const &inph,
   for (int y = 0; y < inph->GetYaxis()->GetNbins(); ++y) {
     for (int z = 0; z < inph->GetZaxis()->GetNbins(); ++z) {
       double sum = 0;
+      double esum = 0;
       for (int x = (xbl - 1); x < (xbu - 1); ++x) {
         sum += inph->GetBinContent(x + 1, y + 1, z + 1);
+        esum += pow(inph->GetBinError(x + 1, y + 1, z + 1), 2);
       }
       out->SetBinContent(z + 1, y + 1, sum);
+      out->SetBinError(z + 1, y + 1, sqrt(esum));
     }
+  }
+
+  return out;
+}
+
+std::unique_ptr<TH1> ProjectY_XSlice(std::unique_ptr<TH3> const &inph,
+                                     int xbl = 1, int xbu = -1) {
+  std::unique_ptr<TH1> out = dynamic_cast_uptr<TH1>(Project3D(inph, "y"));
+  out->SetDirectory(nullptr);
+  out->Reset();
+
+  if (xbu == -1) {
+    xbu = inph->GetXaxis()->GetNbins() + 1;
+  }
+
+  if (inph->GetYaxis()->GetNbins() != out->GetXaxis()->GetNbins()) {
+    std::cout << "In Y: " << inph->GetYaxis()->GetTitle() << ", "
+              << inph->GetYaxis()->GetNbins() << std::endl;
+    std::cout << "Out X: " << out->GetXaxis()->GetTitle() << ", "
+              << out->GetXaxis()->GetNbins() << std::endl;
+    abort();
+  }
+
+  for (int y = 0; y < inph->GetYaxis()->GetNbins(); ++y) {
+    double sum = 0;
+    double esum = 0;
+    for (int z = 0; z < inph->GetZaxis()->GetNbins(); ++z) {
+      for (int x = (xbl - 1); x < (xbu - 1); ++x) {
+        sum += inph->GetBinContent(x + 1, y + 1, z + 1);
+        esum += pow(inph->GetBinError(x + 1, y + 1, z + 1), 2);
+      }
+    }
+    out->SetBinContent(y + 1, sum);
+    out->SetBinError(y + 1, sqrt(esum));
+  }
+
+  return out;
+}
+
+std::unique_ptr<TH1> ProjectZ_XSlice(std::unique_ptr<TH3> const &inph,
+                                     int xbl = 1, int xbu = -1) {
+  std::unique_ptr<TH1> out = dynamic_cast_uptr<TH1>(Project3D(inph, "z"));
+  out->SetDirectory(nullptr);
+  out->Reset();
+
+  if (xbu == -1) {
+    xbu = inph->GetXaxis()->GetNbins() + 1;
+  }
+
+  if (inph->GetZaxis()->GetNbins() != out->GetXaxis()->GetNbins()) {
+    std::cout << "In Y: " << inph->GetYaxis()->GetTitle() << ", "
+              << inph->GetYaxis()->GetNbins() << std::endl;
+    std::cout << "Out X: " << out->GetXaxis()->GetTitle() << ", "
+              << out->GetXaxis()->GetNbins() << std::endl;
+    abort();
+  }
+
+  for (int z = 0; z < inph->GetZaxis()->GetNbins(); ++z) {
+    double sum = 0;
+    double esum = 0;
+    for (int y = 0; y < inph->GetYaxis()->GetNbins(); ++y) {
+      for (int x = (xbl - 1); x < (xbu - 1); ++x) {
+        sum += inph->GetBinContent(x + 1, y + 1, z + 1);
+        esum += pow(inph->GetBinError(x + 1, y + 1, z + 1), 2);
+      }
+    }
+    out->SetBinContent(z + 1, sum);
+    out->SetBinError(z + 1, sqrt(esum));
   }
 
   return out;
