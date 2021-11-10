@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
 
 template <typename TOut, typename TIn>
 std::unique_ptr<TOut> dynamic_cast_uptr(std::unique_ptr<TIn> &&in) {

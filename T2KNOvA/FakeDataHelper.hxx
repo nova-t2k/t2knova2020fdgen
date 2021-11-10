@@ -74,14 +74,10 @@ const int all_tgta[] = {1, 12, 16};
 
 static bool loaded = false;
 static std::unordered_map<
-    nuspecies,
-    std::unordered_map<reweightconfig,
-                       std::unordered_map<int, std::unique_ptr<TH1>>>>
+    int, std::unordered_map<int, std::unordered_map<int, std::unique_ptr<TH1>>>>
     rwhists;
 static std::unordered_map<
-    nuspecies,
-    std::unordered_map<reweightconfig,
-                       std::unordered_map<int, std::unique_ptr<TH1>>>>
+    int, std::unordered_map<int, std::unordered_map<int, std::unique_ptr<TH1>>>>
     EnuCorrections;
 
 template <typename T, size_t N> inline size_t arrsize(T (&arr)[N]) { return N; }
@@ -94,11 +90,11 @@ inline void LoadHists(std::string const &inputfile = "FakeDataInputs.root") {
     abort();
   }
   int found = 0;
-  for (int i = 0; i < arrsize(all_nuspecies); ++i) {
+  for (size_t i = 0; i < arrsize(all_nuspecies); ++i) {
     nuspecies nuspec = nuspecies(i);
     std::string nuspec_str = all_nuspecies[i];
 
-    for (int j = 0; j < arrsize(all_rwconfig); ++j) {
+    for (size_t j = 0; j < arrsize(all_rwconfig); ++j) {
       reweightconfig rwconfig = reweightconfig(j);
       if (rwconfig ==
           kT2KND_to_NOvA_EnuKludge) { // this doesn't have its own histograms
@@ -109,7 +105,7 @@ inline void LoadHists(std::string const &inputfile = "FakeDataInputs.root") {
       for (selection sel : ReWeightSelectionList) {
         std::string sel_str = SelectionList[sel];
 
-        for (int l = 0; l < arrsize(all_tgta_str); ++l) {
+        for (size_t l = 0; l < arrsize(all_tgta_str); ++l) {
           std::string tgta_str = all_tgta_str[l];
           int tgta_sel_offset = all_tgta[l] * 100;
 
@@ -226,8 +222,6 @@ inline double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg, int tgta,
   }
   nuspecies nuspec = getnuspec(nu_pdg);
 
-  bool iscc = (nu_pdg != lep_pdg);
-
   std::unique_ptr<TH1> &rathist =
       rwhists[nuspec][kT2KND_to_NOvA][(tgta * 100) + PrimSel];
 
@@ -245,8 +239,6 @@ inline double GetFakeDataWeight_ND280ToNOvA_EnuKludge(
     LoadHists();
   }
   nuspecies nuspec = getnuspec(nu_pdg);
-
-  bool iscc = (nu_pdg != lep_pdg);
 
   std::unique_ptr<TH1> &rathist =
       rwhists[nuspec][kT2KND_to_NOvA][(tgta * 100) + PrimSel];
@@ -269,8 +261,6 @@ inline double GetFakeDataWeight_ND280ToNOvA_Enu(int nu_pdg, int lep_pdg,
   }
   nuspecies nuspec = getnuspec(nu_pdg);
 
-  bool iscc = (nu_pdg != lep_pdg);
-
   std::unique_ptr<TH1> &rathist =
       rwhists[nuspec][kT2KND_to_NOvA_Enu][(tgta * 100) + PrimSel];
   if (rathist) {
@@ -287,8 +277,6 @@ inline double GetFakeDataWeight_ND280ToNOvA_Q2(int nu_pdg, int lep_pdg,
     LoadHists();
   }
   nuspecies nuspec = getnuspec(nu_pdg);
-
-  bool iscc = (nu_pdg != lep_pdg);
 
   std::unique_ptr<TH1> &rathist =
       rwhists[nuspec][kT2KND_to_NOvA_Q2][(tgta * 100) + PrimSel];
