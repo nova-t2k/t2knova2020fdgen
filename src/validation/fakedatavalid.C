@@ -105,15 +105,15 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_plep) {
       w *= t2knova::GetFakeDataWeight_NOvAToT2K_PLep(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
-          rdr.EavAlt(), false);
+          rdr.Eav_NOvA(), false);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_Q2) {
       w *= t2knova::GetFakeDataWeight_NOvAToT2K_Q2(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.Q2(),
-          rdr.EavAlt(), false);
+          rdr.Eav_NOvA(), false);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
       w *= t2knova::GetFakeDataWeight_NOvAToT2K_PtLep(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
-          (rdr.PLep()) * sqrt(1 - pow(rdr.CosLep(), 2)), rdr.EavAlt(), false);
+          (rdr.PLep()) * sqrt(1 - pow(rdr.CosLep(), 2)), rdr.Eav_NOvA(), false);
     }
 
     std::vector<int> sels = rdr.GetSelections();
@@ -127,11 +127,11 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
                           rdr.AngLep_deg());
     EnuPtLepEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(),
                          rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)),
-                         rdr.EavAlt());
+                         rdr.Eav_NOvA());
     Enu->Fill(w, sels, rdr.Mode(), rdr.Enu_true());
     PLep->Fill(w, sels, rdr.Mode(), rdr.PLep());
     ThetaLep->Fill(w, sels, rdr.Mode(), rdr.AngLep_deg());
-    EAvHad->Fill(w, sels, rdr.Mode(), rdr.EavAlt());
+    EAvHad->Fill(w, sels, rdr.Mode(), rdr.Eav_NOvA());
     PtLep->Fill(w, sels, rdr.Mode(),
                 rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)));
     Q2->Fill(w, sels, rdr.Mode(), rdr.Q2());

@@ -6,7 +6,26 @@
 #include "TTreeReaderArray.h"
 #include "TTreeReaderValue.h"
 
+#include "TLorentzVector.h"
+
 namespace t2knova {
+
+struct vect4 {
+  vect4(std::array<float, 4> const &vec) {
+    TLorentzVector v(vec[0], vec[1], vec[2], vec[3]);
+    E = v.E();
+    _gamma = v.Gamma();
+  }
+  float E;
+  float _gamma;
+  float Gamma() { return _gamma; }
+};
+
+struct nova_part {
+  nova_part(int _pdg, std::array<float, 4> const &vec) : pdg(_pdg), p(vec) {}
+  int pdg;
+  vect4 p;
+};
 
 class T2KNOvATruthTreeReader {
 public:
@@ -14,8 +33,57 @@ public:
   int PDGNu() { return *_PDGNu; }
   int Mode() { return fModeInfo ? *_Mode : 0; }
   float CosLep() { return *_CosLep; }
-  float AngLep_deg() { return acos(*_CosLep) * (180.0/M_PI); }
+  float AngLep_deg() { return acos(*_CosLep) * (180.0 / M_PI); }
   float EavAlt() { return *_EavAlt; }
+  float Eav_NOvA() {
+
+    float eAvail = 0;
+
+    for (int i = 0; i < *_nfsp; ++i) {
+      nova_part particle(_pdg[i],
+                         std::array<float, 4>{_px[i], _py[i], _pz[i], _E[i]});
+
+      // Code below here is from Zoya (unaltered from NOvA/CAFAna
+      // implementation)
+
+      double particle_Eavail = 0;
+      // protons, pions: KE only
+      if (particle.pdg == 2212 || abs(particle.pdg) == 211) {
+        double gamma = particle.p.Gamma();
+        particle_Eavail = (gamma - 1) / gamma * particle.p.E;
+      }
+      // pi0s, electrons, photons: total energy
+      else if (particle.pdg == 111 || abs(particle.pdg) == 11 ||
+               particle.pdg == 22)
+        particle_Eavail = particle.p.E;
+
+      else if (particle.pdg >= 2000000000) {
+        // skip the bindinos
+      }
+
+      else if (particle.pdg >= 1000000000) {
+        // do nothing for nucleons
+      } else if (particle.pdg >= 2000 && particle.pdg != 2212 &&
+                 particle.pdg != 2112) {
+        particle_Eavail = particle.p.E - 0.9382;
+        // Primarily strange baryons add total energy minus proton mass since
+        // decays will mostly contain protons
+      } else if (particle.pdg <= -2000) {
+        particle_Eavail = particle.p.E + 0.9382;
+        // Primarily anti-protons add total energy plus proton mass since
+        // anhillation is mostly the interaction mode
+      } else if (particle.pdg != 2112 &&
+                 (abs(particle.pdg) < 11 ||
+                  abs(particle.pdg) > 16)) { // no neutrons or leptons
+        particle_Eavail = particle.p.E;
+        // mostly kaons add all the energy
+      }
+
+      eAvail += particle_Eavail;
+    } // end loop over primaries
+
+    return eAvail;
+  }
   float Enu_true() { return *_Enu_true; }
   float PLep() { return *_PLep; }
   float Q2() { return *_Q2; }
@@ -52,7 +120,8 @@ public:
         _CosLep(rdr, "CosLep"), _EavAlt(rdr, "EavAlt"),
         _Enu_true(rdr, "Enu_true"), _PLep(rdr, "PLep"), _Q2(rdr, "Q2"),
         _q0(rdr, "q0"), _q3(rdr, "q3"), _tgta(rdr, "tgta"), _nfsp(rdr, "nfsp"),
-        _pdg(rdr, "pdg"), _E(rdr, "E"), _fScaleFactor(rdr, "fScaleFactor"),
+        _pdg(rdr, "pdg"), _px(rdr, "px"), _py(rdr, "py"), _pz(rdr, "pz"),
+        _E(rdr, "E"), _fScaleFactor(rdr, "fScaleFactor"),
         _RWWeight(rdr, "RWWeight"), fModeInfo(true) {
     rdr.Restart();
     (void)rdr.Next();
@@ -69,6 +138,9 @@ public:
     CheckValue(_tgta);
     CheckValue(_nfsp);
     CheckValue(_pdg);
+    CheckValue(_px);
+    CheckValue(_py);
+    CheckValue(_pz);
     CheckValue(_E);
     CheckValue(_fScaleFactor);
     CheckValue(_RWWeight);
@@ -104,6 +176,9 @@ private:
   TTreeReaderValue<int> _nfsp;
   TTreeReaderArray<int> _pdg;
   TTreeReaderArray<float> _E;
+  TTreeReaderArray<float> _px;
+  TTreeReaderArray<float> _py;
+  TTreeReaderArray<float> _pz;
 
   TTreeReaderValue<double> _fScaleFactor;
   TTreeReaderValue<double> _RWWeight;

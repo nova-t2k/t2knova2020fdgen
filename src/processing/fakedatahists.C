@@ -124,12 +124,12 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
                                     rdr.AngLep_deg());
     } else {
       EnuPLepEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.PLep(),
-                          rdr.EavAlt());
+                          rdr.Eav_NOvA());
       EnuQ2EAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2(),
-                        rdr.EavAlt());
+                        rdr.Eav_NOvA());
       EnuPtLepEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(),
                            rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)),
-                           rdr.EavAlt());
+                           rdr.Eav_NOvA());
     }
     ent_it++;
   }
