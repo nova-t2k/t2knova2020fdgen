@@ -2,6 +2,8 @@
 
 #include "T2KNOvA/FakeDataHelper.hxx"
 
+#include "plotutils.h"
+
 #include "toml/toml_helper.h"
 
 #include "TDirectory.h"
@@ -58,16 +60,16 @@ template <typename TH> struct TrueChannelHist {
     Apply([=](TH &h) { h.SetTitle(title.c_str()); });
   }
 
-  void Write(TDirectory *f, bool scale = false) {
+  void Write(TDirectory *f, bool width_scale = false) {
     Apply([=](TH &h) {
       if (!h.Integral()) {
         return;
       }
 
-      if (scale) {
+      if (width_scale) {
         THBase *hc = (THBase *)h.Clone();
         hc->SetDirectory(nullptr);
-        hc->Scale(1, "width");
+        Scale(hc, 1.0, width_scale);
         f->WriteTObject(hc, h.GetName());
         delete hc;
       } else {
@@ -163,9 +165,9 @@ template <typename TH> struct SelectionHists {
     }
   }
 
-  void Write(TDirectory *f, bool scale = false) {
+  void Write(TDirectory *f, bool width_scale = false) {
     for (auto &h : Hists) {
-      h.second.Write(f, scale);
+      h.second.Write(f, width_scale);
     }
   }
 

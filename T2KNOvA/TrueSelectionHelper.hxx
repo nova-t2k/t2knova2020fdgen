@@ -210,19 +210,21 @@ inline FSParticleSummary T2KNOvAFlatTreeToFSParticleSummary(int NFSP,
 #define SEL_X(a) X_CATNAME(k, a),
 
 enum selection { SEL_LIST };
+std::vector<selection> AllSelectionList = {SEL_LIST};
 
 #undef SEL_X
 #define SEL_X(a) #a,
 
 std::vector<std::string> SelectionList = {SEL_LIST};
 
-#undef SEL_LIST
 #undef X_CATNAME
 #undef SEL_X
 
+#undef SEL_LIST
+
 std::vector<selection> ReWeightSelectionList = {
-    kCCInc, kCC0pi, kCC1cpi, kCC1pi0, kCCmultipi, kCCOther,
-    kNCInc, kNC0pi, kNC1cpi, kNC1pi0, kNCmultipi, kNCOther};
+    kCCInc, kCC0pi, kCC1cpi, kCC1pi0, kCCmultipi, kNC1Gamma, kCCOther,
+    kNCInc, kNC0pi, kNC1cpi, kNC1pi0, kNCmultipi, kNC1Gamma, kNCOther};
 
 inline std::vector<int> GetSelections(FSParticleSummary fsps) {
   if (fsps.GetNNonNucleonPions() ==
@@ -242,8 +244,8 @@ inline std::vector<int> GetSelections(FSParticleSummary fsps) {
     }
   } else if (fsps.GetNNonNucleonPions() == fsps.NGamma) {
     if (fsps.NGamma == 1) {
-      return fsps.IsCC ? std::vector<int>{kCC1Gamma}
-                       : std::vector<int>{kNC1Gamma};
+      return fsps.IsCC ? std::vector<int>{kCCInc,kCC1Gamma}
+                       : std::vector<int>{kNCInc,kNC1Gamma};
     } else {
       return fsps.IsCC ? std::vector<int>{kCCNGamma}
                        : std::vector<int>{kNCNGamma};

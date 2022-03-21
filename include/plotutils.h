@@ -8,6 +8,7 @@
 #include "TGraph.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TH3.h"
 #include "TLegend.h"
 #include "TPad.h"
 #include "TSpline.h"
@@ -17,8 +18,7 @@
 #include <memory>
 #include <vector>
 
-template <typename TH>
-double IntegralTH(std::unique_ptr<TH> &h) {
+template <typename TH> double IntegralTH(std::unique_ptr<TH> &h) {
   if (!h) {
     return 0;
   }
@@ -75,8 +75,8 @@ void StyleTH1Fill(std::unique_ptr<TH1> &h, int color, int style = 1001,
   h->SetFillColorAlpha(color, alpha);
 }
 
-double GetMaximumTH1s(
-    std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs) {
+double
+GetMaximumTH1s(std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs) {
   double max = -std::numeric_limits<double>::max();
 
   for (auto const &h : hs) {
@@ -104,14 +104,153 @@ void DrawTH1s(std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs,
   }
 }
 
+template <typename TH>
+void Scale(TH *hist, double sf = 1, bool width_scale = false);
+template <> void Scale(TH2 *hist, double sf, bool width_scale) {
+  for (int i = 0; i < hist->GetXaxis()->GetNbins(); ++i) {
+    for (int j = 0; j < hist->GetYaxis()->GetNbins(); ++j) {
+      double bw_x = hist->GetXaxis()->GetBinWidth(i + 1);
+      double bw_y = hist->GetYaxis()->GetBinWidth(j + 1);
+      double bw = bw_x * bw_y;
+      double bsf = width_scale ? sf / bw : sf;
+
+      double bc = hist->GetBinContent(i + 1, j + 1);
+      hist->SetBinContent(i + 1, j + 1, bc * bsf);
+      double be = hist->GetBinError(i + 1, j + 1);
+      hist->SetBinError(i + 1, j + 1, be * bsf);
+    }
+  }
+}
+template <> void Scale(TH3 *hist, double sf, bool width_scale) {
+  for (int i = 0; i < hist->GetXaxis()->GetNbins(); ++i) {
+    for (int j = 0; j < hist->GetYaxis()->GetNbins(); ++j) {
+      for (int k = 0; k < hist->GetZaxis()->GetNbins(); ++k) {
+        double bw_x = hist->GetXaxis()->GetBinWidth(i + 1);
+        double bw_y = hist->GetYaxis()->GetBinWidth(j + 1);
+        double bw_z = hist->GetZaxis()->GetBinWidth(k + 1);
+        double bw = bw_x * bw_y * bw_z;
+        double bsf = width_scale ? sf / bw : sf;
+
+        double bc = hist->GetBinContent(i + 1, j + 1, k + 1);
+        hist->SetBinContent(i + 1, j + 1, k + 1, bc * bsf);
+        double be = hist->GetBinError(i + 1, j + 1, k + 1);
+        hist->SetBinError(i + 1, j + 1, k + 1, be * bsf);
+      }
+    }
+  }
+}
+
+template <> void Scale(TH1 *hist, double sf, bool width_scale) {
+
+  switch (hist->GetDimension()) {
+  case 1: {
+    for (int i = 0; i < hist->GetXaxis()->GetNbins(); ++i) {
+      double bw = hist->GetXaxis()->GetBinWidth(i + 1);
+      double bsf = width_scale ? sf / bw : sf;
+
+      double bc = hist->GetBinContent(i + 1);
+      hist->SetBinContent(i + 1, bc * bsf);
+      double be = hist->GetBinError(i + 1);
+      hist->SetBinError(i + 1, be * bsf);
+    }
+    break;
+  }
+  case 2: {
+    Scale(static_cast<TH2 *>(hist), sf, width_scale);
+    break;
+  }
+  case 3: {
+    Scale(static_cast<TH3 *>(hist), sf, width_scale);
+    break;
+  }
+  default: {
+    std::cout << "[ERROR]: Found histogram with dimension: "
+              << hist->GetDimension() << std::endl;
+    abort();
+  }
+  }
+}
+
+template <typename TH> void UnscaleWidth(TH *hist);
+template <> void UnscaleWidth(TH2 *hist) {
+  for (int i = 0; i < hist->GetXaxis()->GetNbins(); ++i) {
+    for (int j = 0; j < hist->GetYaxis()->GetNbins(); ++j) {
+      double bw_x = hist->GetXaxis()->GetBinWidth(i + 1);
+      double bw_y = hist->GetYaxis()->GetBinWidth(j + 1);
+      double bw = bw_x * bw_y;
+
+      double bc = hist->GetBinContent(i + 1, j + 1);
+      hist->SetBinContent(i + 1, j + 1, bc * bw);
+      double be = hist->GetBinError(i + 1, j + 1);
+      hist->SetBinError(i + 1, j + 1, be * bw);
+    }
+  }
+}
+template <> void UnscaleWidth(TH3 *hist) {
+  for (int i = 0; i < hist->GetXaxis()->GetNbins(); ++i) {
+    for (int j = 0; j < hist->GetYaxis()->GetNbins(); ++j) {
+      for (int k = 0; k < hist->GetZaxis()->GetNbins(); ++k) {
+        double bw_x = hist->GetXaxis()->GetBinWidth(i + 1);
+        double bw_y = hist->GetYaxis()->GetBinWidth(j + 1);
+        double bw_z = hist->GetZaxis()->GetBinWidth(k + 1);
+        double bw = bw_x * bw_y * bw_z;
+
+        double bc = hist->GetBinContent(i + 1, j + 1, k + 1);
+        hist->SetBinContent(i + 1, j + 1, k + 1, bc * bw);
+        double be = hist->GetBinError(i + 1, j + 1, k + 1);
+        hist->SetBinError(i + 1, j + 1, k + 1, be * bw);
+      }
+    }
+  }
+}
+
+template <> void UnscaleWidth(TH1 *hist) {
+
+  switch (hist->GetDimension()) {
+  case 1: {
+    for (int i = 0; i < hist->GetXaxis()->GetNbins(); ++i) {
+      double bw = hist->GetXaxis()->GetBinWidth(i + 1);
+
+      double bc = hist->GetBinContent(i + 1);
+      hist->SetBinContent(i + 1, bc * bw);
+      double be = hist->GetBinError(i + 1);
+      hist->SetBinError(i + 1, be * bw);
+    }
+    break;
+  }
+  case 2: {
+    UnscaleWidth(static_cast<TH2 *>(hist));
+    break;
+  }
+  case 3: {
+    UnscaleWidth(static_cast<TH3 *>(hist));
+    break;
+  }
+  default: {
+    std::cout << "[ERROR]: Found histogram with dimension: "
+              << hist->GetDimension() << std::endl;
+    abort();
+  }
+  }
+}
+
 void ScaleTH1s(std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs,
-               double s, std::string opts = "") {
+               double s, bool width_scale = false) {
   for (auto &h : hs) {
-    if (!h.get()) {
+    if (!h.get().get()) {
       continue;
     }
-    h.get()->Scale(s, opts.c_str());
+    Scale(h.get().get(), s, width_scale);
   }
+}
+
+void ScaleTH1s(std::vector<std::unique_ptr<TH1>> &hs, double s,
+               bool width_scale = false) {
+  std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> rhs;
+  for (auto &h : hs) {
+    rhs.push_back(h);
+  }
+  ScaleTH1s(rhs, s, width_scale);
 }
 
 double GetMaximumTH1s(std::vector<std::unique_ptr<TH1>> &hs) {
@@ -129,15 +268,6 @@ void DrawTH1s(std::vector<std::unique_ptr<TH1>> &hs, std::string opts = "",
     rhs.push_back(h);
   }
   DrawTH1s(rhs, opts, first);
-}
-
-void ScaleTH1s(std::vector<std::unique_ptr<TH1>> &hs, double s,
-               std::string opts = "") {
-  std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> rhs;
-  for (auto &h : hs) {
-    rhs.push_back(h);
-  }
-  ScaleTH1s(rhs, s, opts);
 }
 
 TCanvas *MakeCanvas(double mt = 0.03, double ml = 0.15, double mr = 0.03,

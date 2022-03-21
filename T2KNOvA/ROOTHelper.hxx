@@ -5,9 +5,11 @@
 #include "TH2.h"
 #include "TH3.h"
 
+#include "plotutils.h"
+
 #include <iostream>
-#include <string>
 #include <memory>
+#include <string>
 
 template <typename TOut, typename TIn>
 std::unique_ptr<TOut> dynamic_cast_uptr(std::unique_ptr<TIn> &&in) {
@@ -123,33 +125,27 @@ EnsureTHF(typename std::enable_if<THTraits<TN>::NDims == 2,
   return ret;
 }
 
-std::unique_ptr<TH1> Project3D(std::unique_ptr<TH3> const &hin,
-                               std::string const &projconfig) {
+std::unique_ptr<TH1> Project3D(TH3 const &hin, std::string const &projconfig) {
+  std::unique_ptr<TH3> hin_unscaled(
+      static_cast<TH3 *>(hin.Clone("unscale_clone")));
   if (projconfig.size() == 1) {
     std::unique_ptr<TH1> doublehist =
-        std::unique_ptr<TH1>(hin->Project3D(projconfig.c_str()));
+        std::unique_ptr<TH1>(hin_unscaled->Project3D(projconfig.c_str()));
     doublehist->SetDirectory(nullptr);
+    Scale(doublehist.get(), 1.0, true);
     return EnsureTHF<TH1>(doublehist);
   } else {
     std::unique_ptr<TH2> doublehist = std::unique_ptr<TH2>(
-        dynamic_cast<TH2 *>(hin->Project3D(projconfig.c_str())));
+        dynamic_cast<TH2 *>(hin_unscaled->Project3D(projconfig.c_str())));
     doublehist->SetDirectory(nullptr);
+    Scale(doublehist.get(), 1.0, true);
     return EnsureTHF<TH2>(doublehist);
   }
 }
 
-std::unique_ptr<TH1> Project3D(TH3 const &hin, std::string const &projconfig) {
-  if (projconfig.size() == 1) {
-    std::unique_ptr<TH1> doublehist =
-        std::unique_ptr<TH1>(hin.Project3D(projconfig.c_str()));
-    doublehist->SetDirectory(nullptr);
-    return EnsureTHF<TH1>(doublehist);
-  } else {
-    std::unique_ptr<TH2> doublehist = std::unique_ptr<TH2>(
-        dynamic_cast<TH2 *>(hin.Project3D(projconfig.c_str())));
-    doublehist->SetDirectory(nullptr);
-    return EnsureTHF<TH2>(doublehist);
-  }
+std::unique_ptr<TH1> Project3D(std::unique_ptr<TH3> const &hin,
+                               std::string const &projconfig) {
+  return Project3D(*hin, projconfig);
 }
 
 inline std::unique_ptr<TH1> GetTH1(std::unique_ptr<TFile> &f,
@@ -259,25 +255,25 @@ TDirectory *MakeDirectoryStructure(TDirectory *din, std::string path = "") {
     std::string tab = "";
     while (path.find("/") != std::string::npos) {
       std::string ndir = path.substr(0, path.find("/"));
-      std::cout << tab << "Next Dir: " << ndir << std::endl;
+      // std::cout << tab << "Next Dir: " << ndir << std::endl;
       if (!din->GetDirectory(ndir.c_str())) {
-        std::cout << tab << "Need to make it" << std::endl;
+        // std::cout << tab << "Need to make it" << std::endl;
         din = din->mkdir(ndir.c_str());
       } else {
-        std::cout << tab << "--Have it!" << std::endl;
+        // std::cout << tab << "--Have it!" << std::endl;
         din = din->GetDirectory(ndir.c_str());
       }
       path = path.substr(path.find("/") + 1);
-      std::cout << tab << "Remaining path: " << path << std::endl;
+      // std::cout << tab << "Remaining path: " << path << std::endl;
       tab = tab + "  ";
     }
     if (path.size()) {
-      std::cout << tab << "Next Dir: " << path << std::endl;
+      // std::cout << tab << "Next Dir: " << path << std::endl;
       if (!din->GetDirectory(path.c_str())) {
-        std::cout << tab << "Need to make it" << std::endl;
+        // std::cout << tab << "Need to make it" << std::endl;
         din = din->mkdir(path.c_str());
       } else {
-        std::cout << tab << "--Have it!" << std::endl;
+        // std::cout << tab << "--Have it!" << std::endl;
         din = din->GetDirectory(path.c_str());
       }
     }
@@ -430,12 +426,20 @@ std::unique_ptr<TH2> ProjectYZSlice(std::unique_ptr<TH3> const &inph,
     for (int z = 0; z < inph->GetZaxis()->GetNbins(); ++z) {
       double sum = 0;
       double esum = 0;
+      double bw_y = inph->GetYaxis()->GetBinWidth(y + 1);
+      double bw_z = inph->GetZaxis()->GetBinWidth(z + 1);
       for (int x = (xbl - 1); x < (xbu - 1); ++x) {
-        sum += inph->GetBinContent(x + 1, y + 1, z + 1);
-        esum += pow(inph->GetBinError(x + 1, y + 1, z + 1), 2);
+
+        double bw_x = inph->GetXaxis()->GetBinWidth(x + 1);
+        double bw = bw_x * bw_y * bw_z;
+
+        sum += inph->GetBinContent(x + 1, y + 1, z + 1) * bw;
+        esum += pow(inph->GetBinError(x + 1, y + 1, z + 1) * bw, 2);
       }
-      out->SetBinContent(z + 1, y + 1, sum);
-      out->SetBinError(z + 1, y + 1, sqrt(esum));
+      double bw = bw_y * bw_z;
+
+      out->SetBinContent(z + 1, y + 1, sum / bw);
+      out->SetBinError(z + 1, y + 1, sqrt(esum) / bw);
     }
   }
 
@@ -463,14 +467,21 @@ std::unique_ptr<TH1> ProjectY_XSlice(std::unique_ptr<TH3> const &inph,
   for (int y = 0; y < inph->GetYaxis()->GetNbins(); ++y) {
     double sum = 0;
     double esum = 0;
+    double bw_y = inph->GetYaxis()->GetBinWidth(y + 1);
+
     for (int z = 0; z < inph->GetZaxis()->GetNbins(); ++z) {
+      double bw_z = inph->GetZaxis()->GetBinWidth(z + 1);
+
       for (int x = (xbl - 1); x < (xbu - 1); ++x) {
-        sum += inph->GetBinContent(x + 1, y + 1, z + 1);
-        esum += pow(inph->GetBinError(x + 1, y + 1, z + 1), 2);
+        double bw_x = inph->GetXaxis()->GetBinWidth(x + 1);
+        double bw = bw_x * bw_y * bw_z;
+
+        sum += inph->GetBinContent(x + 1, y + 1, z + 1) * bw;
+        esum += pow(inph->GetBinError(x + 1, y + 1, z + 1) * bw, 2);
       }
     }
-    out->SetBinContent(y + 1, sum);
-    out->SetBinError(y + 1, sqrt(esum));
+    out->SetBinContent(y + 1, sum / bw_y);
+    out->SetBinError(y + 1, sqrt(esum) / bw_y);
   }
 
   return out;
@@ -497,14 +508,21 @@ std::unique_ptr<TH1> ProjectZ_XSlice(std::unique_ptr<TH3> const &inph,
   for (int z = 0; z < inph->GetZaxis()->GetNbins(); ++z) {
     double sum = 0;
     double esum = 0;
+    double bw_z = inph->GetZaxis()->GetBinWidth(z + 1);
+
     for (int y = 0; y < inph->GetYaxis()->GetNbins(); ++y) {
+      double bw_y = inph->GetYaxis()->GetBinWidth(y + 1);
+
       for (int x = (xbl - 1); x < (xbu - 1); ++x) {
-        sum += inph->GetBinContent(x + 1, y + 1, z + 1);
-        esum += pow(inph->GetBinError(x + 1, y + 1, z + 1), 2);
+        double bw_x = inph->GetXaxis()->GetBinWidth(x + 1);
+        double bw = bw_x * bw_y * bw_z;
+
+        sum += inph->GetBinContent(x + 1, y + 1, z + 1) * bw;
+        esum += pow(inph->GetBinError(x + 1, y + 1, z + 1) * bw, 2);
       }
     }
-    out->SetBinContent(z + 1, sum);
-    out->SetBinError(z + 1, sqrt(esum));
+    out->SetBinContent(z + 1, sum / bw_z);
+    out->SetBinError(z + 1, sqrt(esum) / bw_z);
   }
 
   return out;

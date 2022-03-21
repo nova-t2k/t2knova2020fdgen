@@ -26,6 +26,8 @@ TrueChannelHist<TH1F> *totxsecs_untuned;
 
 SelectionHists<TH1F> *Enu;
 SelectionHists<TH1F> *Enu_untuned;
+SelectionHists<TH1F> *PLep;
+SelectionHists<TH1F> *PLep_untuned;
 SelectionHists<TH1F> *Q2;
 SelectionHists<TH1F> *Q2_untuned;
 SelectionHists<TH1F> *EGamma;
@@ -41,6 +43,10 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
   Enu = SelectionHistsFromTOML<TH1F>("Enu", toml::find(plots_config, "Enu"));
   Enu_untuned = SelectionHistsFromTOML<TH1F>("Enu_untuned",
                                              toml::find(plots_config, "Enu"));
+
+  PLep = SelectionHistsFromTOML<TH1F>("PLep", toml::find(plots_config, "PLep"));
+  PLep_untuned = SelectionHistsFromTOML<TH1F>("PLep_untuned",
+                                              toml::find(plots_config, "PLep"));
 
   Q2 = SelectionHistsFromTOML<TH1F>("Q2", toml::find(plots_config, "Q2"));
   Q2_untuned = SelectionHistsFromTOML<TH1F>("Q2_untuned",
@@ -111,6 +117,8 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
 
     Enu->Fill(w, sels, rdr.Mode(), rdr.Enu_true());
     Enu_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(), rdr.Enu_true());
+    PLep->Fill(w, sels, rdr.Mode(), rdr.PLep());
+    PLep_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(), rdr.PLep());
     Q2->Fill(w, sels, rdr.Mode(), rdr.Q2());
     Q2_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(), rdr.Q2());
     EGamma->Fill(w, sels, rdr.Mode(), rdr.EGamma());
@@ -243,6 +251,9 @@ int main(int argc, char const *argv[]) {
 
   Enu->Write(dout, true);
   Enu_untuned->Write(dout, true);
+
+  PLep->Write(dout, true);
+  PLep_untuned->Write(dout, true);
 
   Q2->Write(dout, true);
   Q2_untuned->Write(dout, true);

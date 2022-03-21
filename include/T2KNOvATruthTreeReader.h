@@ -35,6 +35,59 @@ public:
   float CosLep() { return *_CosLep; }
   float AngLep_deg() { return acos(*_CosLep) * (180.0 / M_PI); }
   float EavAlt() { return *_EavAlt; }
+
+  TLorentzVector FSLepP4(){
+    for (int i = 0; i < *_nfsp; ++i) {
+      if(_pdg[i] == PDGLep()){
+        return TLorentzVector(_px[i], _py[i], _pz[i], _E[i]);
+      }
+    }
+    return TLorentzVector();
+  }
+
+  float hmfscpip() {
+    double maxp = 0;
+    for (int i = 0; i < *_nfsp; ++i) {
+      if (std::abs(_pdg[i]) == 211) {
+        TVector3 v(_px[i], _py[i], _pz[i]);
+        if (v.Mag() > maxp) {
+          maxp = v.Mag();
+        }
+      }
+    }
+    return maxp;
+  }
+  float hmfspi0p() {
+    double maxp = 0;
+    for (int i = 0; i < *_nfsp; ++i) {
+      if (std::abs(_pdg[i]) == 111) {
+        TVector3 v(_px[i], _py[i], _pz[i]);
+        if (v.Mag() > maxp) {
+          maxp = v.Mag();
+        }
+      }
+    }
+    return maxp;
+  }
+  int ncpi() {
+    int ncpi = 0;
+    for (int i = 0; i < *_nfsp; ++i) {
+      if (std::abs(_pdg[i]) == 211) {
+        ncpi++;
+      }
+    }
+    return ncpi;
+  }
+  int npi0() {
+    int npi0 = 0;
+    for (int i = 0; i < *_nfsp; ++i) {
+      if (std::abs(_pdg[i]) == 111) {
+        npi0++;
+      }
+    }
+    return npi0;
+  }
+
   float Eav_NOvA() {
 
     float eAvail = 0;

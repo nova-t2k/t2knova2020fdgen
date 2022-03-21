@@ -8,14 +8,15 @@ set -x
 
 GENERATORS=( GENIE NEUT )
 SPECIES=( numu numub nue nueb )
-SPECIES=( numu numub )
+# SPECIES=( numu numub )
 DETECTORS=( NOvAND ND280 )
-# DETECTORS=( ND280 )
+DETECTORS=( ND280 )
+# DETECTORS=( NOvAND )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
 DET_MATS["ND280"]="H2O CH"
-DET_MATS["ND280"]="CH"
+# DET_MATS["ND280"]="CH"
 
 declare -A MAT_ELEMENTS
 MAT_ELEMENTS["CH"]="C H"
@@ -26,140 +27,186 @@ MAT_ELEMENTS["H2O"]="H O"
 
 for DET in ${DETECTORS}; do
     for TGT in ${DET_MATS[${DET}]}; do
-      for SPC in ${SPECIES[@]}; do
+        for SPC in ${SPECIES[@]}; do
 
-        for WGHTSCHEME in T2KND_to_NOvA \
-                          T2KND_to_NOvA_Enu \
-                          T2KND_to_NOvA_Q2 \
-                          T2KND_to_NOvA_EnuKludge; do
+            if [ "${DET}" == "ND280" ]; then
 
-            bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${SPC}.root \
-                                -F FDSInputs/FakeDataInputs.root \
-                                -H config/FakeDataValidConfig.toml \
-                                -W ${WGHTSCHEME} \
-                                -a any \
-                                -o FDSValid/FakeDataValid_${WGHTSCHEME}.root \
-                                -d ND280/${WGHTSCHEME}/${TGT}/${SPC} &
-        done
-
-        wait
-
-        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${SPC}.root \
-                            -F FDSInputs/FakeDataInputs.root \
-                            -H config/FakeDataValidConfig.toml \
-                            -a any \
-                            -o FDSValid/FakeDataValid_NEUT.root \
-                            -d ND280/T2KNDTune/${TGT}/${SPC} &
-
-        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.ND280.${TGT}.${SPC}.root \
-                            -F FDSInputs/FakeDataInputs.root \
-                            -H config/FakeDataValidConfig.toml \
-                            -a any \
-                            -o FDSValid/FakeDataValid_GENIE.root \
-                            -d ND280/NOvATune/${TGT}/${SPC} &
-      
-        wait
-
-        for ELE in ${MAT_ELEMENTS["${TGT}"]}; do
-
-            for WGHTSCHEME in T2KND_to_NOvA \
-                              T2KND_to_NOvA_Enu \
-                              T2KND_to_NOvA_Q2 \
-                              T2KND_to_NOvA_EnuKludge; do
+                OSCARG=""
+                if [ "${TGT}" == "H2O" ]; then
+                    OSCARG="--oscillate"
+                fi
 
                 bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${SPC}.root \
                                     -F FDSInputs/FakeDataInputs.root \
-                                    -H config/FakeDataValidConfig.toml \
-                                    -W ${WGHTSCHEME} \
-                                    -a ${ELE} \
-                                    -o FDSValid/FakeDataValid_${WGHTSCHEME}.root \
-                                    -d ND280/${WGHTSCHEME}/${ELE}/${SPC} &
-            done
+                                    -M -H config/FakeDataValidConfig.toml \
+                                    -W T2KND_to_NOvA \
+                                    -a any ${OSCARG} \
+                                    -o FDSValid/FakeDataValid_T2KND_to_NOvA_${SPC}.root \
+                                    -d ND280/T2KND_to_NOvA/${TGT}/${SPC} &
 
-            wait
 
-            bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${SPC}.root \
-                                -F FDSInputs/FakeDataInputs.root \
-                                -H config/FakeDataValidConfig.toml \
-                                -a ${ELE} \
-                                -o FDSValid/FakeDataValid_NEUT.root \
-                                -d ND280/T2KNDTune/${ELE}/${SPC} &
+                bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${SPC}.root \
+                                    -F FDSInputs/FakeDataInputs.root \
+                                    -M -H config/FakeDataValidConfig.toml \
+                                    -a any ${OSCARG} \
+                                    -o FDSValid/FakeDataValid_NEUT.root \
+                                    -d ND280/T2KNDTune/${TGT}/${SPC} &
 
-            bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.ND280.${TGT}.${SPC}.root \
-                                -F FDSInputs/FakeDataInputs.root \
-                                -H config/FakeDataValidConfig.toml \
-                                -a ${ELE} \
-                                -o FDSValid/FakeDataValid_GENIE.root \
-                                -d ND280/NOvATune/${ELE}/${SPC} &
-            wait
+                bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.ND280.${TGT}.${SPC}.root \
+                                    -F FDSInputs/FakeDataInputs.root \
+                                    -M -H config/FakeDataValidConfig.toml \
+                                    -a any ${OSCARG} \
+                                    -o FDSValid/FakeDataValid_GENIE.root \
+                                    -d ND280/NOvATune/${TGT}/${SPC} &
 
-        done
+                wait
 
-        for WGHTSCHEME in NOvA_to_T2KND_plep \
-                          NOvA_to_T2KND_Q2 \
-                          NOvA_to_T2KND_ptlep; do
+                # bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${SPC}.root \
+                #                     -F FDSInputs/FakeDataInputs.root \
+                #                     --No-Tune -M -H config/FakeDataValidConfig.toml \
+                #                     -a any \
+                #                     -o FDSValid/FakeDataValid_NEUT_notune.root \
+                #                     -d ND280/NEUT/${TGT}/${SPC} &
 
-            bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.${SPC}.root \
-                                -F FDSInputs/FakeDataInputs.root \
-                                -H config/FakeDataValidConfig.toml \
-                                -W ${WGHTSCHEME} \
-                                -a any \
-                                -o FDSValid/FakeDataValid_${WGHTSCHEME}.root \
-                                -d NOvAND/${WGHTSCHEME}/${TGT}/${SPC} &
-        done
+                # bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.ND280.${TGT}.${SPC}.root \
+                #                     -F FDSInputs/FakeDataInputs.root \
+                #                     --No-Tune -M -H config/FakeDataValidConfig.toml \
+                #                     -a any \
+                #                     -o FDSValid/FakeDataValid_GENIE_notune.root \
+                #                     -d ND280/GENIE/${TGT}/${SPC} &
+              
+                # wait
 
-        wait
+                # for ELE in ${MAT_ELEMENTS["${TGT}"]}; do
 
-        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.NOvAND.${TGT}.${SPC}.root \
-                            -F FDSInputs/FakeDataInputs.root \
-                            -H config/FakeDataValidConfig.toml \
-                            -a any \
-                            -o FDSValid/FakeDataValid_NEUT.root \
-                            -d NOvAND/T2KNDTune/${TGT}/${SPC} &
+                #     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${SPC}.root \
+                #                         -F FDSInputs/FakeDataInputs.root \
+                #                         -M -H config/FakeDataValidConfig.toml \
+                #                         -W T2KND_to_NOvA \
+                #                         -a ${ELE} \
+                #                         -o FDSValid/FakeDataValid_T2KND_to_NOvA.root \
+                #                         -d ND280/T2KND_to_NOvA/${ELE}/${SPC} &
 
-        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.${SPC}.root \
-                            -F FDSInputs/FakeDataInputs.root \
-                            -H config/FakeDataValidConfig.toml \
-                            -a any \
-                            -o FDSValid/FakeDataValid_GENIE.root \
-                            -d NOvAND/NOvATune/${TGT}/${SPC} &
-      
-        wait
+                #     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${SPC}.root \
+                #                         -F FDSInputs/FakeDataInputs.root \
+                #                         -M -H config/FakeDataValidConfig.toml \
+                #                         -a ${ELE} \
+                #                         -o FDSValid/FakeDataValid_NEUT.root \
+                #                         -d ND280/T2KNDTune/${ELE}/${SPC} &
 
-        for ELE in ${MAT_ELEMENTS["${TGT}"]}; do
+                #     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.ND280.${TGT}.${SPC}.root \
+                #                         -F FDSInputs/FakeDataInputs.root \
+                #                         -M -H config/FakeDataValidConfig.toml \
+                #                         -a ${ELE} \
+                #                         -o FDSValid/FakeDataValid_GENIE.root \
+                #                         -d ND280/NOvATune/${ELE}/${SPC} &
 
-            for WGHTSCHEME in NOvA_to_T2KND_plep \
-                          NOvA_to_T2KND_Q2 \
-                          NOvA_to_T2KND_ptlep; do
+                #     wait
+
+                #     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${SPC}.root \
+                #                         -F FDSInputs/FakeDataInputs.root \
+                #                         --No-Tune -M -H config/FakeDataValidConfig.toml \
+                #                         -a ${ELE} \
+                #                         -o FDSValid/FakeDataValid_NEUT_notune.root \
+                #                         -d ND280/NEUT/${ELE}/${SPC} &
+
+                #     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.ND280.${TGT}.${SPC}.root \
+                #                         -F FDSInputs/FakeDataInputs.root \
+                #                         --No-Tune -M -H config/FakeDataValidConfig.toml \
+                #                         -a ${ELE} \
+                #                         -o FDSValid/FakeDataValid_GENIE_notune.root \
+                #                         -d ND280/GENIE/${ELE}/${SPC} &
+                #     wait
+
+                # done
+            else
 
                 bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.${SPC}.root \
                                     -F FDSInputs/FakeDataInputs.root \
-                                    -H config/FakeDataValidConfig.toml \
-                                    -W ${WGHTSCHEME} \
-                                    -a ${ELE} \
-                                    -o FDSValid/FakeDataValid_${WGHTSCHEME}.root \
-                                    -d NOvAND/${WGHTSCHEME}/${ELE}/${SPC} &
-            done
+                                    -M -H config/FakeDataValidConfig.toml \
+                                    -W NOvA_to_T2KND_ptlep \
+                                    -a any \
+                                    -o FDSValid/FakeDataValid_NOvA_to_T2KND_ptlep.root \
+                                    -d NOvAND/NOvA_to_T2KND_ptlep/${TGT}/${SPC} &
 
-            wait
+                bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.NOvAND.${TGT}.${SPC}.root \
+                                    -F FDSInputs/FakeDataInputs.root \
+                                    -M -H config/FakeDataValidConfig.toml \
+                                    -a any \
+                                    -o FDSValid/FakeDataValid_NEUT.root \
+                                    -d NOvAND/T2KNDTune/${TGT}/${SPC} &
 
-            bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.NOvAND.${TGT}.${SPC}.root \
-                                -F FDSInputs/FakeDataInputs.root \
-                                -H config/FakeDataValidConfig.toml \
-                                -a ${ELE} \
-                                -o FDSValid/FakeDataValid_NEUT.root \
-                                -d NOvAND/T2KNDTune/${ELE}/${SPC} &
+                bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.${SPC}.root \
+                                    -F FDSInputs/FakeDataInputs.root \
+                                    -M -H config/FakeDataValidConfig.toml \
+                                    -a any \
+                                    -o FDSValid/FakeDataValid_GENIE.root \
+                                    -d NOvAND/NOvATune/${TGT}/${SPC} &
 
-            bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.${SPC}.root \
-                                -F FDSInputs/FakeDataInputs.root \
-                                -H config/FakeDataValidConfig.toml \
-                                -a ${ELE} \
-                                -o FDSValid/FakeDataValid_GENIE.root \
-                                -d NOvAND/NOvATune/${ELE}/${SPC} &
-            wait
+                wait
 
+                bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.NOvAND.${TGT}.${SPC}.root \
+                                    -F FDSInputs/FakeDataInputs.root \
+                                    --No-Tune -M -H config/FakeDataValidConfig.toml \
+                                    -a any \
+                                    -o FDSValid/FakeDataValid_NEUT_notune.root \
+                                    -d NOvAND/NEUT/${TGT}/${SPC} &
+
+                bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.${SPC}.root \
+                                    -F FDSInputs/FakeDataInputs.root \
+                                    --No-Tune -M -H config/FakeDataValidConfig.toml \
+                                    -a any \
+                                    -o FDSValid/FakeDataValid_GENIE_notune.root \
+                                    -d NOvAND/GENIE/${TGT}/${SPC} &
+              
+                wait
+
+                for ELE in ${MAT_ELEMENTS["${TGT}"]}; do
+
+                    bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.${SPC}.root \
+                                        -F FDSInputs/FakeDataInputs.root \
+                                        -M -H config/FakeDataValidConfig.toml \
+                                        -W NOvA_to_T2KND_ptlep \
+                                        -a ${ELE} \
+                                        -o FDSValid/FakeDataValid_NOvA_to_T2KND_ptlep.root \
+                                        -d NOvAND/NOvA_to_T2KND_ptlep/${ELE}/${SPC} &
+
+                    bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.NOvAND.${TGT}.${SPC}.root \
+                                        -F FDSInputs/FakeDataInputs.root \
+                                        -M -H config/FakeDataValidConfig.toml \
+                                        -a ${ELE} \
+                                        -o FDSValid/FakeDataValid_NEUT.root \
+                                        -d NOvAND/T2KNDTune/${ELE}/${SPC} &
+
+                    bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.${SPC}.root \
+                                        -F FDSInputs/FakeDataInputs.root \
+                                        -M -H config/FakeDataValidConfig.toml \
+                                        -a ${ELE} \
+                                        -o FDSValid/FakeDataValid_GENIE.root \
+                                        -d NOvAND/NOvATune/${ELE}/${SPC} &
+
+                    wait
+
+                    bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.NOvAND.${TGT}.${SPC}.root \
+                                        -F FDSInputs/FakeDataInputs.root \
+                                        --No-Tune -M -H config/FakeDataValidConfig.toml \
+                                        -a ${ELE} \
+                                        -o FDSValid/FakeDataValid_NEUT_notune.root \
+                                        -d NOvAND/NEUT/${ELE}/${SPC} &
+
+                    bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.${SPC}.root \
+                                        -F FDSInputs/FakeDataInputs.root \
+                                        --No-Tune -M -H config/FakeDataValidConfig.toml \
+                                        -a ${ELE} \
+                                        -o FDSValid/FakeDataValid_GENIE_notune.root \
+                                        -d NOvAND/GENIE/${ELE}/${SPC} &
+                    wait
+
+                done
+
+            fi
         done
-      done
+        wait
     done
 done
  

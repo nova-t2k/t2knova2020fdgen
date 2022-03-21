@@ -12,11 +12,14 @@ int main(int argc, char const *argv[]) {
   t2knova::T2KNOvATruthTreeReader rdr(ttrdr);
   while (ttrdr.Next()) {
     auto sels = rdr.GetSelections();
-    if ((rdr.Mode() == -1) && (std::find(sels.begin(), sels.end(),
-                                         t2knova::kCCOther) != sels.end())) {
+    if (
+      //(rdr.Mode() == -1) &&
+        (std::find(sels.begin(), sels.end(), t2knova::kCCOther) !=
+         sels.end()) &&
+        (rdr.Enu_true() < 1)) {
       std::cout << rdr.PrintStack() << std::endl;
 
-      std::cout << "- Selected as: ";
+      std::cout << "Mode: " << rdr.Mode() << " - Selected as: ";
       for (auto sel : sels) {
         std::cout << " " << sel << ": " << t2knova::SelectionList[sel];
       }

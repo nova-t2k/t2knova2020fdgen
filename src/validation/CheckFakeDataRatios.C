@@ -27,7 +27,7 @@ int main(int argc, char const *argv[]) {
     c2->Print("T2KNOvATunePreds_modes.pdf[");
   }
 
-  for (auto detstr : {"ND280"}) {
+  for (auto detstr : {"ND280", "NOvAND"}) {
     for (auto selstr : selstrs) {
       for (auto tgtstr : {"C", "O", "H"}) {
         for (auto nuspec : {
@@ -37,6 +37,7 @@ int main(int argc, char const *argv[]) {
           for (auto _projstr : {
                    "Enu",
                    "Q2",
+                   "PLep_prj0",
                    "EGamma",
                    "Enu_Frac",
                }) {

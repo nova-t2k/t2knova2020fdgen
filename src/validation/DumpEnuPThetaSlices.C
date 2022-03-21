@@ -31,6 +31,7 @@ int main(int argc, char const *argv[]) {
            t2knova::kCC1cpi,
            t2knova::kCC1pi0,
            t2knova::kCCmultipi,
+           t2knova::kCC1Gamma,
            t2knova::kCCOther,
        }) {
 

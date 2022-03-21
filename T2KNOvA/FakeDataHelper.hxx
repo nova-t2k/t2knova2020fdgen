@@ -20,14 +20,16 @@ constexpr double MaxFracError = 1.0 / sqrt(NMinEvs);
 double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg, int tgta,
                                         double E_nu_GeV, double PLep_GeV,
                                         double EVisHadronic_GeV,
+                                        int PrimSel = -1,
                                         bool interpolate = true);
 double GetFakeDataWeight_NOvAToT2K_Q2(int nu_pdg, int lep_pdg, int tgta,
                                       double E_nu_GeV, double Q2_GeV2,
-                                      double EVisHadronic_GeV,
+                                      double EVisHadronic_GeV, int PrimSel = -1,
                                       bool interpolate = true);
 double GetFakeDataWeight_NOvAToT2K_PtLep(int nu_pdg, int lep_pdg, int tgta,
                                          double E_nu_GeV, double PtLep_GeV,
                                          double EVisHadronic_GeV,
+                                         int PrimSel = -1,
                                          bool interpolate = true);
 double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg, int tgta,
                                      double E_nu_GeV, double PLep_GeV,
@@ -116,12 +118,13 @@ inline void LoadHists(std::string const &inputfile = "FakeDataInputs.root") {
             rwhists[nuspec][rwconfig][tgta_sel_offset + sel]->SetDirectory(
                 nullptr);
             found++;
-          } else {
-            std::cout << "[WARN]: Failed to read "
-                      << rwconfig_str + "/" + tgta_str + "/" + nuspec_str +
-                             "/" + sel_str
-                      << std::endl;
           }
+          // else {
+          //   std::cout << "[WARN]: Failed to read "
+          //             << rwconfig_str + "/" + tgta_str + "/" + nuspec_str +
+          //                    "/" + sel_str
+          //             << std::endl;
+          // }
 
           if (rwconfig == kT2KND_to_NOvA) {
             EnuCorrections[nuspec][rwconfig][tgta_sel_offset + sel] =
@@ -147,7 +150,7 @@ inline double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg,
                                                int tgta, double E_nu_GeV,
                                                double PLep_GeV,
                                                double EVisHadronic_GeV,
-                                               bool interpolate) {
+                                               int PrimSel, bool interpolate) {
   if (!loaded) {
     LoadHists();
   }
@@ -155,9 +158,10 @@ inline double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg,
 
   bool iscc = (nu_pdg != lep_pdg);
 
+  int offset = (PrimSel == -1) ? (iscc ? kCCInc : kNCInc) : PrimSel;
+
   std::unique_ptr<TH1> &rathist =
-      rwhists[nuspec][kNOvA_to_T2KND_plep]
-             [(tgta * 100) + (iscc ? kCCInc : kNCInc)];
+      rwhists[nuspec][kNOvA_to_T2KND_plep][(tgta * 100) + offset];
 
   if (rathist) {
     double wght =
@@ -171,7 +175,7 @@ inline double GetFakeDataWeight_NOvAToT2K_PLep(int nu_pdg, int lep_pdg,
 inline double GetFakeDataWeight_NOvAToT2K_Q2(int nu_pdg, int lep_pdg, int tgta,
                                              double E_nu_GeV, double Q2_GeV2,
                                              double EVisHadronic_GeV,
-                                             bool interpolate) {
+                                             int PrimSel, bool interpolate) {
   if (!loaded) {
     LoadHists();
   }
@@ -179,9 +183,10 @@ inline double GetFakeDataWeight_NOvAToT2K_Q2(int nu_pdg, int lep_pdg, int tgta,
 
   bool iscc = (nu_pdg != lep_pdg);
 
+  int offset = (PrimSel == -1) ? (iscc ? kCCInc : kNCInc) : PrimSel;
+
   std::unique_ptr<TH1> &rathist =
-      rwhists[nuspec][kNOvA_to_T2KND_Q2]
-             [(tgta * 100) + (iscc ? kCCInc : kNCInc)];
+      rwhists[nuspec][kNOvA_to_T2KND_Q2][(tgta * 100) + offset];
   if (rathist) {
     double wght =
         EvalHist3D(rathist, E_nu_GeV, Q2_GeV2, EVisHadronic_GeV, interpolate);
@@ -194,7 +199,7 @@ inline double GetFakeDataWeight_NOvAToT2K_PtLep(int nu_pdg, int lep_pdg,
                                                 int tgta, double E_nu_GeV,
                                                 double PtLep_GeV,
                                                 double EVisHadronic_GeV,
-                                                bool interpolate) {
+                                                int PrimSel, bool interpolate) {
   if (!loaded) {
     LoadHists();
   }
@@ -202,9 +207,10 @@ inline double GetFakeDataWeight_NOvAToT2K_PtLep(int nu_pdg, int lep_pdg,
 
   bool iscc = (nu_pdg != lep_pdg);
 
+  int offset = (PrimSel == -1) ? (iscc ? kCCInc : kNCInc) : PrimSel;
+
   std::unique_ptr<TH1> &rathist =
-      rwhists[nuspec][kNOvA_to_T2KND_ptlep]
-             [(tgta * 100) + (iscc ? kCCInc : kNCInc)];
+      rwhists[nuspec][kNOvA_to_T2KND_ptlep][(tgta * 100) + offset];
   if (rathist) {
     double wght =
         EvalHist3D(rathist, E_nu_GeV, PtLep_GeV, EVisHadronic_GeV, interpolate);

@@ -44,6 +44,38 @@ axis_titles = [
       "d#sigma/d#it{E_{#nu}} cm^{2} GeV^{-1}"
 ]
 
+[FakeDataConfig.PLep]
+
+title = "PLep"
+selections = [
+      "CCInc",
+      "CC0pi",
+      "CC1Gamma",
+      "CCNGamma",
+      "CC1cpi",
+      "CC1pi0",
+      "CCmultipi",
+      "CCOther",
+      "NCInc",
+      "NC0pi",
+      "NC1Gamma",
+      "NCNGamma",
+      "NC1cpi",
+      "NC1pi0",
+      "NCmultipi",
+      "NCOther",
+]
+
+x_binning = [
+      "uniform",
+      [200, 0, 10]
+]
+
+axis_titles = [
+      "#it{p}_{lep} (GeV/#it{c})",
+      "d#sigma/d#it{p}_{lep} cm^{2} GeV^{-1} c"
+]
+
 [FakeDataConfig.Q2]
 
 title = "Q2"
