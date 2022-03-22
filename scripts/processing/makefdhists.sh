@@ -18,7 +18,7 @@ SPECIES=( numu numub nue nueb )
 # SPECIES=( numu numub )
 
 DETECTORS=( NOvAND ND280 )
-DETECTORS=( ND280 )
+# DETECTORS=( ND280 )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"

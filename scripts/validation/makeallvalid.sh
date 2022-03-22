@@ -20,6 +20,13 @@ DET_MATS["ND280"]="H2O CH"
 # DET_MATS["ND280"]="CH"
 # DET_MATS["ND280"]="H2O"
 
+declare -A MAT_ELEMENTS
+MAT_ELEMENTS["CH"]="C H"
+# MAT_ELEMENTS["CH"]="C"
+MAT_ELEMENTS["H2O"]="H O"
+# MAT_ELEMENTS["CH"]=""
+# MAT_ELEMENTS["H2O"]=""
+
 for DET in ${DETECTORS}; do
     for TGT in ${DET_MATS[${DET}]}; do
         for SPC in ${SPECIES[@]}; do
@@ -74,6 +81,9 @@ for DET in ${DETECTORS}; do
                                         -d ND280/NOvATune_osc/${TGT}/${SPC} &
                     wait
                 fi
+
+                for ELE in ${MAT_ELEMENTS["${TGT}"]}; do
+                done
 
             else
 

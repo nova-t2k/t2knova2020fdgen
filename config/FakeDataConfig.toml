@@ -3,23 +3,7 @@
 [FakeDataConfig.EnuPLepThetaLep]
 
 title = "EnuPLepThetaLep"
-selections = [
-      "CC0pi",
-      "CC0pi_QE",
-      "CC0pi_2p2h",
-      "CC0pi_Other",
-      "CC1cpi",
-      "CC1pi0",
-      "CCmultipi",
-      "CC1Gamma",
-      "CCOther",
-      "NC0pi",
-      "NC1cpi",
-      "NC1pi0",
-      "NCmultipi",
-      "NC1Gamma",
-      "NCOther",
-]
+selections = [ "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "NC0pi", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", ]
 
 x_binning = [
       "var",
@@ -31,11 +15,6 @@ x_binning = [
             4.25, 4.5, 4.75, 5, 5.5, 6, 6.5,
             7, 8, 9, 10
       ]
-]
-
-x_unif_binning = [
-      "uniform",
-      [200, 0, 10]
 ]
 
 y_binning = [
@@ -59,23 +38,7 @@ axis_titles = [
 [FakeDataConfig.EnuPtLepEAvHad]
 
 title = "EnuPtLepEAvHad"
-selections = [
-      "CC0pi",
-      "CC0pi_QE",
-      "CC0pi_2p2h",
-      "CC0pi_Other",
-      "CC1cpi",
-      "CC1pi0",
-      "CCmultipi",
-      "CC1Gamma",
-      "CCOther",
-      "NC0pi",
-      "NC1cpi",
-      "NC1pi0",
-      "NCmultipi",
-      "NC1Gamma",
-      "NCOther",
-]
+selections = [ "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "NC0pi", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", ]
 
 x_binning = [
       "uniform",

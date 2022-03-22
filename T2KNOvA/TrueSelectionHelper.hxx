@@ -242,8 +242,8 @@ std::vector<std::string> SelectionList = {SEL_LIST};
 
 std::vector<selection> ReWeightSelectionList = {
     kCC0pi,  kCC0pi_QE,  kCC0pi_2p2h, kCC0pi_Other, kCC1cpi,
-    kCC1pi0, kCCmultipi, kCC1Gamma,   kCCOther,     kNC0pi,
-    kNC1cpi, kNC1pi0,    kNCmultipi,  kNC1Gamma,    kNCOther};
+    kCC1pi0, kCCmultipi, kCCOther,    kNC0pi,       kNC1cpi,
+    kNC1pi0, kNCmultipi, kNCOther};
 
 inline std::vector<int> GetSelections(FSParticleSummary fsps, int mode = 0) {
   std::vector<int> sels = std::vector<int>{fsps.IsCC ? kCCInc : kNCInc};
