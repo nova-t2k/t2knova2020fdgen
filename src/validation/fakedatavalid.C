@@ -23,7 +23,7 @@ bool bymode = false;
 bool dotune = true;
 bool doosc = false;
 
-TH1F *totxsecs;
+TrueChannelHist<TH1F> *XSecs;
 
 SelectionHists<TH3F> *EnuPLepThetaLep;
 SelectionHists<TH3F> *EnuPtLepEAvHad;
@@ -34,13 +34,13 @@ SelectionHists<TH1F> *ThetaLep;
 SelectionHists<TH1F> *EAvHad;
 SelectionHists<TH1F> *PtLep;
 SelectionHists<TH1F> *Q2;
-SelectionHists<TH1F> *q0;
-SelectionHists<TH1F> *q3;
 SelectionHists<TH2F> *q0q3;
 SelectionHists<TH1F> *hmfscpip;
 SelectionHists<TH1F> *hmfspi0p;
 SelectionHists<TH1F> *ncpi;
 SelectionHists<TH1F> *npi0;
+SelectionHists<TH1F> *EGamma;
+SelectionHists<TH1F> *EGamma_DeExcite;
 
 OscillationHelper oh_disp, oh_app, oh_dispb, oh_appb;
 
@@ -72,38 +72,35 @@ double EnuQErec(double elep, double plep, double costh, double binding,
 
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
           t2knova::reweightconfig weightconfig, int tgta_select = 0) {
-  EnuPLepThetaLep = SelectionHistsFromTOML<TH3F>(
-      "EnuPLepThetaLep", toml::find(plots_config, "EnuPLepThetaLep"));
-  EnuPtLepEAvHad = SelectionHistsFromTOML<TH3F>(
-      "EnuPtLepEAvHad", toml::find(plots_config, "EnuPtLepEAvHad"));
-  Enu = SelectionHistsFromTOML<TH1F>("Enu", toml::find(plots_config, "Enu"));
 
-  ERecQE = SelectionHistsFromTOML<TH1F>("ERecQE", toml::find(plots_config, "ERecQE"));
-  PLep = SelectionHistsFromTOML<TH1F>("PLep", toml::find(plots_config, "PLep"));
-  Q2 = SelectionHistsFromTOML<TH1F>("Q2", toml::find(plots_config, "Q2"));
-  q0 = SelectionHistsFromTOML<TH1F>("q0", toml::find(plots_config, "q0"));
-  q3 = SelectionHistsFromTOML<TH1F>("q3", toml::find(plots_config, "q3"));
-  q0q3 = SelectionHistsFromTOML<TH2F>("q0q3", toml::find(plots_config, "q0q3"));
+  EnuPLepThetaLep =
+      SelectionHistsFromTOML<TH3F>("EnuPLepThetaLep", plots_config);
 
-  ThetaLep = SelectionHistsFromTOML<TH1F>("ThetaLep",
-                                          toml::find(plots_config, "ThetaLep"));
+  EnuPtLepEAvHad = SelectionHistsFromTOML<TH3F>("EnuPtLepEAvHad", plots_config);
+  Enu = SelectionHistsFromTOML<TH1F>("Enu", plots_config);
 
-  EAvHad = SelectionHistsFromTOML<TH1F>("EAvHad",
-                                        toml::find(plots_config, "EAvHad"));
+  ERecQE = SelectionHistsFromTOML<TH1F>("ERecQE", plots_config);
+  PLep = SelectionHistsFromTOML<TH1F>("PLep", plots_config);
+  Q2 = SelectionHistsFromTOML<TH1F>("Q2", plots_config);
+  q0q3 = SelectionHistsFromTOML<TH2F>("q0q3", plots_config);
 
-  PtLep =
-      SelectionHistsFromTOML<TH1F>("PtLep", toml::find(plots_config, "PtLep"));
+  ThetaLep = SelectionHistsFromTOML<TH1F>("ThetaLep", plots_config);
 
-  hmfscpip = SelectionHistsFromTOML<TH1F>("hmfscpip",
-                                          toml::find(plots_config, "hmfscpip"));
-  hmfspi0p = SelectionHistsFromTOML<TH1F>("hmfspi0p",
-                                          toml::find(plots_config, "hmfspi0p"));
-  ncpi = SelectionHistsFromTOML<TH1F>("ncpi", toml::find(plots_config, "ncpi"));
-  npi0 = SelectionHistsFromTOML<TH1F>("npi0", toml::find(plots_config, "npi0"));
+  EAvHad = SelectionHistsFromTOML<TH1F>("EAvHad", plots_config);
 
-  totxsecs = new TH1F("totxsecs", ";;#sigma^{#int#Phi} cm^{2}",
-                      SelectionList.size(), 0, SelectionList.size());
-  totxsecs->SetDirectory(nullptr);
+  PtLep = SelectionHistsFromTOML<TH1F>("PtLep", plots_config);
+
+  hmfscpip = SelectionHistsFromTOML<TH1F>("hmfscpip", plots_config);
+  hmfspi0p = SelectionHistsFromTOML<TH1F>("hmfspi0p", plots_config);
+  ncpi = SelectionHistsFromTOML<TH1F>("ncpi", plots_config);
+  npi0 = SelectionHistsFromTOML<TH1F>("npi0", plots_config);
+
+  EGamma = SelectionHistsFromTOML<TH1F>("EGamma", plots_config);
+  EGamma_DeExcite = SelectionHistsFromTOML<TH1F>("EGamma_DeExcite", plots_config);
+
+  XSecs = new TrueChannelHist<TH1F>("SelectionXSecs", ";Selection;Rate",
+                                    AllSelectionList.size(), 0,
+                                    AllSelectionList.size());
 
   T2KNOvATruthTreeReader rdr(ttrdr);
   if (!bymode) {
@@ -133,7 +130,8 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
 
     double w = rdr.fScaleFactor() * (dotune ? rdr.RWWeight() : 1);
 
-    if (doosc && (std::abs(rdr.Mode()) < 30)) { //Oscillate CC events if enabled
+    if (doosc && (std::abs(rdr.Mode()) < 30)) { // Oscillate CC events if
+                                                // enabled
       switch (rdr.PDGNu()) {
       case 14: {
         w *= oh_disp.GetWeight(rdr.Enu_true());
@@ -156,32 +154,12 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
       }
     }
 
-    int primary_selection = rdr.GetPrimarySelection();
+    int primary_selection = rdr.GetPrimarySelection(rdr.Mode());
 
     if (weightconfig == t2knova::kT2KND_to_NOvA) {
       w *= t2knova::GetFakeDataWeight_ND280ToNOvA(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
           rdr.AngLep_deg(), primary_selection, false);
-    } else if (weightconfig == t2knova::kT2KND_to_NOvA_EnuKludge) {
-      w *= t2knova::GetFakeDataWeight_ND280ToNOvA_EnuKludge(
-          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
-          rdr.AngLep_deg(), primary_selection, false);
-    } else if (weightconfig == t2knova::kT2KND_to_NOvA_Enu) {
-      w *= t2knova::GetFakeDataWeight_ND280ToNOvA_Enu(
-          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
-          primary_selection, false);
-    } else if (weightconfig == t2knova::kT2KND_to_NOvA_Q2) {
-      w *= t2knova::GetFakeDataWeight_ND280ToNOvA_Q2(rdr.PDGNu(), rdr.PDGLep(),
-                                                     rdr.tgta(), rdr.Q2(),
-                                                     primary_selection, false);
-    } else if (weightconfig == t2knova::kNOvA_to_T2KND_plep) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_PLep(
-          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
-          rdr.Eav_NOvA(), primary_selection, false);
-    } else if (weightconfig == t2knova::kNOvA_to_T2KND_Q2) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_Q2(
-          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.Q2(),
-          rdr.Eav_NOvA(), primary_selection, false);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
       w *= t2knova::GetFakeDataWeight_NOvAToT2K_PtLep(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
@@ -189,7 +167,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
           primary_selection, false);
     }
 
-    std::vector<int> sels = rdr.GetSelections();
+    std::vector<int> sels = rdr.GetSelections(rdr.Mode());
 
     if (!sels.size()) {
       ent_it++;
@@ -212,13 +190,18 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     PtLep->Fill(w, sels, rdr.Mode(),
                 rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)));
     Q2->Fill(w, sels, rdr.Mode(), rdr.Q2());
-    q0->Fill(w, sels, rdr.Mode(), rdr.q0());
-    q3->Fill(w, sels, rdr.Mode(), rdr.q3());
-    q0q3->Fill(w, sels, rdr.Mode(), rdr.q0(), rdr.q3());
+    q0q3->Fill(w, sels, rdr.Mode(), rdr.q3(), rdr.q0());
     hmfscpip->Fill(w, sels, rdr.Mode(), rdr.hmfscpip());
     hmfspi0p->Fill(w, sels, rdr.Mode(), rdr.hmfspi0p());
     ncpi->Fill(w, sels, rdr.Mode(), rdr.ncpi());
     npi0->Fill(w, sels, rdr.Mode(), rdr.npi0());
+
+    EGamma->Fill(w, sels, rdr.Mode(), rdr.EGamma());
+    EGamma_DeExcite->Fill(w, sels, rdr.Mode(), rdr.EGamma());
+
+    for (auto sel : sels) {
+      XSecs->Fill(w, rdr.Mode(), sel);
+    }
 
     ent_it++;
   }
@@ -294,16 +277,6 @@ void handleOpts(int argc, char const *argv[]) {
       std::string arg = std::string(argv[++opt]);
       if (arg == "T2KND_to_NOvA") {
         wconfig = t2knova::kT2KND_to_NOvA;
-      } else if (arg == "T2KND_to_NOvA_EnuKludge") {
-        wconfig = t2knova::kT2KND_to_NOvA_EnuKludge;
-      } else if (arg == "T2KND_to_NOvA_Enu") {
-        wconfig = t2knova::kT2KND_to_NOvA_Enu;
-      } else if (arg == "T2KND_to_NOvA_Q2") {
-        wconfig = t2knova::kT2KND_to_NOvA_Q2;
-      } else if (arg == "NOvA_to_T2KND_plep") {
-        wconfig = t2knova::kNOvA_to_T2KND_plep;
-      } else if (arg == "NOvA_to_T2KND_Q2") {
-        wconfig = t2knova::kNOvA_to_T2KND_Q2;
       } else if (arg == "NOvA_to_T2KND_ptlep") {
         wconfig = t2knova::kNOvA_to_T2KND_ptlep;
       } else {
@@ -373,11 +346,13 @@ int main(int argc, char const *argv[]) {
 
   TDirectory *dout = MakeDirectoryStructure(&fout, output_dir);
 
-  for (int i = 0; i < SelectionList.size(); ++i) {
-    totxsecs->GetXaxis()->SetBinLabel(i + 1, SelectionList[i].c_str());
-  }
+  XSecs->Apply([](TH1F &h) {
+    for (int i = 0; i < SelectionList.size(); ++i) {
+      h.GetXaxis()->SetBinLabel(i + 1, SelectionList[i].c_str());
+    }
+  });
 
-  dout->WriteTObject(totxsecs, "totxsecs");
+  XSecs->Write(dout);
   EnuPLepThetaLep->Write(dout, true);
   EnuPtLepEAvHad->Write(dout, true);
   Enu->Write(dout, true);
@@ -386,14 +361,15 @@ int main(int argc, char const *argv[]) {
   EAvHad->Write(dout, true);
   PtLep->Write(dout, true);
   Q2->Write(dout, true);
-  q0->Write(dout, true);
-  q3->Write(dout, true);
   q0q3->Write(dout, true);
 
   hmfscpip->Write(dout, true);
   hmfspi0p->Write(dout, true);
   ncpi->Write(dout, true);
   npi0->Write(dout, true);
+  
+  EGamma->Write(dout, true);
+  EGamma_DeExcite->Write(dout, true);
 
   fout.Close();
 }

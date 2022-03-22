@@ -1,0 +1,112 @@
+[FakeDataValidConfig]
+
+EnuCut = 20.0
+
+[FakeDataValidConfig.Enu]
+
+title = "Enu"
+selections = [
+  "CCInc", "NCInc", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0", "CCmultipi", "CC1Gamma", "CCOther", "NC0pi", "NC1cpi", "NC1pi0", "NCmultipi", "NC1Gamma", "NCOther",
+]
+
+x_binning = [
+      "var",
+      [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45,
+        0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,
+        0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2,
+        2.2, 2.4, 2.6, 2.8, 3, 3.25, 3.5, 3.75 , 4,
+        4.25, 4.5, 4.75, 5, 5.5, 6, 6.5,
+        7, 8
+      ]
+]
+
+axis_titles = [
+      "#it{E}_{#nu} (GeV)",
+      "d#sigma/d#it{E}_{#nu} cm^{2} GeV^{-1}"
+]
+
+[FakeDataValidConfig.q0q3]
+
+title = "q0q3"
+selections = [
+  "CCInc", "NCInc", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0", "CCmultipi", "CC1Gamma", "CCOther", "NC0pi", "NC1cpi", "NC1pi0", "NCmultipi", "NC1Gamma", "NCOther",
+]
+
+x_binning = [
+      "uniform",
+      [50, 0, 2]
+]
+
+y_binning = [
+      "uniform",
+      [50, 0, 2]
+]
+
+axis_titles = [
+      "q_{0} (GeV)",
+      "q_{3} (GeV/#it{c})",
+      "d#sigma/dq_{0}_{3} cm^{2} GeV^{-2} #it{c}"
+]
+
+[FakeDataValidConfig.EAvHad]
+
+title = "EAvHad"
+selections = [
+  "CCInc", "NCInc", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0", "CCmultipi", "CC1Gamma", "CCOther", "NC0pi", "NC1cpi", "NC1pi0", "NCmultipi", "NC1Gamma", "NCOther",
+]
+
+x_binning = [
+      "uniform",
+      [100, 0, 5]
+]
+
+axis_titles = [
+      "it{E}_{had}^{vis} (GeV)",
+      "d#sigma/d#it{E}_{had}^{vis} cm^{2} GeV^{-1}"
+]
+
+[FakeDataValidConfig.PtLep]
+
+title = "PtLep"
+selections = [
+  "CCInc", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0", "CCmultipi", "CC1Gamma", "CCOther",
+]
+
+x_binning = [
+      "uniform",
+      [100, 0, 2]
+]
+
+axis_titles = [
+      "#it{p}^{T}_{lep} (GeV)",
+      "d#sigma/d#it{p}^{T}_{lep} cm^{2} GeV^{-1} #it{c}"
+]
+
+[FakeDataValidConfig.EnuPtLepEAvHad]
+
+title = "EnuPtLepEAvHad"
+selections = [
+  "CCInc", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0", "CCmultipi", "CC1Gamma", "CCOther",
+]
+
+x_binning = [
+      "uniform",
+      [60, 0, 20]
+]
+
+y_binning = [
+      "uniform",
+      [40,0,2]
+]
+
+z_binning = [
+      "uniform",
+      [100, 0, 10]
+]
+
+axis_titles = [
+      "#it{E}_{#nu} (GeV)",
+      "#it{p}^{T}_{lep} (GeV/#it{c})",
+      "#it{E}_{Had}^{Vis} (GeV)",
+      "GeV^{-4} #it{c}"
+]

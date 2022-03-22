@@ -17,67 +17,26 @@
 
 bool bymode = false;
 
-std::string FixProjName(std::string, std::string const &);
-
 using namespace t2knova;
 
-TrueChannelHist<TH1F> *totxsecs;
-TrueChannelHist<TH1F> *totxsecs_untuned;
-
-SelectionHists<TH1F> *Enu;
-SelectionHists<TH1F> *Enu_untuned;
-SelectionHists<TH1F> *PLep;
-SelectionHists<TH1F> *PLep_untuned;
-SelectionHists<TH1F> *Q2;
-SelectionHists<TH1F> *Q2_untuned;
-SelectionHists<TH1F> *EGamma;
-SelectionHists<TH1F> *EGamma_untuned;
 SelectionHists<TH3F> *EnuPLepThetaLep;
-SelectionHists<TH3F> *EnuPLepThetaLep_untuned;
-SelectionHists<TH3F> *EnuPLepEAvHad;
-SelectionHists<TH3F> *EnuQ2EAvHad;
 SelectionHists<TH3F> *EnuPtLepEAvHad;
+TrueChannelHist<TH1F> *XSecs;
 
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
           int tgta_select = 0) {
-  Enu = SelectionHistsFromTOML<TH1F>("Enu", toml::find(plots_config, "Enu"));
-  Enu_untuned = SelectionHistsFromTOML<TH1F>("Enu_untuned",
-                                             toml::find(plots_config, "Enu"));
-
-  PLep = SelectionHistsFromTOML<TH1F>("PLep", toml::find(plots_config, "PLep"));
-  PLep_untuned = SelectionHistsFromTOML<TH1F>("PLep_untuned",
-                                              toml::find(plots_config, "PLep"));
-
-  Q2 = SelectionHistsFromTOML<TH1F>("Q2", toml::find(plots_config, "Q2"));
-  Q2_untuned = SelectionHistsFromTOML<TH1F>("Q2_untuned",
-                                            toml::find(plots_config, "Q2"));
-
-  EGamma = SelectionHistsFromTOML<TH1F>("EGamma",
-                                        toml::find(plots_config, "EGamma"));
-  EGamma_untuned = SelectionHistsFromTOML<TH1F>(
-      "EGamma_untuned", toml::find(plots_config, "EGamma"));
 
   if (ist2k) {
-    EnuPLepThetaLep = SelectionHistsFromTOML<TH3F>(
-        "EnuPLepThetaLep", toml::find(plots_config, "EnuPLepThetaLep"));
-    EnuPLepThetaLep_untuned = SelectionHistsFromTOML<TH3F>(
-        "EnuPLepThetaLep_untuned", toml::find(plots_config, "EnuPLepThetaLep"));
+    EnuPLepThetaLep =
+        SelectionHistsFromTOML<TH3F>("EnuPLepThetaLep", plots_config);
   } else {
-    EnuPLepEAvHad = SelectionHistsFromTOML<TH3F>(
-        "EnuPLepEAvHad", toml::find(plots_config, "EnuPLepEAvHad"));
-    EnuQ2EAvHad = SelectionHistsFromTOML<TH3F>(
-        "EnuQ2EAvHad", toml::find(plots_config, "EnuQ2EAvHad"));
-    EnuPtLepEAvHad = SelectionHistsFromTOML<TH3F>(
-        "EnuPtLepEAvHad", toml::find(plots_config, "EnuPtLepEAvHad"));
+    EnuPtLepEAvHad =
+        SelectionHistsFromTOML<TH3F>("EnuPtLepEAvHad", plots_config);
   }
 
-  totxsecs =
-      new TrueChannelHist<TH1F>("totxsecs", ";;#sigma^{#int#Phi} cm^{2}",
-                                SelectionList.size(), 0, SelectionList.size());
-
-  totxsecs_untuned = new TrueChannelHist<TH1F>(
-      "totxsecs_untuned", ";;#sigma^{#int#Phi} cm^{2}", SelectionList.size(), 0,
-      SelectionList.size());
+  XSecs = new TrueChannelHist<TH1F>("SelectionXSecs", ";Selection;Rate",
+                                    AllSelectionList.size(), 0,
+                                    AllSelectionList.size());
 
   T2KNOvATruthTreeReader rdr(ttrdr);
   if (!bymode) {
@@ -101,44 +60,26 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
 
     double w = rdr.fScaleFactor() * rdr.RWWeight();
 
-    std::vector<int> sels = rdr.GetSelections();
+    std::vector<int> sels = rdr.GetSelections(rdr.Mode());
 
     if (!sels.size()) {
       ent_it++;
       continue;
     }
 
-    bool iscc = rdr.PDGLep() % 2;
-
-    for (int s : sels) {
-      totxsecs->Fill(w, rdr.Mode(), s);
-      totxsecs_untuned->Fill(rdr.fScaleFactor(), rdr.Mode(), s);
-    }
-
-    Enu->Fill(w, sels, rdr.Mode(), rdr.Enu_true());
-    Enu_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(), rdr.Enu_true());
-    PLep->Fill(w, sels, rdr.Mode(), rdr.PLep());
-    PLep_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(), rdr.PLep());
-    Q2->Fill(w, sels, rdr.Mode(), rdr.Q2());
-    Q2_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(), rdr.Q2());
-    EGamma->Fill(w, sels, rdr.Mode(), rdr.EGamma());
-
-    EGamma_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(), rdr.EGamma());
     if (ist2k) {
       EnuPLepThetaLep->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.PLep(),
                             rdr.AngLep_deg());
-      EnuPLepThetaLep_untuned->Fill(rdr.fScaleFactor(), sels, rdr.Mode(),
-                                    rdr.Enu_true(), rdr.PLep(),
-                                    rdr.AngLep_deg());
     } else {
-      EnuPLepEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.PLep(),
-                          rdr.Eav_NOvA());
-      EnuQ2EAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2(),
-                        rdr.Eav_NOvA());
       EnuPtLepEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(),
                            rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)),
                            rdr.Eav_NOvA());
     }
+
+    for (auto sel : sels) {
+      XSecs->Fill(w, rdr.Mode(), sel);
+    }
+
     ent_it++;
   }
 }
@@ -237,186 +178,19 @@ int main(int argc, char const *argv[]) {
 
   TDirectory *dout = MakeDirectoryStructure(&fout, output_dir);
 
-  auto axis_labeler = [](TH1F &h) {
+  XSecs->Apply([](TH1F &h) {
     for (int i = 0; i < SelectionList.size(); ++i) {
       h.GetXaxis()->SetBinLabel(i + 1, SelectionList[i].c_str());
     }
-  };
-
-  totxsecs->Apply(axis_labeler);
-  totxsecs->Write(dout);
-
-  totxsecs_untuned->Apply(axis_labeler);
-  totxsecs_untuned->Write(dout);
-
-  Enu->Write(dout, true);
-  Enu_untuned->Write(dout, true);
-
-  PLep->Write(dout, true);
-  PLep_untuned->Write(dout, true);
-
-  Q2->Write(dout, true);
-  Q2_untuned->Write(dout, true);
-
-  EGamma->Write(dout, true);
-  EGamma_untuned->Write(dout, true);
-
-  auto ProjYZ = [=](TH3F const &h) -> TH2F {
-    std::unique_ptr<TH2F> h2 = dynamic_cast_uptr<TH2F>(Project3D(h, "yz"));
-    h2->SetDirectory(nullptr);
-    h2->SetName(FixProjName(h.GetName(), "yz").c_str());
-    return TH2F(*h2.get());
-  };
-  auto ProjYX = [=](TH3F const &h) -> TH2F {
-    std::unique_ptr<TH2F> h2 = dynamic_cast_uptr<TH2F>(Project3D(h, "yx"));
-    h2->SetDirectory(nullptr);
-    h2->SetName(FixProjName(h.GetName(), "yx").c_str());
-    return TH2F(*h2.get());
-  };
-  auto ProjXZ = [=](TH3F const &h) -> TH2F {
-    std::unique_ptr<TH2F> h2 = dynamic_cast_uptr<TH2F>(Project3D(h, "xz"));
-    h2->SetDirectory(nullptr);
-    h2->SetName(FixProjName(h.GetName(), "xz").c_str());
-    return TH2F(*h2.get());
-  };
-
-  auto ProjX = [=](TH3F const &h) -> TH1F {
-    std::unique_ptr<TH1F> h1 = dynamic_cast_uptr<TH1F>(Project3D(h, "x"));
-    h1->SetDirectory(nullptr);
-    h1->SetName(FixProjName(h.GetName(), "x").c_str());
-    return TH1F(*h1.get());
-  };
-
-  auto ProjY = [=](TH3F const &h) -> TH1F {
-    std::unique_ptr<TH1F> h1 = dynamic_cast_uptr<TH1F>(Project3D(h, "y"));
-    h1->SetDirectory(nullptr);
-    h1->SetName(FixProjName(h.GetName(), "y").c_str());
-    return TH1F(*h1.get());
-  };
-
-  auto ProjZ = [=](TH3F const &h) -> TH1F {
-    std::unique_ptr<TH1F> h1 = dynamic_cast_uptr<TH1F>(Project3D(h, "z"));
-    h1->SetDirectory(nullptr);
-    h1->SetName(FixProjName(h.GetName(), "z").c_str());
-    return TH1F(*h1.get());
-  };
+  });
 
   if (ist2k) {
     EnuPLepThetaLep->Write(dout, true);
-    auto PLepThetaLep = EnuPLepThetaLep->Transform<TH2F>(ProjYZ);
-    PLepThetaLep.Write(dout, true);
-    auto EnuPLep = EnuPLepThetaLep->Transform<TH2F>(ProjYX);
-    EnuPLep.Write(dout, true);
-    auto EnuThetaLep = EnuPLepThetaLep->Transform<TH2F>(ProjXZ);
-    EnuThetaLep.Write(dout, true);
-
-    auto EnuProj = EnuPLepThetaLep->Transform<TH1F>(ProjX);
-    EnuProj.Write(dout, true);
-    auto PLep = EnuPLepThetaLep->Transform<TH1F>(ProjY);
-    PLep.Write(dout, true);
-    auto ThetaLep = EnuPLepThetaLep->Transform<TH1F>(ProjZ);
-    ThetaLep.Write(dout, true);
-
-    EnuPLepThetaLep_untuned->Write(dout, true);
-    auto PLepThetaLep_untuned =
-        EnuPLepThetaLep_untuned->Transform<TH2F>(ProjYZ);
-    PLepThetaLep_untuned.Write(dout, true);
-    auto EnuPLep_untuned = EnuPLepThetaLep_untuned->Transform<TH2F>(ProjYX);
-    EnuPLep_untuned.Write(dout, true);
-    auto EnuThetaLep_untuned = EnuPLepThetaLep_untuned->Transform<TH2F>(ProjXZ);
-    EnuThetaLep_untuned.Write(dout, true);
-
-    auto EnuProj_untuned = EnuPLepThetaLep_untuned->Transform<TH1F>(ProjX);
-    EnuProj_untuned.Write(dout, true);
-    auto PLep_untuned = EnuPLepThetaLep_untuned->Transform<TH1F>(ProjY);
-    PLep_untuned.Write(dout, true);
-    auto ThetaLep_untuned = EnuPLepThetaLep_untuned->Transform<TH1F>(ProjZ);
-    ThetaLep_untuned.Write(dout, true);
   } else {
-    EnuPLepEAvHad->Write(dout, true);
-    auto PLepEAvHad = EnuPLepEAvHad->Transform<TH2F>(ProjYZ);
-    PLepEAvHad.Write(dout, true);
-    auto EnuPLep = EnuPLepEAvHad->Transform<TH2F>(ProjYX);
-    EnuPLep.Write(dout, true);
-    auto EnuEAvHad = EnuPLepEAvHad->Transform<TH2F>(ProjXZ);
-    EnuEAvHad.Write(dout, true);
-
-    EnuQ2EAvHad->Write(dout, true);
-    auto Q2EAvHad = EnuQ2EAvHad->Transform<TH2F>(ProjYZ);
-    Q2EAvHad.Write(dout, true);
-    auto EnuQ2 = EnuQ2EAvHad->Transform<TH2F>(ProjYX);
-    EnuQ2.Write(dout, true);
-
     EnuPtLepEAvHad->Write(dout, true);
-    auto PtLepEAvHad = EnuPtLepEAvHad->Transform<TH2F>(ProjYZ);
-    PtLepEAvHad.Write(dout, true);
-    auto EnuPtLep = EnuPtLepEAvHad->Transform<TH2F>(ProjYX);
-    EnuPtLep.Write(dout, true);
   }
+
+  XSecs->Write(dout);
 
   fout.Close();
-}
-
-std::string FixProjName(std::string name, std::string const &proj) {
-  std::string ogname = name;
-  if (name.find("EnuPLepThetaLep") != std::string::npos) {
-    if (proj == "yz") {
-      name.replace(0, std::string("EnuPLepThetaLep").size(),
-                   "PLepThetaLep_prj0");
-    } else if (proj == "yx") {
-      name.replace(0, std::string("EnuPLepThetaLep").size(), "PLepEnu_prj0");
-    } else if (proj == "xz") {
-      name.replace(0, std::string("EnuPLepThetaLep").size(),
-                   "EnuThetaLep_prj0");
-    } else if (proj == "x") {
-      name.replace(0, std::string("EnuPLepThetaLep").size(), "Enu_prj0");
-    } else if (proj == "y") {
-      name.replace(0, std::string("EnuPLepThetaLep").size(), "PLep_prj0");
-    } else if (proj == "z") {
-      name.replace(0, std::string("EnuPLepThetaLep").size(), "ThetaLep_prj0");
-    }
-  } else if (name.find("EnuPLepEAvHad") != std::string::npos) {
-    if (proj == "yz") {
-      name.replace(0, std::string("EnuPLepEAvHad").size(), "PLepEAvHad_prj1");
-    } else if (proj == "yx") {
-      name.replace(0, std::string("EnuPLepEAvHad").size(), "PLepEnu_prj1");
-    } else if (proj == "xz") {
-      name.replace(0, std::string("EnuPLepEAvHad").size(), "EnuEAvHad_prj1");
-    } else if (proj == "x") {
-      name.replace(0, std::string("EnuPLepEAvHad").size(), "Enu_prj1");
-    } else if (proj == "y") {
-      name.replace(0, std::string("EnuPLepEAvHad").size(), "PLep_prj1");
-    } else if (proj == "z") {
-      name.replace(0, std::string("EnuPLepEAvHad").size(), "EAvHad_prj1");
-    }
-  } else if (name.find("EnuQ2EAvHad") != std::string::npos) {
-    if (proj == "yz") {
-      name.replace(0, std::string("EnuQ2EAvHad").size(), "Q2EAvHad_prj2");
-    } else if (proj == "yx") {
-      name.replace(0, std::string("EnuQ2EAvHad").size(), "Q2Enu_prj2");
-    } else if (proj == "xz") {
-      name.replace(0, std::string("EnuQ2EAvHad").size(), "EnuEAvHad_prj2");
-    } else if (proj == "x") {
-      name.replace(0, std::string("EnuQ2EAvHad").size(), "Enu_prj2");
-    } else if (proj == "y") {
-      name.replace(0, std::string("EnuQ2EAvHad").size(), "Q2_prj2");
-    } else if (proj == "z") {
-      name.replace(0, std::string("EnuQ2EAvHad").size(), "EAvHad_prj2");
-    }
-  } else if (name.find("EnuPtLepEAvHad") != std::string::npos) {
-    if (proj == "yz") {
-      name.replace(0, std::string("EnuPtLepEAvHad").size(), "PtLepEAvHad_prj3");
-    } else if (proj == "yx") {
-      name.replace(0, std::string("EnuPtLepEAvHad").size(), "PtLepEnu_prj3");
-    } else if (proj == "xz") {
-      name.replace(0, std::string("EnuPtLepEAvHad").size(), "EnuEAvHad_prj3");
-    } else if (proj == "x") {
-      name.replace(0, std::string("EnuPtLepEAvHad").size(), "Enu_prj3");
-    } else if (proj == "y") {
-      name.replace(0, std::string("EnuPtLepEAvHad").size(), "PtLep_prj3");
-    } else if (proj == "z") {
-      name.replace(0, std::string("EnuPtLepEAvHad").size(), "EAvHad_prj3");
-    }
-  }
-  return name;
 }

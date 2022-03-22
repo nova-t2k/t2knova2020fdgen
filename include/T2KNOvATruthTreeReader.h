@@ -36,9 +36,9 @@ public:
   float AngLep_deg() { return acos(*_CosLep) * (180.0 / M_PI); }
   float EavAlt() { return *_EavAlt; }
 
-  TLorentzVector FSLepP4(){
+  TLorentzVector FSLepP4() {
     for (int i = 0; i < *_nfsp; ++i) {
-      if(_pdg[i] == PDGLep()){
+      if (_pdg[i] == PDGLep()) {
         return TLorentzVector(_px[i], _py[i], _pz[i], _E[i]);
       }
     }
@@ -200,14 +200,18 @@ public:
     rdr.Restart();
   }
 
-  std::vector<int> GetSelections() {
+  std::vector<int> GetSelections(int Mode = 0) {
     return t2knova::GetSelections(
-        T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress()));
+        T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress(),
+                                           (float *)_E.GetAddress()),
+        Mode);
   }
 
-  int GetPrimarySelection() {
+  int GetPrimarySelection(int Mode = 0) {
     return t2knova::GetPrimarySelection(
-        T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress()));
+        T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress(),
+                                           (float *)_E.GetAddress()),
+        Mode);
   }
 
 private:

@@ -217,7 +217,17 @@ template <typename TN>
 SelectionHists<TN> *SelectionHistsFromTOML(
     typename std::enable_if<THTraits<TN>::NDims == 1, std::string>::type const
         &plotname,
-    toml::value const &config) {
+    toml::value const &plots_config) {
+
+  if (!plots_config.contains(
+          plotname)) { // If we cannot find the config just silently fail and
+                       // create a histo blob that will never get
+                       // filled/printed
+    return new SelectionHists<TN>(plotname, "", {}, 1, 0, 1);
+  }
+
+  toml::value const &config = toml::find(plots_config, plotname);
+
   std::vector<std::string> axis_titles =
       toml_h::find<std::vector<std::string>>(config, "axis_titles");
 
@@ -241,7 +251,17 @@ template <typename TN>
 SelectionHists<TN> *SelectionHistsFromTOML(
     typename std::enable_if<THTraits<TN>::NDims == 2, std::string>::type const
         &plotname,
-    toml::value const &config) {
+    toml::value const &plots_config) {
+
+  if (!plots_config.contains(
+          plotname)) { // If we cannot find the config just silently fail and
+                       // create a histo blob that will never get
+                       // filled/printed
+    return new SelectionHists<TN>(plotname, "", {}, 1, 0, 1, 1, 0, 1);
+  }
+
+  toml::value const &config = toml::find(plots_config, plotname);
+
   std::vector<std::string> axis_titles =
       toml_h::find<std::vector<std::string>>(config, "axis_titles");
 
@@ -269,7 +289,17 @@ template <typename TN>
 SelectionHists<TN> *SelectionHistsFromTOML(
     typename std::enable_if<THTraits<TN>::NDims == 3, std::string>::type const
         &plotname,
-    toml::value const &config) {
+    toml::value const &plots_config) {
+
+  if (!plots_config.contains(
+          plotname)) { // If we cannot find the config just silently fail and
+                       // create a histo blob that will never get
+                       // filled/printed
+    return new SelectionHists<TN>(plotname, "", {}, 1, 0, 1, 1, 0, 1, 1, 0, 1);
+  }
+
+  toml::value const &config = toml::find(plots_config, plotname);
+
   std::vector<std::string> axis_titles =
       toml_h::find<std::vector<std::string>>(config, "axis_titles");
 

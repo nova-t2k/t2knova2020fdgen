@@ -307,7 +307,7 @@ TPad *MakeRatioBottomPad(double mt = 0.03, double ml = 0.15, double mr = 0.03,
   return c1;
 }
 TPad *MakeRatioBottomPadTopLegend(double mt = 0.03, double ml = 0.15,
-                                  double mr = 0.03, double mb = 0.25,
+                                  double mr = 0.03, double mb = 0.3,
                                   double midpoint = 0.3,
                                   std::string name = "pbottom") {
   return MakeRatioBottomPad(mt, ml, mr, mb, midpoint, name);

@@ -3,17 +3,46 @@
 #include "colordef.h"
 #include "plotutils.h"
 
+#include "TExec.h"
+
+using namespace t2knova;
+
+bool const kT2K = true;
+bool const kNOvA = false;
+bool bymode = true;
+
+std::vector<std::string> output_files_opened;
+
+void OpenPDF(std::string const &fname) {
+  if (std::find(output_files_opened.begin(), output_files_opened.end(),
+                fname) == output_files_opened.end()) {
+    TCanvas oc(fname.c_str(), "", 800, 800);
+    oc.Print((fname + ".pdf[").c_str());
+    output_files_opened.push_back(fname);
+  }
+}
+
+void ClosePDFs() {
+  for (auto &fname : output_files_opened) {
+    TCanvas fc("fc", "", 800, 800);
+    fc.Print((fname + ".pdf]").c_str());
+  }
+}
+
 struct hblob {
   std::unique_ptr<TH1> From;
   std::unique_ptr<TH1> Target;
   std::vector<std::unique_ptr<TH1>> ReWeights;
 
+  bool is2D;
   bool ist2kbase;
 
-  void Load(std::unique_ptr<TFile> &fin, bool t2kbase, std::string varname,
-            t2knova::nuspecies nuspec, std::string tgtstr,
-            t2knova::selection sel, int mode = 0) {
+  void Load(std::unique_ptr<TFile> &fin, bool t2kbase, bool isosc,
+            std::string varname, nuspecies nuspec, std::string tgtstr,
+            selection sel, int mode = 0) {
     this->ist2kbase = t2kbase;
+
+    ReWeights.clear();
 
     std::string mode_str = "";
     if (mode != 0) {
@@ -21,18 +50,23 @@ struct hblob {
           (mode < 0 ? "_Mode_m" : "_Mode_") + std::to_string(std::abs(mode));
     }
 
+    std::string sel_str = "";
+    if (sel != t2knova::kNoPrimarySel) {
+      sel_str = std::string("_") + SelectionList[sel];
+    }
+
     From =
         GetTH1(fin,
                std::string(t2kbase ? "ND280/T2KNDTune" : "NOvAND/NOvATune") +
-                   "/" + tgtstr + "/" + t2knova::all_nuspecies[nuspec] + "/" +
-                   varname + "_" + t2knova::SelectionList[sel] + mode_str,
+                   (isosc ? "_osc" : "") + "/" + tgtstr + "/" +
+                   all_nuspecies[nuspec] + "/" + varname + sel_str + mode_str,
                false);
 
     Target =
         GetTH1(fin,
                std::string(t2kbase ? "ND280/NOvATune" : "NOvAND/T2KNDTune") +
-                   "/" + tgtstr + "/" + t2knova::all_nuspecies[nuspec] + "/" +
-                   varname + "_" + t2knova::SelectionList[sel] + mode_str,
+                   (isosc ? "_osc" : "") + "/" + tgtstr + "/" +
+                   all_nuspecies[nuspec] + "/" + varname + sel_str + mode_str,
                false);
 
     if (!From || !Target) {
@@ -42,40 +76,21 @@ struct hblob {
     From->SetName("FROM");
     Target->SetName("TARGET");
 
-    // std::vector<std::string> ReWeightHists = ist2kbase ?
-    // std::vector<std::string>{
-    //   std::string("ND280/T2KND_to_NOvA") + "/" + tgtstr + "/" +
-    //                  t2knova::all_nuspecies[nuspec] + "/" + varname + "_" +
-    //                  t2knova::SelectionList[sel],
-    //                  std::string("ND280/T2KND_to_NOvA_EnuKludge") + "/" +
-    //                  tgtstr +
-    //                  "/" + t2knova::all_nuspecies[nuspec] + "/" + varname +
-    //                  "_" + t2knova::SelectionList[sel],
-    //                  std::string("ND280/T2KND_to_NOvA_Enu") + "/" + tgtstr +
-    //                  "/" + t2knova::all_nuspecies[nuspec] + "/" + varname +
-    //                  "_" + t2knova::SelectionList[sel],
-    //                  std::string("ND280/T2KND_to_NOvA_Q2") + "/" + tgtstr +
-    //                  "/" + t2knova::all_nuspecies[nuspec] + "/" + varname +
-    //                  "_" + t2knova::SelectionList[sel],
-    // } : std::vector<std::string>{
-    //     std::string("NOvAND/NOvA_to_T2KND_ptlep") + "/" + tgtstr + "/" +
-    //                  t2knova::all_nuspecies[nuspec] + "/" + varname + "_" +
-    //                  t2knova::SelectionList[sel],
-    //                  std::string("NOvAND/NOvA_to_T2KND_plep") + "/" + tgtstr
-    //                  + "/" + t2knova::all_nuspecies[nuspec] + "/" + varname +
-    //                  "_" + t2knova::SelectionList[sel],
-    //                  std::string("NOvAND/NOvA_to_T2KND_Q2") + "/" + tgtstr +
-    //                  "/" + t2knova::all_nuspecies[nuspec] + "/" + varname +
-    //                  "_" + t2knova::SelectionList[sel],
-    // };
+    std::vector<std::string> ReWeightHists;
 
-    std::vector<std::string> ReWeightHists = ist2kbase ? std::vector<std::string>{
-      std::string("ND280/T2KND_to_NOvA") + "/" + tgtstr + "/" +
-                     t2knova::all_nuspecies[nuspec] + "/" + varname + "_" +
-                     t2knova::SelectionList[sel] + mode_str,} : std::vector<std::string>{
-        std::string("NOvAND/NOvA_to_T2KND_ptlep") + "/" + tgtstr + "/" +
-                     t2knova::all_nuspecies[nuspec] + "/" + varname + "_" +
-                     t2knova::SelectionList[sel] + mode_str,};
+    if (ist2kbase) {
+      ReWeightHists = std::vector<std::string>{
+          std::string("ND280/T2KND_to_NOvA") + (isosc ? "_osc" : "") + "/" +
+              tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname + sel_str +
+              mode_str,
+      };
+    } else {
+      ReWeightHists = std::vector<std::string>{
+          std::string("NOvAND/NOvA_to_T2KND_ptlep") + (isosc ? "_osc" : "") +
+              "/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
+              sel_str + mode_str,
+      };
+    }
 
     int i = 0;
     for (auto &n : ReWeightHists) {
@@ -90,10 +105,13 @@ struct hblob {
     }
   }
 
-  void Print(const char *fname, const char *title = "") {
-    if (!From || !Target) {
-      return;
-    }
+  void Print1D(std::string fname, std::string title = "",
+               std::string mode_line = "") {
+
+    bool HaveBoth = bool(From) && bool(Target);
+    bool HaveReWeight = ReWeights.size() && bool(ReWeights[0]);
+
+    TH1 *First = (From ? From.get() : Target.get());
 
     double max_gen = GetMaximumTH1s(
         std::vector<std::reference_wrapper<std::unique_ptr<TH1>>>{From,
@@ -101,20 +119,31 @@ struct hblob {
     double max_rw = GetMaximumTH1s(ReWeights);
     double max = std::max(max_gen, max_rw);
 
-    TCanvas *c1 = MakeCanvasTopLegend();
+    TCanvas *c1;
+    TPad *p1, *p2;
 
-    TPad *p1 = MakeRatioTopPadTopLegend();
-    p1->AppendPad();
-    TPad *p2 = MakeRatioBottomPadTopLegend();
-    p2->AppendPad();
+    if (HaveBoth) {
+      c1 = MakeCanvasTopLegend();
+      p1 = MakeRatioTopPadTopLegend();
+      p1->AppendPad();
+      p2 = MakeRatioBottomPadTopLegend();
+      p2->AppendPad();
 
-    p1->cd();
+      p1->cd();
+    } else {
+      c1 = MakeCanvas();
+      c1->SetTopMargin(0.2);
+    }
 
-    From->SetLineColor(kBlack);
-    From->SetLineWidth(2);
+    if (From) {
+      From->SetLineColor(kBlack);
+      From->SetLineWidth(2);
+    }
 
-    Target->SetLineWidth(2);
-    Target->SetLineColor(SORNBrightWheel[1]);
+    if (Target) {
+      Target->SetLineWidth(2);
+      Target->SetLineColor(SORNBrightWheel[1]);
+    }
 
     int cols[] = {SORNBrightWheel[2], SORNBrightWheel[4], SORNBrightWheel[5],
                   SORNBrightWheel[6]};
@@ -129,16 +158,23 @@ struct hblob {
       h->SetLineColor(cols[lc++]);
     }
 
-    From->GetYaxis()->SetRangeUser(0, max * 1.1);
-    From->GetYaxis()->SetTitle("Cross Section 10^{-39}");
-    From->SetTitle("");
-    StyleAxis(From->GetYaxis());
-    HideAxis(From->GetXaxis());
+    First->GetYaxis()->SetRangeUser(0, max * 1.1);
+    First->GetYaxis()->SetTitle("Cross Section 10^{-39}");
+    First->SetTitle("");
+    StyleAxis(First->GetYaxis());
 
-    ReWeights[0]->Draw();
+    if (HaveBoth) {
+      HideAxis(First->GetXaxis());
+    }
 
-    From->DrawClone("EHIST");
-    Target->DrawClone("EHISTSAME");
+    if (HaveReWeight) {
+      ReWeights[0]->Draw();
+    }
+
+    First->DrawClone("EHIST");
+    if (HaveBoth) {
+      Target->DrawClone("EHISTSAME");
+    }
 
     for (auto &h : ReWeights) {
       if (!h) {
@@ -148,37 +184,38 @@ struct hblob {
       h->DrawClone("EHISTSAME");
     }
 
-    p2->cd();
+    if (HaveBoth) {
+      p2->cd();
 
-    From->Divide(Target.get());
-    for (auto &h : ReWeights) {
-      if (!h) {
-        continue;
+      From->Divide(Target.get());
+      for (auto &h : ReWeights) {
+        if (!h) {
+          continue;
+        }
+        h->Divide(Target.get());
       }
-      h->Divide(Target.get());
-    }
 
-    Target->Divide(Target.get());
-    StyleAxis(Target->GetXaxis(), 2);
-    StyleAxis(Target->GetYaxis(), 2, 0.5, 1);
-    Target->GetYaxis()->SetRangeUser(0.8, 1.2);
-    Target->GetYaxis()->SetTitle("Ratio To Generated");
-    Target->SetTitle("");
-    Target->SetLineStyle(2);
+      Target->Divide(Target.get());
+      StyleAxis(Target->GetXaxis(), 2);
+      StyleAxis(Target->GetYaxis(), 2, 0.5, 1);
+      Target->GetYaxis()->SetRangeUser(0.8, 1.2);
+      Target->GetYaxis()->SetTitle("Ratio To Generated");
+      Target->SetTitle("");
+      Target->SetLineStyle(2);
 
-    Target->Draw("HIST");
-    From->DrawClone("HISTSAME");
+      Target->Draw("HIST");
+      From->DrawClone("HISTSAME");
 
-    for (auto &h : ReWeights) {
-      if (!h) {
-        continue;
+      for (auto &h : ReWeights) {
+        if (!h) {
+          continue;
+        }
+        h->DrawClone("HISTSAME");
       }
-      h->DrawClone("HISTSAME");
+      Target->SetLineStyle(1);
     }
 
     c1->cd();
-
-    Target->SetLineStyle(1);
 
     TLegend *leg = MakeTopLegend();
     leg->SetTextSize(0.02);
@@ -187,7 +224,7 @@ struct hblob {
     leg->AddEntry(Target.get(), ist2kbase ? "NOvA2020" : "BANFF Post ND280",
                   "l");
 
-    if (ReWeights[0]) {
+    if (HaveReWeight) {
       leg->AddEntry(ReWeights[0].get(),
                     ist2kbase ? "Reweight to NOvA (Enu PLep ThetaLep)"
                               : "ReWeight to BANFF (Enu PtLep EVisHad)",
@@ -197,35 +234,156 @@ struct hblob {
     leg->Draw();
 
     TLatex ttl;
-    ttl.SetTextSize(0.05);
-    ttl.SetTextAlign(22);
-    ttl.DrawLatexNDC(0.75, 0.75, title);
+    ttl.SetTextSize(0.04);
+    ttl.SetTextAlign(32);
+    ttl.DrawLatexNDC(0.99, 0.875, title.c_str());
+    if (mode_line.size()) {
+      ttl.DrawLatexNDC(0.99, 0.825, mode_line.c_str());
+    }
 
-    c1->Print(fname);
+    OpenPDF(fname);
+    c1->Print((fname + ".pdf").c_str());
+  }
+
+  void Print2D(std::string fname, std::string title = "",
+               std::string mode_line = "") {
+
+    static const long unsigned int BWRPalette =
+        (long unsigned int)GetBWRPalette();
+
+    static std::string BWR_cmd = "gStyle->SetPalette(100, (int*)" +
+                                 std::to_string(BWRPalette) +
+                                 ");gStyle->SetNumberContours(100);";
+
+    static TExec *ex1 = new TExec("ex1", "gStyle->SetPalette(kBird);");
+    static TExec *ex2 = new TExec("ex2", BWR_cmd.c_str());
+
+    bool HaveBoth = bool(From) && bool(Target);
+    bool HaveReWeight = ReWeights.size() && bool(ReWeights[0]);
+
+    TCanvas *c1 = MakeCanvas();
+
+    TLatex ttl;
+    ttl.SetTextSize(0.025);
+    ttl.SetTextAlign(32);
+
+    if (From) {
+      TPad *p = new TPad("pFrom", "", 0, 0.5, 0.5, 1);
+      p->AppendPad();
+      p->SetRightMargin(0.2);
+      p->SetTopMargin(0.03);
+      p->cd();
+
+      From->SetTitle("");
+      auto CL = From->DrawClone("COLZ");
+      ex1->Draw();
+      CL->Draw("COLZ SAME");
+
+      c1->cd();
+      ttl.DrawLatexNDC(0.38, 0.6, ist2kbase ? "BANFF Post ND280" : "NOvA2020");
+    }
+
+    if (Target) {
+      TPad *p = new TPad("pTarget", "", 0.5, 0.5, 1, 1);
+      p->AppendPad();
+      p->SetRightMargin(0.2);
+      p->SetTopMargin(0.03);
+      p->cd();
+
+      Target->SetTitle("");
+      auto CL = Target->DrawClone("COLZ");
+      ex1->Draw();
+      CL->Draw("COLZ SAME");
+
+      c1->cd();
+      ttl.DrawLatexNDC(0.88, 0.6, ist2kbase ? "NOvA2020" : "BANFF Post ND280");
+    }
+
+    if (HaveBoth) {
+      From->Divide(Target.get());
+
+      TPad *p = new TPad("pBoth", "", 0, 0, 0.5, 0.5);
+      p->AppendPad();
+      p->SetRightMargin(0.2);
+      p->SetTopMargin(0.03);
+      p->cd();
+
+      From->GetZaxis()->SetRangeUser(0, 2);
+      From->GetZaxis()->SetTitleOffset(2);
+      auto CL = From->DrawClone("COLZ");
+      ex2->Draw();
+      CL->Draw("COLZ SAME");
+
+      c1->cd();
+      ttl.DrawLatexNDC(0.38, 0.1,
+                       ist2kbase ? "BANFF/NOvA2020" : "NOvA2020/ND280");
+    }
+
+    if (HaveReWeight) {
+      TPad *p = new TPad("pRW", "", 0.5, 0, 1, 0.5);
+      p->AppendPad();
+      p->SetRightMargin(0.2);
+      p->SetTopMargin(0.03);
+      p->cd();
+
+      ReWeights[0]->Divide(Target.get());
+      ReWeights[0]->SetTitle("");
+      ReWeights[0]->GetZaxis()->SetRangeUser(0, 2);
+      ReWeights[0]->GetZaxis()->SetTitleOffset(2);
+      auto CL = ReWeights[0]->DrawClone("COLZ");
+      ex2->Draw();
+      CL->Draw("COLZ SAME");
+
+      c1->cd();
+      ttl.DrawLatexNDC(0.88, 0.1, "Reweight/Generated");
+    }
+    OpenPDF(fname);
+    c1->Print((fname + ".pdf").c_str());
+  }
+
+  void Print(std::string fname, std::string title = "",
+             std::string mode_line = "") {
+
+    if (!From && !Target) {
+      return;
+    }
+    TH1 *First = (From ? From.get() : Target.get());
+
+    if (First->GetDimension() == 1) {
+      Print1D(fname, title, mode_line);
+    } else if (First->GetDimension() == 2) {
+      Print2D(fname, title, mode_line);
+    }
   }
 
   static void LoadAndPrint(std::unique_ptr<TFile> &fin, bool t2kbase,
-                           std::string varname, t2knova::nuspecies nuspec,
-                           std::string tgtstr, t2knova::selection sel,
-                           const char *fname, const char *title) {
+                           std::string varname, nuspecies nuspec,
+                           std::string tgtstr, selection sel, std::string fname,
+                           std::string title) {
     hblob h;
-    h.Load(fin, t2kbase, varname, nuspec, tgtstr, sel);
-    h.Print(fname, (std::string(title) + " " + tgtstr + " " +
-                    t2knova::all_nuspecies_latex[nuspec])
-                       .c_str());
+    h.Load(fin, t2kbase, false, varname, nuspec, tgtstr, sel);
+    h.Print(fname, title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
+            "All modes");
 
-    bool bymode = true;
+    h.Load(fin, t2kbase, true, varname, nuspec, tgtstr, sel);
+    h.Print(fname + "_osc",
+            title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
+            "All modes");
+
     if (bymode) {
       for (int i = -60; i < 60; ++i) {
-        if(i == 0){
+        if (i == 0) {
           continue;
         }
-        hblob h;
-        h.Load(fin, t2kbase, varname, nuspec, tgtstr, sel, i);
-        h.Print(fname, (std::string(title) + " " + tgtstr + " " +
-                        t2knova::all_nuspecies_latex[nuspec] +
-                        " m:" + std::to_string(i))
-                           .c_str());
+        h.Load(fin, t2kbase, false, varname, nuspec, tgtstr, sel, i);
+        h.Print(fname + "_Modes",
+                title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
+                "True mode:" + std::to_string(i));
+
+        h.Load(fin, t2kbase, true, varname, nuspec, tgtstr, sel, i);
+        h.Print(fname + "_Modes_osc",
+                title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
+                "True mode:" + std::to_string(i));
       }
     }
   }
@@ -239,51 +397,35 @@ void ValidPlots(std::string const &finname) {
   }
 
   TCanvas c1("cdummy", "", 800, 800);
-  c1.Print("validplots_t2k.pdf[");
-  c1.Print("validplots_nova.pdf[");
 
-  // for (auto tgtstr : {"C", "H", "O", "CH", "H2O"}) {
   for (auto tgtstr : {std::string("CH"), std::string("H2O")}) {
-    for (auto nuspec :
-         {t2knova::kNuMu, t2knova::kNuMub, t2knova::kNuE, t2knova::kNuEb}) {
-      for (int sel : {
-               t2knova::kCCInc,
-               t2knova::kCC0pi,
-               t2knova::kCC1cpi,
-               t2knova::kCC1pi0,
-               t2knova::kCCmultipi,
-               t2knova::kCC1Gamma,
-               t2knova::kCCOther,
-               t2knova::kNCInc,
-               t2knova::kNC0pi,
-               t2knova::kNC1cpi,
-               t2knova::kNC1pi0,
-               t2knova::kNCmultipi,
-               t2knova::kNC1Gamma,
-               t2knova::kNCOther,
-           }) {
-        for (auto proj : {
-                 "Enu",
-                 "ERecQE",
-                 "PLep",
-                 "ThetaLep",
-                 "Q2",
-                 "q0",
-                 "q3",
-                 "hmfscpip",
-                 "hmfspi0p",
-                 "ncpi",
-                 "npi0",
-             }) {
+    for (auto nuspec : {kNuMu, kNuMub, kNuE, kNuEb}) {
 
-          if(std::string(proj) == "ERecQE" && sel >= t2knova::kNCInc ){
-            continue;
-          }
-          hblob::LoadAndPrint(fin, true, proj, nuspec, tgtstr,
-                              t2knova::selection(sel), "validplots_t2k.pdf",
-                              t2knova::SelectionList[sel].c_str());
+      hblob::LoadAndPrint(
+          fin, kT2K, "SelectionXSecs", nuspec, tgtstr, kNoPrimarySel,
+          std::string("Valid_ND280_SelectionXSecs_") + all_nuspecies[nuspec],
+          "SelectionXSecs");
+
+      for (int sel :
+           {kCCInc,      kCCInc_RW,    kCC0pi,           kCC0pi_QE,
+            kCC0pi_2p2h, kCC0pi_Other, kCC1Gamma,        kCCDeExciteGamma,
+            kCCNGamma,   kCC1cpi,      kCC1pi0,          kCCmultipi,
+            kCCOther,    kCCOther_QE,  kNCInc,           kNCInc_RW,
+            kNC0pi,      kNC1Gamma,    kNCDeExciteGamma, kNCNGamma,
+            kNC1cpi,     kNC1pi0,      kNCmultipi,       kNCOther,
+            kNCOther_QE}) {
+
+        for (auto t2k_proj :
+             {"Enu", "ERecQE", "PLep", "ThetaLep", "Q2", "q0q3", "hmfscpip",
+              "hmfspi0p", "ncpi", "npi0", "EGamma", "EGamma_DeExcite"}) {
+
+          hblob::LoadAndPrint(
+              fin, kT2K, t2k_proj, nuspec, tgtstr, selection(sel),
+              "Valid_ND280_" + SelectionList[sel] + "_" + all_nuspecies[nuspec],
+              SelectionList[sel]);
         }
-        // for (auto proj : {
+
+        // for (auto nova_proj : {
         //          "Enu",
         //          "PtLep",
         //          "PLep",
@@ -296,16 +438,15 @@ void ValidPlots(std::string const &finname) {
         //          "ncpi",
         //          "npi0",
         //      }) {
-        //   hblob::LoadAndPrint(fin, false, proj, nuspec, tgtstr,
-        //                       t2knova::selection(sel), "validplots_nova.pdf",
-        //                       t2knova::SelectionList[sel].c_str());
+        //   hblob::LoadAndPrint(fin, false, nova_proj, nuspec, tgtstr,
+        //                       selection(sel), "validplots_nova.pdf",
+        //                       SelectionList[sel]);
         // }
       }
     }
   }
 
-  c1.Print("validplots_t2k.pdf]");
-  c1.Print("validplots_nova.pdf]");
+  ClosePDFs();
 }
 
 int main(int argc, char const *argv[]) {
