@@ -9,7 +9,8 @@ using namespace t2knova;
 
 bool const kT2K = true;
 bool const kNOvA = false;
-bool bymode = true;
+bool bymode = false;
+bool doosc = false;
 
 std::vector<std::string> output_files_opened;
 
@@ -265,12 +266,15 @@ struct hblob {
 
     TLatex ttl;
     ttl.SetTextSize(0.025);
-    ttl.SetTextAlign(32);
+    ttl.SetTextAlign(12);
 
     if (From) {
       TPad *p = new TPad("pFrom", "", 0, 0.5, 0.5, 1);
       p->AppendPad();
-      p->SetRightMargin(0.2);
+      p->SetTopMargin(0.05);
+      p->SetBottomMargin(0.2);
+      p->SetLeftMargin(0.11);
+      p->SetRightMargin(0.14);
       p->SetTopMargin(0.03);
       p->cd();
 
@@ -280,13 +284,16 @@ struct hblob {
       CL->Draw("COLZ SAME");
 
       c1->cd();
-      ttl.DrawLatexNDC(0.38, 0.6, ist2kbase ? "BANFF Post ND280" : "NOvA2020");
+      ttl.DrawLatexNDC(0.1, 0.95, ist2kbase ? "BANFF Post ND280" : "NOvA2020");
     }
 
     if (Target) {
       TPad *p = new TPad("pTarget", "", 0.5, 0.5, 1, 1);
       p->AppendPad();
-      p->SetRightMargin(0.2);
+      p->SetTopMargin(0.05);
+      p->SetBottomMargin(0.2);
+      p->SetLeftMargin(0.11);
+      p->SetRightMargin(0.14);
       p->SetTopMargin(0.03);
       p->cd();
 
@@ -296,7 +303,7 @@ struct hblob {
       CL->Draw("COLZ SAME");
 
       c1->cd();
-      ttl.DrawLatexNDC(0.88, 0.6, ist2kbase ? "NOvA2020" : "BANFF Post ND280");
+      ttl.DrawLatexNDC(0.6, 0.95, ist2kbase ? "NOvA2020" : "BANFF Post ND280");
     }
 
     if (HaveBoth) {
@@ -304,38 +311,46 @@ struct hblob {
 
       TPad *p = new TPad("pBoth", "", 0, 0, 0.5, 0.5);
       p->AppendPad();
-      p->SetRightMargin(0.2);
+      p->SetTopMargin(0.05);
+      p->SetBottomMargin(0.2);
+      p->SetLeftMargin(0.11);
+      p->SetRightMargin(0.14);
       p->SetTopMargin(0.03);
       p->cd();
 
       From->GetZaxis()->SetRangeUser(0, 2);
-      From->GetZaxis()->SetTitleOffset(2);
+      From->GetZaxis()->SetTitleOffset(1.25);
+      From->GetZaxis()->SetTitle("Event Rate Ratio");
       auto CL = From->DrawClone("COLZ");
       ex2->Draw();
       CL->Draw("COLZ SAME");
 
       c1->cd();
-      ttl.DrawLatexNDC(0.38, 0.1,
+      ttl.DrawLatexNDC(0.1, 0.45,
                        ist2kbase ? "BANFF/NOvA2020" : "NOvA2020/ND280");
     }
 
     if (HaveReWeight) {
       TPad *p = new TPad("pRW", "", 0.5, 0, 1, 0.5);
       p->AppendPad();
-      p->SetRightMargin(0.2);
+      p->SetTopMargin(0.05);
+      p->SetBottomMargin(0.2);
+      p->SetLeftMargin(0.11);
+      p->SetRightMargin(0.14);
       p->SetTopMargin(0.03);
       p->cd();
 
       ReWeights[0]->Divide(Target.get());
       ReWeights[0]->SetTitle("");
       ReWeights[0]->GetZaxis()->SetRangeUser(0, 2);
-      ReWeights[0]->GetZaxis()->SetTitleOffset(2);
+      ReWeights[0]->GetZaxis()->SetTitleOffset(1.25);
+      ReWeights[0]->GetZaxis()->SetTitle("Event Rate Ratio");
       auto CL = ReWeights[0]->DrawClone("COLZ");
       ex2->Draw();
       CL->Draw("COLZ SAME");
 
       c1->cd();
-      ttl.DrawLatexNDC(0.88, 0.1, "Reweight/Generated");
+      ttl.DrawLatexNDC(0.6, 0.45, "Reweight/Generated");
     }
     OpenPDF(fname);
     c1->Print((fname + ".pdf").c_str());
@@ -365,10 +380,12 @@ struct hblob {
     h.Print(fname, title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
             "All modes");
 
-    h.Load(fin, t2kbase, true, varname, nuspec, tgtstr, sel);
-    h.Print(fname + "_osc",
-            title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
-            "All modes");
+    if (doosc) {
+      h.Load(fin, t2kbase, true, varname, nuspec, tgtstr, sel);
+      h.Print(fname + "_osc",
+              title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
+              "All modes");
+    }
 
     if (bymode) {
       for (int i = -60; i < 60; ++i) {
@@ -380,10 +397,12 @@ struct hblob {
                 title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
                 "True mode:" + std::to_string(i));
 
-        h.Load(fin, t2kbase, true, varname, nuspec, tgtstr, sel, i);
-        h.Print(fname + "_Modes_osc",
-                title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
-                "True mode:" + std::to_string(i));
+        if (doosc) {
+          h.Load(fin, t2kbase, true, varname, nuspec, tgtstr, sel, i);
+          h.Print(fname + "_Modes_osc",
+                  title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
+                  "True mode:" + std::to_string(i));
+        }
       }
     }
   }
@@ -415,33 +434,15 @@ void ValidPlots(std::string const &finname) {
             kNC1cpi,     kNC1pi0,      kNCmultipi,       kNCOther,
             kNCOther_QE}) {
 
-        for (auto t2k_proj :
-             {"Enu", "ERecQE", "PLep", "ThetaLep", "Q2", "q0q3", "hmfscpip",
-              "hmfspi0p", "ncpi", "npi0", "EGamma", "EGamma_DeExcite"}) {
+        for (auto t2k_proj : {"Enu", "ERecQE", "PLep", "ThetaLep", "Q2",
+                              "q0q3_low", "q0q3_high", "hmfscpip", "hmfspi0p",
+                              "ncpi", "npi0", "EGamma", "EGamma_DeExcite"}) {
 
           hblob::LoadAndPrint(
               fin, kT2K, t2k_proj, nuspec, tgtstr, selection(sel),
               "Valid_ND280_" + SelectionList[sel] + "_" + all_nuspecies[nuspec],
               SelectionList[sel]);
         }
-
-        // for (auto nova_proj : {
-        //          "Enu",
-        //          "PtLep",
-        //          "PLep",
-        //          "EAvHad",
-        //          "Q2",
-        //          "q0",
-        //          "q3",
-        //          "hmfscpip",
-        //          "hmfspi0p",
-        //          "ncpi",
-        //          "npi0",
-        //      }) {
-        //   hblob::LoadAndPrint(fin, false, nova_proj, nuspec, tgtstr,
-        //                       selection(sel), "validplots_nova.pdf",
-        //                       SelectionList[sel]);
-        // }
       }
     }
   }

@@ -60,7 +60,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
 
     double w = rdr.fScaleFactor() * rdr.RWWeight();
 
-    std::vector<int> sels = rdr.GetSelections(rdr.Mode());
+    std::vector<int> sels = rdr.GetSelections();
 
     if (!sels.size()) {
       ent_it++;

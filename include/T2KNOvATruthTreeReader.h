@@ -200,18 +200,18 @@ public:
     rdr.Restart();
   }
 
-  std::vector<int> GetSelections(int Mode = 0) {
+  std::vector<int> GetSelections() {
     return t2knova::GetSelections(
         T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress(),
                                            (float *)_E.GetAddress()),
-        Mode);
+        Mode());
   }
 
-  int GetPrimarySelection(int Mode = 0) {
+  int GetPrimarySelection() {
     return t2knova::GetPrimarySelection(
         T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress(),
                                            (float *)_E.GetAddress()),
-        Mode);
+        Mode());
   }
 
 private:

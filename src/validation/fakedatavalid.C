@@ -25,8 +25,6 @@ bool doosc = false;
 
 TrueChannelHist<TH1F> *XSecs;
 
-SelectionHists<TH3F> *EnuPLepThetaLep;
-SelectionHists<TH3F> *EnuPtLepEAvHad;
 SelectionHists<TH1F> *Enu;
 SelectionHists<TH1F> *ERecQE;
 SelectionHists<TH1F> *PLep;
@@ -73,10 +71,6 @@ double EnuQErec(double elep, double plep, double costh, double binding,
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
           t2knova::reweightconfig weightconfig, int tgta_select = 0) {
 
-  EnuPLepThetaLep =
-      SelectionHistsFromTOML<TH3F>("EnuPLepThetaLep", plots_config);
-
-  EnuPtLepEAvHad = SelectionHistsFromTOML<TH3F>("EnuPtLepEAvHad", plots_config);
   Enu = SelectionHistsFromTOML<TH1F>("Enu", plots_config);
 
   ERecQE = SelectionHistsFromTOML<TH1F>("ERecQE", plots_config);
@@ -154,7 +148,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
       }
     }
 
-    int primary_selection = rdr.GetPrimarySelection(rdr.Mode());
+    int primary_selection = rdr.GetPrimarySelection();
 
     if (weightconfig == t2knova::kT2KND_to_NOvA) {
       w *= t2knova::GetFakeDataWeight_ND280ToNOvA(
@@ -167,18 +161,13 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
           primary_selection, false);
     }
 
-    std::vector<int> sels = rdr.GetSelections(rdr.Mode());
+    std::vector<int> sels = rdr.GetSelections();
 
     if (!sels.size()) {
       ent_it++;
       continue;
     }
 
-    EnuPLepThetaLep->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.PLep(),
-                          rdr.AngLep_deg());
-    EnuPtLepEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(),
-                         rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)),
-                         rdr.Eav_NOvA());
     Enu->Fill(w, sels, rdr.Mode(), rdr.Enu_true());
     ERecQE->Fill(w, sels, rdr.Mode(),
                  EnuQErec(rdr.FSLepP4().E(), rdr.PLep(), rdr.CosLep(), 0,
@@ -352,10 +341,10 @@ int main(int argc, char const *argv[]) {
     }
   });
 
-  XSecs->Write(dout);
-  EnuPLepThetaLep->Write(dout, true);
-  EnuPtLepEAvHad->Write(dout, true);
+  XSecs->Write(dout, false);
+
   Enu->Write(dout, true);
+  ERecQE->Write(dout, true);
   PLep->Write(dout, true);
   ThetaLep->Write(dout, true);
   EAvHad->Write(dout, true);
