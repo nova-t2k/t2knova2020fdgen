@@ -4,7 +4,9 @@
 
 #include "plotutils.h"
 
+#ifndef NO_TOML
 #include "toml/toml_helper.h"
+#endif
 
 #include "TDirectory.h"
 #include "TFile.h"
@@ -194,6 +196,8 @@ template <typename TH> struct SelectionHists {
   }
 };
 
+#ifndef NO_TOML
+
 std::vector<double> BinningFromTOML(toml::value const &binning_config) {
   std::string binning_type = toml_h::find<std::string>(binning_config, 0);
   std::vector<double> const &binning_details =
@@ -324,5 +328,6 @@ SelectionHists<TN> *SelectionHistsFromTOML(
       x_binning.size() - 1, x_binning.data(), y_binning.size() - 1,
       y_binning.data(), z_binning.size() - 1, z_binning.data());
 }
+#endif
 
 } // namespace t2knova
