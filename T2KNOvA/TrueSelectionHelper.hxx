@@ -228,19 +228,19 @@ T2KNOvAFlatTreeToFSParticleSummary(int NFSP, int *FSPDG, float *FSE_GeV) {
 #define SEL_X(a) X_CATNAME(k, a),
 
 enum selection { SEL_LIST };
-std::vector<selection> AllSelectionList = {SEL_LIST};
+static std::vector<selection> AllSelectionList = {SEL_LIST};
 
 #undef SEL_X
 #define SEL_X(a) #a,
 
-std::vector<std::string> SelectionList = {SEL_LIST};
+static std::vector<std::string> SelectionList = {SEL_LIST};
 
 #undef X_CATNAME
 #undef SEL_X
 
 #undef SEL_LIST
 
-std::vector<selection> ReWeightSelectionList = {
+static std::vector<selection> ReWeightSelectionList = {
     kCC0pi,  kCC0pi_QE,  kCC0pi_2p2h, kCC0pi_Other, kCC1cpi,
     kCC1pi0, kCCmultipi, kCCOther,    kNC0pi,       kNC1cpi,
     kNC1pi0, kNCmultipi, kNCOther};
