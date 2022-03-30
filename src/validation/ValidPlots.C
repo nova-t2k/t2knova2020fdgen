@@ -8,7 +8,7 @@
 using namespace t2knova;
 
 bool const kT2K = true;
-bool const kNOvA = false;
+bool const kNOvAND = false;
 bool bymode = false;
 bool doosc = false;
 
@@ -33,6 +33,8 @@ void ClosePDFs() {
 struct hblob {
   std::unique_ptr<TH1> From;
   std::unique_ptr<TH1> Target;
+  std::unique_ptr<TH1> Outlier_high;
+  std::unique_ptr<TH1> Outlier_low;
   std::vector<std::unique_ptr<TH1>> ReWeights;
 
   bool is2D;
@@ -70,12 +72,12 @@ struct hblob {
                    all_nuspecies[nuspec] + "/" + varname + sel_str + mode_str,
                false);
 
-    if (!From || !Target) {
-      return;
+    if (From) {
+      From->SetName("FROM");
     }
-
-    From->SetName("FROM");
-    Target->SetName("TARGET");
+    if (Target) {
+      Target->SetName("TARGET");
+    }
 
     std::vector<std::string> ReWeightHists;
 
@@ -95,14 +97,43 @@ struct hblob {
 
     int i = 0;
     for (auto &n : ReWeightHists) {
-      ReWeights.push_back(GetTH1(fin, n));
+      ReWeights.push_back(GetTH1(fin, n, false));
       if (!ReWeights.back()) {
         std::cout << "[ERROR]: Failed to read " << n << std::endl;
+        continue;
       }
       ReWeights.back()->SetName(
           (std::string("ReWeight_") + std::to_string(i++)).c_str());
       std::cout << "read " << n << " as " << ReWeights.back()->GetName()
                 << std::endl;
+    }
+
+    if (ReWeights.size() && ReWeights[0]) {
+      if (ist2kbase) {
+        std::string Outlier_high_name =
+            std::string("ND280/T2KND_to_NOvA") + (isosc ? "_osc" : "") + "/" +
+            tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
+            "_outlier_high" + sel_str + mode_str;
+        std::string Outlier_low_name =
+            std::string("ND280/T2KND_to_NOvA") + (isosc ? "_osc" : "") + "/" +
+            tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
+            "_outlier_low" + sel_str + mode_str;
+
+        Outlier_low = GetTH1(fin, Outlier_low_name, false);
+        Outlier_high = GetTH1(fin, Outlier_high_name, false);
+      } else {
+        std::string Outlier_high_name =
+            std::string("NOvAND/NOvA_to_T2KND_ptlep") + (isosc ? "_osc" : "") +
+            "/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
+            "_outlier_high" + sel_str + mode_str;
+        std::string Outlier_low_name =
+            std::string("NOvAND/NOvA_to_T2KND_ptlep") + (isosc ? "_osc" : "") +
+            "/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
+            "_outlier_low" + sel_str + mode_str;
+
+        Outlier_low = GetTH1(fin, Outlier_low_name, false);
+        Outlier_high = GetTH1(fin, Outlier_high_name, false);
+      }
     }
   }
 
@@ -179,7 +210,6 @@ struct hblob {
 
     for (auto &h : ReWeights) {
       if (!h) {
-        throw;
         continue;
       }
       h->DrawClone("EHISTSAME");
@@ -262,6 +292,8 @@ struct hblob {
     bool HaveBoth = bool(From) && bool(Target);
     bool HaveReWeight = ReWeights.size() && bool(ReWeights[0]);
 
+    bool HaveOutliers = bool(Outlier_low) && bool(Outlier_high);
+
     TCanvas *c1 = MakeCanvas();
 
     TLatex ttl;
@@ -271,11 +303,10 @@ struct hblob {
     if (From) {
       TPad *p = new TPad("pFrom", "", 0, 0.5, 0.5, 1);
       p->AppendPad();
-      p->SetTopMargin(0.05);
-      p->SetBottomMargin(0.2);
+      p->SetBottomMargin(0.15);
       p->SetLeftMargin(0.11);
       p->SetRightMargin(0.14);
-      p->SetTopMargin(0.03);
+      p->SetTopMargin(0.08);
       p->cd();
 
       From->SetTitle("");
@@ -284,17 +315,16 @@ struct hblob {
       CL->Draw("COLZ SAME");
 
       c1->cd();
-      ttl.DrawLatexNDC(0.1, 0.95, ist2kbase ? "BANFF Post ND280" : "NOvA2020");
+      ttl.DrawLatexNDC(0.1, 0.975, ist2kbase ? "BANFF Post ND280" : "NOvA2020");
     }
 
     if (Target) {
       TPad *p = new TPad("pTarget", "", 0.5, 0.5, 1, 1);
       p->AppendPad();
-      p->SetTopMargin(0.05);
-      p->SetBottomMargin(0.2);
+      p->SetBottomMargin(0.15);
       p->SetLeftMargin(0.11);
       p->SetRightMargin(0.14);
-      p->SetTopMargin(0.03);
+      p->SetTopMargin(0.08);
       p->cd();
 
       Target->SetTitle("");
@@ -303,41 +333,40 @@ struct hblob {
       CL->Draw("COLZ SAME");
 
       c1->cd();
-      ttl.DrawLatexNDC(0.6, 0.95, ist2kbase ? "NOvA2020" : "BANFF Post ND280");
+      ttl.DrawLatexNDC(0.6, 0.975, ist2kbase ? "NOvA2020" : "BANFF Post ND280");
     }
 
     if (HaveBoth) {
-      From->Divide(Target.get());
+      auto FROMCL = (TH2 *)From->Clone("FROMCL");
+      FROMCL->Divide(Target.get());
 
       TPad *p = new TPad("pBoth", "", 0, 0, 0.5, 0.5);
       p->AppendPad();
-      p->SetTopMargin(0.05);
-      p->SetBottomMargin(0.2);
+      p->SetBottomMargin(0.15);
       p->SetLeftMargin(0.11);
       p->SetRightMargin(0.14);
-      p->SetTopMargin(0.03);
+      p->SetTopMargin(0.08);
       p->cd();
 
-      From->GetZaxis()->SetRangeUser(0, 2);
-      From->GetZaxis()->SetTitleOffset(1.25);
-      From->GetZaxis()->SetTitle("Event Rate Ratio");
-      auto CL = From->DrawClone("COLZ");
+      FROMCL->GetZaxis()->SetRangeUser(0, 2);
+      FROMCL->GetZaxis()->SetTitleOffset(1.25);
+      FROMCL->GetZaxis()->SetTitle("Event Rate Ratio");
+      auto CL = FROMCL->DrawClone("COLZ");
       ex2->Draw();
       CL->Draw("COLZ SAME");
 
       c1->cd();
-      ttl.DrawLatexNDC(0.1, 0.45,
+      ttl.DrawLatexNDC(0.1, 0.475,
                        ist2kbase ? "BANFF/NOvA2020" : "NOvA2020/ND280");
     }
 
     if (HaveReWeight) {
       TPad *p = new TPad("pRW", "", 0.5, 0, 1, 0.5);
       p->AppendPad();
-      p->SetTopMargin(0.05);
-      p->SetBottomMargin(0.2);
+      p->SetBottomMargin(0.15);
       p->SetLeftMargin(0.11);
       p->SetRightMargin(0.14);
-      p->SetTopMargin(0.03);
+      p->SetTopMargin(0.08);
       p->cd();
 
       ReWeights[0]->Divide(Target.get());
@@ -350,9 +379,114 @@ struct hblob {
       CL->Draw("COLZ SAME");
 
       c1->cd();
-      ttl.DrawLatexNDC(0.6, 0.45, "Reweight/Generated");
+      ttl.DrawLatexNDC(0.6, 0.475, "Reweight/Generated");
     }
     OpenPDF(fname);
+    c1->Print((fname + ".pdf").c_str());
+
+    if (!HaveOutliers) {
+      return;
+    }
+    if (From) {
+      if (Outlier_low) {
+        TPad *p_low = new TPad("pFrom_low", "", 0, 0.5, 0.5, 1);
+        p_low->AppendPad();
+        p_low->SetBottomMargin(0.15);
+        p_low->SetLeftMargin(0.11);
+        p_low->SetRightMargin(0.14);
+        p_low->SetTopMargin(0.08);
+        p_low->cd();
+
+        From->SetTitle("");
+        auto CL_low = (TH2 *)From->DrawClone("COLZ");
+        ex1->Draw();
+        CL_low->Draw("COLZ SAME");
+
+        Outlier_low->SetLineColor(kRed);
+        Outlier_low->Scale(CL_low->GetMaximum() / Outlier_low->GetMaximum());
+        Outlier_low->DrawClone("BOX SAME");
+
+        c1->cd();
+        ttl.DrawLatexNDC(0.1, 0.975,
+                         ist2kbase ? "BANFF Post ND280 (Clamped Low)"
+                                   : "NOvA2020 (Clamped Low)");
+      }
+
+      if (Outlier_high) {
+        TPad *p_high = new TPad("pFrom_high", "", 0, 0, 0.5, 0.5);
+        p_high->AppendPad();
+        p_high->SetBottomMargin(0.15);
+        p_high->SetLeftMargin(0.11);
+        p_high->SetRightMargin(0.14);
+        p_high->SetTopMargin(0.08);
+        p_high->cd();
+
+        From->SetTitle("");
+        auto CL_high = (TH2 *)From->DrawClone("COLZ");
+        ex1->Draw();
+        CL_high->Draw("COLZ SAME");
+
+        Outlier_high->SetLineColor(kRed);
+        Outlier_high->Scale(CL_high->GetMaximum() / Outlier_high->GetMaximum());
+        Outlier_high->DrawClone("BOX SAME");
+
+        c1->cd();
+        ttl.DrawLatexNDC(0.1, 0.475,
+                         ist2kbase ? "BANFF Post ND280 (Clamped High)"
+                                   : "NOvA2020 (Clamped High)");
+      }
+    }
+
+    if (Target) {
+      if (Outlier_low) {
+        TPad *p_low = new TPad("pTarget_low", "", 0.5, 0.5, 1, 1);
+        p_low->AppendPad();
+        p_low->SetBottomMargin(0.15);
+        p_low->SetLeftMargin(0.11);
+        p_low->SetRightMargin(0.14);
+        p_low->SetTopMargin(0.08);
+        p_low->cd();
+
+        Target->SetTitle("");
+        auto CL_low = (TH2 *)Target->DrawClone("COLZ");
+        ex1->Draw();
+        CL_low->Draw("COLZ SAME");
+
+        Outlier_low->SetLineColor(kRed);
+        Outlier_low->Scale(CL_low->GetMaximum() / Outlier_low->GetMaximum());
+        Outlier_low->DrawClone("BOX SAME");
+
+        c1->cd();
+        ttl.DrawLatexNDC(0.6, 0.975,
+                         !ist2kbase ? "BANFF Post ND280 (Clamped Low)"
+                                   : "NOvA2020 (Clamped Low)");
+      }
+
+      if (Outlier_high) {
+        TPad *p_high = new TPad("pTarget_high", "", 0.5, 0, 1, 0.5);
+        p_high->AppendPad();
+        p_high->SetBottomMargin(0.15);
+        p_high->SetLeftMargin(0.11);
+        p_high->SetRightMargin(0.14);
+        p_high->SetTopMargin(0.08);
+        p_high->cd();
+
+        Target->SetTitle("");
+        auto CL_high = (TH2 *)Target->DrawClone("COLZ");
+        ex1->Draw();
+        CL_high->Draw("COLZ SAME");
+
+        Outlier_high->SetLineColor(kRed);
+        Outlier_high->Scale(CL_high->GetMaximum() / Outlier_high->GetMaximum());
+        Outlier_high->DrawClone("BOX SAME");
+
+        c1->cd();
+        ttl.DrawLatexNDC(0.6, 0.475,
+                         !ist2kbase ? "BANFF Post ND280 (Clamped High)"
+                                   : "NOvA2020 (Clamped High)");
+      }
+    }
+
     c1->Print((fname + ".pdf").c_str());
   }
 
@@ -362,6 +496,7 @@ struct hblob {
     if (!From && !Target) {
       return;
     }
+
     TH1 *First = (From ? From.get() : Target.get());
 
     if (First->GetDimension() == 1) {
@@ -434,14 +569,42 @@ void ValidPlots(std::string const &finname) {
             kNC1cpi,     kNC1pi0,      kNCmultipi,       kNCOther,
             kNCOther_QE}) {
 
-        for (auto t2k_proj : {"Enu", "ERecQE", "PLep", "ThetaLep", "Q2",
-                              "q0q3_low", "q0q3_high", "hmfscpip", "hmfspi0p",
-                              "ncpi", "npi0", "EGamma", "EGamma_DeExcite"}) {
+        for (auto t2k_proj :
+             {"Enu", "ERecQE", "PLep", "ThetaLep", "PThetaLep", "Q2", "EnuQ2",
+              "EnuERecQE", "q0q3_low", "q0q3_high", "hmfscpip", "hmfspi0p",
+              "ncpi", "npi0", "EGamma", "EGamma_DeExcite", "EvWeights"}) {
 
           hblob::LoadAndPrint(
               fin, kT2K, t2k_proj, nuspec, tgtstr, selection(sel),
               "Valid_ND280_" + SelectionList[sel] + "_" + all_nuspecies[nuspec],
               SelectionList[sel]);
+        }
+      }
+
+      hblob::LoadAndPrint(
+          fin, kNOvAND, "SelectionXSecs", nuspec, tgtstr, kNoPrimarySel,
+          std::string("Valid_NOvAND_SelectionXSecs_") + all_nuspecies[nuspec],
+          "SelectionXSecs");
+
+      for (int sel :
+           {kCCInc,      kCCInc_RW,    kCC0pi,           kCC0pi_QE,
+            kCC0pi_2p2h, kCC0pi_Other, kCC1Gamma,        kCCDeExciteGamma,
+            kCCNGamma,   kCC1cpi,      kCC1pi0,          kCCmultipi,
+            kCCOther,    kCCOther_QE,  kNCInc,           kNCInc_RW,
+            kNC0pi,      kNC1Gamma,    kNCDeExciteGamma, kNCNGamma,
+            kNC1cpi,     kNC1pi0,      kNCmultipi,       kNCOther,
+            kNCOther_QE}) {
+
+        for (auto t2k_proj :
+             {"Enu", "Q2", "PLep", "PtLep", "EAvHad", "EnuEAvHad", "q0q3_low",
+              "q0q3_high", "ThetaLep", "hmfscpip", "hmfspi0p", "ncpi", "npi0",
+              "EGamma", "EGamma_DeExcite"}) {
+
+          hblob::LoadAndPrint(fin, kNOvAND, t2k_proj, nuspec, tgtstr,
+                              selection(sel),
+                              "Valid_NOvAND_" + SelectionList[sel] + "_" +
+                                  all_nuspecies[nuspec],
+                              SelectionList[sel]);
         }
       }
     }

@@ -1,6 +1,6 @@
 [FakeDataValidConfig]
 
-EnuCut = 8
+EnuCut = 8.0
 
 [FakeDataValidConfig.Enu]
 
@@ -40,8 +40,8 @@ x_binning = [
 ]
 
 axis_titles = [
-      "#it{E}_{#nu} (GeV)",
-      "d#sigma/d#it{E}_{#nu} cm^{2} GeV^{-1}"
+      "#it{E}_{RecQE} (GeV)",
+      "d#sigma/d#it{E}_{RecQE} cm^{2} GeV^{-1}"
 ]
 
 [FakeDataValidConfig.Q2]
@@ -98,7 +98,7 @@ axis_titles = [
 [FakeDataValidConfig.q0q3_high]
 
 title = "q0q3_high"
-selections = ["CCInc", "CCInc_RW", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", ]
 
 x_binning = [
       "uniform",
@@ -127,8 +127,98 @@ x_binning = [
 ]
 
 axis_titles = [
-      "#theta_{lep} (GeV)",
+      "#theta_{lep} (deg)",
       "d#sigma/d#theta_{lep} cm^{2} deg^{-1}"
+]
+
+[FakeDataValidConfig.PThetaLep]
+
+title = "PThetaLep"
+selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", ]
+
+y_binning = [
+      "uniform",
+      [30, 0, 180]
+]
+
+x_binning = [
+      "uniform",
+      [80,0,4]
+]
+
+axis_titles = [
+      "#it{p}_{lep} (GeV/#it{c})",
+      "#theta_{lep} (deg)",
+      "d#sigma/d#it{p}_{lep}#theta_{lep} cm^{2} GeV^{-1} #it{c} deg^{-1}"
+]
+
+[FakeDataValidConfig.EnuQ2]
+
+title = "EnuQ2"
+selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+
+x_binning = [
+      "var",
+      [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45,
+        0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,
+        0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2,
+        2.2, 2.4, 2.6, 2.8, 3
+      ]
+]
+
+y_binning = [
+      "uniform",
+      [33,0,1]
+]
+
+axis_titles = [
+      "#it{E}_{#nu} (GeV)",
+      "#it{Q}^{2} (GeV^{2})",
+      "d#sigma/d#it{E}_{#nu}#it{Q}^{2} cm^{2} GeV^{-3}"
+]
+
+[FakeDataValidConfig.EnuERecQE]
+
+title = "EnuERecQE"
+selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+
+x_binning = [
+      "var",
+      [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45,
+        0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,
+        0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2,
+        2.2, 2.4, 2.6, 2.8, 3
+      ]
+]
+
+y_binning = [
+      "var",
+      [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45,
+        0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85,
+        0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2,
+        2.2, 2.4, 2.6, 2.8, 3
+      ]
+]
+
+axis_titles = [
+      "#it{E}_{#nu} (GeV)",
+      "#it{E}_{RecQE} (GeV)",
+      "d#sigma/d#it{E}_{#nu}#it{E}_{RecQE} cm^{2} GeV^{-2}"
+]
+
+[FakeDataValidConfig.EvWeights]
+
+title = "EvWeights"
+selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", ]
+
+x_binning = [
+      "uniform",
+      [100,0,10]
+]
+
+axis_titles = [
+      "Event Weight",
+      "Count (A.U.)"
 ]
 
 [FakeDataValidConfig.hmfscpip]

@@ -62,6 +62,18 @@ template <typename TH> struct TrueChannelHist {
     Apply([=](TH &h) { h.SetTitle(title.c_str()); });
   }
 
+  void SetXAxisTitle(std::string const &title) {
+    Apply([=](TH &h) { h.GetXaxis()->SetTitle(title.c_str()); });
+  }
+
+  void SetYAxisTitle(std::string const &title) {
+    Apply([=](TH &h) { h.GetYaxis()->SetTitle(title.c_str()); });
+  }
+
+  void SetZAxisTitle(std::string const &title) {
+    Apply([=](TH &h) { h.GetZaxis()->SetTitle(title.c_str()); });
+  }
+
   void Write(TDirectory *f, bool width_scale = false) {
     Apply([=](TH &h) {
       if (!h.Integral()) {
@@ -159,6 +171,16 @@ template <typename TH> struct SelectionHists {
 
   void SetTitle(std::string const &title) {
     Apply([=](TH &h) { h.SetTitle(title); });
+  }
+
+  void SetXAxisTitle(std::string const &title) {
+    Apply([=](TH &h) { h.GetXaxis()->SetTitle(title.c_str()); });
+  }
+  void SetYAxisTitle(std::string const &title) {
+    Apply([=](TH &h) { h.GetYaxis()->SetTitle(title.c_str()); });
+  }
+  void SetZAxisTitle(std::string const &title) {
+    Apply([=](TH &h) { h.GetZaxis()->SetTitle(title.c_str()); });
   }
 
   void Apply(std::function<void(TH &)> f) {

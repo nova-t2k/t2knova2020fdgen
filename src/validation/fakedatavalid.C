@@ -24,15 +24,27 @@ bool dotune = true;
 bool doosc = false;
 
 TrueChannelHist<TH1F> *XSecs;
+SelectionHists<TH1F> *EvWeights;
 
 SelectionHists<TH1F> *Enu;
 SelectionHists<TH1F> *ERecQE;
 SelectionHists<TH1F> *PLep;
 SelectionHists<TH1F> *ThetaLep;
+SelectionHists<TH2F> *PThetaLep;
+SelectionHists<TH2F> *PThetaLep_outlier_low;
+SelectionHists<TH2F> *PThetaLep_outlier_high;
 SelectionHists<TH1F> *EAvHad;
 SelectionHists<TH1F> *PtLep;
 SelectionHists<TH1F> *Q2;
-SelectionHists<TH2F> *q0q3;
+SelectionHists<TH2F> *EnuQ2;
+SelectionHists<TH2F> *EnuQ2_outlier_low;
+SelectionHists<TH2F> *EnuQ2_outlier_high;
+SelectionHists<TH2F> *EnuERecQE;
+SelectionHists<TH2F> *q0q3_high_outlier_low;
+SelectionHists<TH2F> *q0q3_high_outlier_high;
+SelectionHists<TH2F> *q0q3_low;
+SelectionHists<TH2F> *q0q3_high;
+SelectionHists<TH2F> *EnuEAvHad;
 SelectionHists<TH1F> *hmfscpip;
 SelectionHists<TH1F> *hmfspi0p;
 SelectionHists<TH1F> *ncpi;
@@ -76,9 +88,16 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   ERecQE = SelectionHistsFromTOML<TH1F>("ERecQE", plots_config);
   PLep = SelectionHistsFromTOML<TH1F>("PLep", plots_config);
   Q2 = SelectionHistsFromTOML<TH1F>("Q2", plots_config);
-  q0q3 = SelectionHistsFromTOML<TH2F>("q0q3", plots_config);
+  EnuQ2 = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
+  EnuERecQE = SelectionHistsFromTOML<TH2F>("EnuERecQE", plots_config);
+
+  q0q3_low = SelectionHistsFromTOML<TH2F>("q0q3_low", plots_config);
+  q0q3_high = SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
+  EnuEAvHad = SelectionHistsFromTOML<TH2F>("EnuEAvHad", plots_config);
 
   ThetaLep = SelectionHistsFromTOML<TH1F>("ThetaLep", plots_config);
+
+  PThetaLep = SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
 
   EAvHad = SelectionHistsFromTOML<TH1F>("EAvHad", plots_config);
 
@@ -90,11 +109,36 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   npi0 = SelectionHistsFromTOML<TH1F>("npi0", plots_config);
 
   EGamma = SelectionHistsFromTOML<TH1F>("EGamma", plots_config);
-  EGamma_DeExcite = SelectionHistsFromTOML<TH1F>("EGamma_DeExcite", plots_config);
+  EGamma_DeExcite =
+      SelectionHistsFromTOML<TH1F>("EGamma_DeExcite", plots_config);
 
   XSecs = new TrueChannelHist<TH1F>("SelectionXSecs", ";Selection;Rate",
                                     AllSelectionList.size(), 0,
                                     AllSelectionList.size());
+  EvWeights = SelectionHistsFromTOML<TH1F>("EvWeights", plots_config);
+
+  PThetaLep_outlier_low =
+      SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
+  PThetaLep_outlier_low->SetName("PThetaLep_outlier_low");
+  PThetaLep_outlier_low->SetZAxisTitle("Count with w <= 0.1");
+  PThetaLep_outlier_high =
+      SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
+  PThetaLep_outlier_high->SetName("PThetaLep_outlier_high");
+  PThetaLep_outlier_high->SetZAxisTitle("Count with w >= 10");
+  EnuQ2_outlier_low = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
+  EnuQ2_outlier_low->SetName("EnuQ2_outlier_low");
+  EnuQ2_outlier_low->SetZAxisTitle("Count with w <= 0.1");
+  EnuQ2_outlier_high = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
+  EnuQ2_outlier_high->SetName("EnuQ2_outlier_high");
+  EnuQ2_outlier_high->SetZAxisTitle("Count with w >= 10");
+  q0q3_high_outlier_low =
+      SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
+  q0q3_high_outlier_low->SetName("q0q3_high_outlier_low");
+  q0q3_high_outlier_low->SetZAxisTitle("Count with w <= 0.1");
+  q0q3_high_outlier_high =
+      SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
+  q0q3_high_outlier_high->SetName("q0q3_high_outlier_high");
+  q0q3_high_outlier_high->SetZAxisTitle("Count with w >= 10");
 
   T2KNOvATruthTreeReader rdr(ttrdr);
   if (!bymode) {
@@ -149,17 +193,18 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     }
 
     int primary_selection = rdr.GetPrimarySelection();
-
+    double rw_w = 1;
     if (weightconfig == t2knova::kT2KND_to_NOvA) {
-      w *= t2knova::GetFakeDataWeight_ND280ToNOvA(
+      rw_w *= t2knova::GetFakeDataWeight_ND280ToNOvA(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
           rdr.AngLep_deg(), primary_selection, false);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
-      w *= t2knova::GetFakeDataWeight_NOvAToT2K_PtLep(
+      rw_w *= t2knova::GetFakeDataWeight_NOvAToT2K_PtLep(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
           (rdr.PLep()) * sqrt(1 - pow(rdr.CosLep(), 2)), rdr.Eav_NOvA(),
           primary_selection, false);
     }
+    w *= rw_w;
 
     std::vector<int> sels = rdr.GetSelections();
 
@@ -169,17 +214,21 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     }
 
     Enu->Fill(w, sels, rdr.Mode(), rdr.Enu_true());
-    ERecQE->Fill(w, sels, rdr.Mode(),
-                 EnuQErec(rdr.FSLepP4().E(), rdr.PLep(), rdr.CosLep(), 0,
-                          rdr.PDGNu() > 0));
-
+    double erec = EnuQErec(rdr.FSLepP4().E(), rdr.PLep(), rdr.CosLep(), 0,
+                           rdr.PDGNu() > 0);
+    ERecQE->Fill(w, sels, rdr.Mode(), erec);
+    EnuERecQE->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), erec);
     PLep->Fill(w, sels, rdr.Mode(), rdr.PLep());
     ThetaLep->Fill(w, sels, rdr.Mode(), rdr.AngLep_deg());
+    PThetaLep->Fill(w, sels, rdr.Mode(), rdr.PLep(), rdr.AngLep_deg());
     EAvHad->Fill(w, sels, rdr.Mode(), rdr.Eav_NOvA());
     PtLep->Fill(w, sels, rdr.Mode(),
                 rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)));
     Q2->Fill(w, sels, rdr.Mode(), rdr.Q2());
-    q0q3->Fill(w, sels, rdr.Mode(), rdr.q3(), rdr.q0());
+    EnuQ2->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
+    q0q3_low->Fill(w, sels, rdr.Mode(), rdr.q3(), rdr.q0());
+    q0q3_high->Fill(w, sels, rdr.Mode(), rdr.q3(), rdr.q0());
+    EnuEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.Eav_NOvA());
     hmfscpip->Fill(w, sels, rdr.Mode(), rdr.hmfscpip());
     hmfspi0p->Fill(w, sels, rdr.Mode(), rdr.hmfspi0p());
     ncpi->Fill(w, sels, rdr.Mode(), rdr.ncpi());
@@ -190,6 +239,20 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
 
     for (auto sel : sels) {
       XSecs->Fill(w, rdr.Mode(), sel);
+    }
+
+    EvWeights->Fill(1, sels, rdr.Mode(), (dotune ? rdr.RWWeight() : 1) * rw_w);
+
+    if (rw_w <= 0.1) {
+      PThetaLep_outlier_low->Fill(1, sels, rdr.Mode(), rdr.PLep(),
+                                  rdr.AngLep_deg());
+      EnuQ2_outlier_low->Fill(1, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
+      q0q3_high_outlier_low->Fill(1, sels, rdr.Mode(), rdr.q3(), rdr.q0());
+    } else if (rw_w >= 10) {
+      PThetaLep_outlier_high->Fill(1, sels, rdr.Mode(), rdr.PLep(),
+                                   rdr.AngLep_deg());
+      EnuQ2_outlier_high->Fill(1, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
+      q0q3_high_outlier_high->Fill(1, sels, rdr.Mode(), rdr.q3(), rdr.q0());
     }
 
     ent_it++;
@@ -217,10 +280,6 @@ void SayUsage(char const *argv[]) {
                "\n\t-W <Config>            : ReWeight Config"
                "\n\t         Configs:"
                "\n\t              * T2KND_to_NOvA"
-               "\n\t              * T2KND_to_NOvA_Enu"
-               "\n\t              * T2KND_to_NOvA_Q2"
-               "\n\t              * NOvA_to_T2KND_plep"
-               "\n\t              * NOvA_to_T2KND_Q2"
                "\n\t              * NOvA_to_T2KND_ptlep"
                "\n\t-d </sub/dir/to/use>   : Output sub directory"
                " input tree. \n"
@@ -347,18 +406,33 @@ int main(int argc, char const *argv[]) {
   ERecQE->Write(dout, true);
   PLep->Write(dout, true);
   ThetaLep->Write(dout, true);
+  PThetaLep->Write(dout, true);
+  PThetaLep_outlier_low->Write(dout, true);
+  PThetaLep_outlier_high->Write(dout, true);
+
   EAvHad->Write(dout, true);
   PtLep->Write(dout, true);
   Q2->Write(dout, true);
-  q0q3->Write(dout, true);
+  EnuQ2->Write(dout, true);
+  EnuQ2_outlier_low->Write(dout, true);
+  EnuQ2_outlier_high->Write(dout, true);
+
+  EnuERecQE->Write(dout, true);
+  q0q3_low->Write(dout, true);
+  q0q3_high->Write(dout, true);
+  q0q3_high_outlier_low->Write(dout, true);
+  q0q3_high_outlier_high->Write(dout, true);
+  EnuEAvHad->Write(dout, true);
 
   hmfscpip->Write(dout, true);
   hmfspi0p->Write(dout, true);
   ncpi->Write(dout, true);
   npi0->Write(dout, true);
-  
+
   EGamma->Write(dout, true);
   EGamma_DeExcite->Write(dout, true);
+
+  EvWeights->Write(dout, true);
 
   fout.Close();
 }

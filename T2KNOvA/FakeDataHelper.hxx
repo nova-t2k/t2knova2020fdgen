@@ -12,6 +12,8 @@
 #include "TH3.h"
 #include "THn.h"
 
+// #define DEBUG_HIST_LOADER
+
 namespace t2knova {
 
 constexpr double NMinEvs = 1;
@@ -76,7 +78,21 @@ inline void LoadHists(std::string const &inputfile = "FakeDataInputs.root") {
             rwhists[nuspec][rwconfig][tgta_sel_offset + sel]->SetDirectory(
                 nullptr);
             found++;
+#ifdef DEBUG_HIST_LOADER
+            std::cout << "[INFO]: Loaded: "
+                      << rwconfig_str + "/" + tgta_str + "/" + nuspec_str +
+                             "/" + sel_str
+                      << std::endl;
+#endif
           }
+#ifdef DEBUG_HIST_LOADER
+          else {
+            std::cout << "[WARN]: Failed to load: "
+                      << rwconfig_str + "/" + tgta_str + "/" + nuspec_str +
+                             "/" + sel_str
+                      << std::endl;
+          }
+#endif
         }
       }
     }
@@ -109,9 +125,17 @@ inline double GetFakeDataWeight_NOvAToT2K_PtLep(int nu_pdg, int lep_pdg,
 
   std::unique_ptr<TH1> &rathist =
       rwhists[nuspec][kNOvA_to_T2KND_ptlep][(tgta * 100) + offset];
+
+  // std::cout << "[RW]: iscc: " << iscc << ", offset: " << offset
+  //           << ", PrimSel: " << PrimSel << std::endl;
+  // std::cout << "[RW] rathist: " << rathist.get() << ", E_nu_GeV: " << E_nu_GeV
+  //           << ", PtLep_GeV: " << PtLep_GeV
+  //           << ", EVisHadronic_GeV: " << EVisHadronic_GeV << std::endl;
+
   if (rathist) {
     double wght =
         EvalHist3D(rathist, E_nu_GeV, PtLep_GeV, EVisHadronic_GeV, interpolate);
+    // std::cout << "--wght: " << wght << std::endl;
     return wght && !std::isnormal(wght) ? 0 : wght;
   }
   return 1;

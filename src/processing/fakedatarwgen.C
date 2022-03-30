@@ -73,18 +73,18 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
         for (std::string const &targetnuc : {"C", "H"}) {
           std::unique_ptr<TH3> neut_novand_plep =
               GetTH<TH3>(fin, "NEUT/NOvAND/" + targetnuc + "/" + species +
-                                  "/EnuPLepEAvHad_" + selection);
+                                  "/EnuPtLepEAvHad_" + selection);
           if (neut_novand_plep) {  // NOvAND
             neut_novand_plep->SetDirectory(nullptr);
 
             std::unique_ptr<TH3> genie_novand =
                 GetTH<TH3>(fin, "GENIE/NOvAND/" + targetnuc + "/" + species +
-                                    "/EnuPLepEAvHad_" + selection);
+                                    "/EnuPtLepEAvHad_" + selection);
             genie_novand->SetDirectory(nullptr);
 
             TDirectory *dir = MakeDirectoryStructure(
                 fout.get(),
-                "nova_to_t2k/EnuPLepEAvHad/" + targetnuc + "/" + species + "/");
+                "nova_to_t2k/EnuPtLepEAvHad/" + targetnuc + "/" + species + "/");
 
             std::unique_ptr<TH3> rat(dynamic_cast<TH3 *>(
                 neut_novand_plep->Clone(selection.c_str())));
@@ -96,7 +96,7 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
           } else {
             std::cout << "[WARN]: Expected to find "
                       << "NEUT/NOvAND/" + targetnuc + "/" + species +
-                             "/EnuPLepEAvHad_" + selection
+                             "/EnuPtLepEAvHad_" + selection
                       << std::endl;
           }
         }
