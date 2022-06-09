@@ -265,7 +265,7 @@ SelectionHists<TN> *SelectionHistsFromTOML(
                          axis_titles[0] + ";" + axis_titles[1];
 
   std::vector<double> x_binning =
-      BinningFromTOML(toml_h::find(config, "x_binning"));
+      BinningFromTOML(toml_h::find<toml::value>(config, "x_binning"));
 
   return new SelectionHists<TN>(
       plotname, titlestr,
@@ -300,9 +300,9 @@ SelectionHists<TN> *SelectionHistsFromTOML(
                          axis_titles[2];
 
   std::vector<double> x_binning =
-      BinningFromTOML(toml_h::find(config, "x_binning"));
+      BinningFromTOML(toml_h::find<toml::value>(config, "x_binning"));
   std::vector<double> y_binning =
-      BinningFromTOML(toml_h::find(config, "y_binning"));
+      BinningFromTOML(toml_h::find<toml::value>(config, "y_binning"));
 
   return new SelectionHists<TN>(
       plotname, titlestr,
@@ -338,11 +338,11 @@ SelectionHists<TN> *SelectionHistsFromTOML(
                          axis_titles[2] + ";" + axis_titles[3];
 
   std::vector<double> x_binning =
-      BinningFromTOML(toml_h::find(config, "x_binning"));
+      BinningFromTOML(toml_h::find<toml::value>(config, "x_binning"));
   std::vector<double> y_binning =
-      BinningFromTOML(toml_h::find(config, "y_binning"));
+      BinningFromTOML(toml_h::find<toml::value>(config, "y_binning"));
   std::vector<double> z_binning =
-      BinningFromTOML(toml_h::find(config, "z_binning"));
+      BinningFromTOML(toml_h::find<toml::value>(config, "z_binning"));
 
   return new SelectionHists<TN>(
       plotname, titlestr,

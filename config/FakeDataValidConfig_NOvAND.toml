@@ -20,7 +20,49 @@ x_binning = [
 
 axis_titles = [
       "#it{E}_{#nu} (GeV)",
-      "d#sigma/d#it{E}_{#nu} cm^{2} GeV^{-1}"
+      "d#sigma/d#it{E}_{#nu}cm^{2} GeV^{-1}"
+]
+
+[FakeDataValidConfig.EnuERecQEBias]
+
+title = "EnuERecQEBias"
+selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+
+x_binning = [
+      "var",
+      [0.0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5]
+]
+
+y_binning = [
+      "uniform",
+      [100,-1,1]
+]
+
+axis_titles = [
+      "#it{E}_{#nu} (GeV)",
+      "#it{E}_{Rec. Bias}^{QE}",
+      "d#sigma/d#it{E}_{#nu}#it{E}_{Rec. Bias}^{QE} cm^{2} GeV^{-1}"
+]
+
+[FakeDataValidConfig.EnuERecAvBias]
+
+title = "EnuERecAvBias"
+selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+
+x_binning = [
+      "var",
+      [0.0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5]
+]
+
+y_binning = [
+      "uniform",
+      [80,-0.3,0.1]
+]
+
+axis_titles = [
+      "#it{E}_{#nu} (GeV)",
+      "#it{E}_{Rec. Bias}^{Had. Av.}",
+      "d#sigma/d#it{E}_{#nu}#it{E}_{Rec. Bias}^{Had. Av.} cm^{2} GeV^{-1}"
 ]
 
 [FakeDataValidConfig.Q2]

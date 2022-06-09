@@ -88,6 +88,49 @@ public:
     return npi0;
   }
 
+  float hmfsprotonp() {
+    double maxp = 0;
+    for (int i = 0; i < *_nfsp; ++i) {
+      if (_pdg[i] == 2212) {
+        TVector3 v(_px[i], _py[i], _pz[i]);
+        if (v.Mag() > maxp) {
+          maxp = v.Mag();
+        }
+      }
+    }
+    return maxp;
+  }
+  float hmfsneutronp() {
+    double maxp = 0;
+    for (int i = 0; i < *_nfsp; ++i) {
+      if (_pdg[i] == 2112) {
+        TVector3 v(_px[i], _py[i], _pz[i]);
+        if (v.Mag() > maxp) {
+          maxp = v.Mag();
+        }
+      }
+    }
+    return maxp;
+  }
+  int nproton() {
+    int nproton = 0;
+    for (int i = 0; i < *_nfsp; ++i) {
+      if (_pdg[i] == 2212) {
+        nproton++;
+      }
+    }
+    return nproton;
+  }
+  int nneutron() {
+    int nneutron = 0;
+    for (int i = 0; i < *_nfsp; ++i) {
+      if (_pdg[i] == 2112) {
+        nneutron++;
+      }
+    }
+    return nneutron;
+  }
+
   float Eav_NOvA() {
 
     float eAvail = 0;

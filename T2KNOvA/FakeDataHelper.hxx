@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
+#include <cmath>
 
 #include "T2KNOvA/ROOTHelper.hxx"
 #include "T2KNOvA/TrueSelectionHelper.hxx"
@@ -17,7 +18,7 @@
 namespace t2knova {
 
 constexpr double NMinEvs = 1;
-constexpr double MaxFracError = 1.0 / sqrt(NMinEvs);
+const double MaxFracError = 1.0 / std::sqrt(NMinEvs);
 
 double GetFakeDataWeight_NOvAToT2K_PtLep(int nu_pdg, int lep_pdg, int tgta,
                                          double E_nu_GeV, double PtLep_GeV,

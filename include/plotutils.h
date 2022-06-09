@@ -75,6 +75,26 @@ void StyleTH1Fill(std::unique_ptr<TH1> &h, int color, int style = 1001,
   h->SetFillColorAlpha(color, alpha);
 }
 
+double GetMinimumTH1(TH1 const & h){
+  double min = -std::numeric_limits<double>::min();
+  
+  for (int i = 0; i < h.GetXaxis()->GetNbins(); ++i){
+    min = std::min(min, h.GetBinContent(i+1));
+  }
+
+  return min;
+}
+
+double GetMaximumTH1(TH1 const & h){
+  double max = -std::numeric_limits<double>::max();
+  
+  for (int i = 0; i < h.GetXaxis()->GetNbins(); ++i){
+    max = std::max(max,h.GetBinContent(i+1));
+  }
+
+  return max;
+}
+
 double
 GetMaximumTH1s(std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs) {
   double max = -std::numeric_limits<double>::max();
@@ -83,10 +103,24 @@ GetMaximumTH1s(std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs) {
     if (!h.get()) {
       continue;
     }
-    max = std::max(max, h.get()->GetMaximum());
+    max = std::max(max, GetMaximumTH1(*h.get()));
   }
 
   return max;
+}
+
+double
+GetMinimumTH1s(std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs) {
+  double min = std::numeric_limits<double>::min();
+
+  for (auto const &h : hs) {
+    if (!h.get()) {
+      continue;
+    }
+    min = std::min(min, GetMinimumTH1(*h.get()));
+  }
+
+  return min;
 }
 
 void DrawTH1s(std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> hs,
@@ -261,6 +295,15 @@ double GetMaximumTH1s(std::vector<std::unique_ptr<TH1>> &hs) {
   return GetMaximumTH1s(rhs);
 }
 
+
+double GetMinimumTH1s(std::vector<std::unique_ptr<TH1>> &hs) {
+  std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> rhs;
+  for (auto &h : hs) {
+    rhs.push_back(h);
+  }
+  return GetMinimumTH1s(rhs);
+}
+
 void DrawTH1s(std::vector<std::unique_ptr<TH1>> &hs, std::string opts = "",
               bool first = true) {
   std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> rhs;
@@ -291,8 +334,8 @@ TPad *MakeRatioTopPad(double mt = 0.05, double ml = 0.15, double mr = 0.03,
   return c1;
 }
 TPad *MakeRatioTopPadTopLegend(double mt = 0.3, double ml = 0.15,
-                               double mr = 0.03, double mb = 0.03,
-                               double midpoint = 0.3,
+                               double mr = 0.03, double mb = 0.035,
+                               double midpoint = 0.35,
                                std::string name = "ptop") {
   return MakeRatioTopPad(mt, ml, mr, mb, midpoint, name);
 }
@@ -306,9 +349,9 @@ TPad *MakeRatioBottomPad(double mt = 0.03, double ml = 0.15, double mr = 0.03,
   c1->SetBottomMargin(mb);
   return c1;
 }
-TPad *MakeRatioBottomPadTopLegend(double mt = 0.03, double ml = 0.15,
-                                  double mr = 0.03, double mb = 0.3,
-                                  double midpoint = 0.3,
+TPad *MakeRatioBottomPadTopLegend(double mt = 0.035, double ml = 0.15,
+                                  double mr = 0.03, double mb = 0.35,
+                                  double midpoint = 0.35,
                                   std::string name = "pbottom") {
   return MakeRatioBottomPad(mt, ml, mr, mb, midpoint, name);
 }

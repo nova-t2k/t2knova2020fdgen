@@ -87,7 +87,7 @@ inline toml::value parse_card(std::string card_name = "") {
 // ********* Prototypes
 
 // Allows implicit cast for integer to floating point for vector elements
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<
     is_vector<T>::value &&
         std::is_floating_point<typename T::value_type>::value,
@@ -95,7 +95,7 @@ typename std::enable_if<
 find(toml::value const &v, Key const &k);
 
 // covers forwarding for vectors of non floating types
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<
     is_vector<T>::value &&
         !std::is_floating_point<typename T::value_type>::value,
@@ -103,14 +103,14 @@ typename std::enable_if<
 find(toml::value const &v, Key const &k);
 
 // Checks std::array sizes for floating types
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<
     is_array<T>::value && std::is_floating_point<typename T::value_type>::value,
     T>::type
 find(toml::value const &v, Key const &k);
 
 // Checks std::array sizes and forwards for non floating types
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<
     is_array<T>::value &&
         !std::is_floating_point<typename T::value_type>::value,
@@ -118,29 +118,29 @@ typename std::enable_if<
 find(toml::value const &v, Key const &k);
 
 // Allows certain string values to be interpreted as bools
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<std::is_same<T, bool>::value, T>::type
 find(toml::value const &v, Key const &k);
 
 // Allows implicit cast for integer to floating point
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<std::is_floating_point<T>::value, T>::type
 find(toml::value const &v, Key const &k);
 
 // default non specialized forwarder for single keys
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<!find_is_specialized<T>::value, T>::type
 find(toml::value const &v, Key const &k);
 
 // forwarder for vectors of keys
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 T find_rec(toml::value const &v,
            typename std::enable_if<is_vector<Key>::value, Key>::type const &ks);
 
 // ********* implementations
 
 // Allows implicit cast for integer to floating point for vector elements
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<
     is_vector<T>::value &&
         std::is_floating_point<typename T::value_type>::value,
@@ -158,7 +158,7 @@ find(toml::value const &v, Key const &k) {
 }
 
 // covers forwarding for vectors of non floating types
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<
     is_vector<T>::value &&
         !std::is_floating_point<typename T::value_type>::value,
@@ -168,7 +168,7 @@ find(toml::value const &v, Key const &k) {
 }
 
 // Checks std::array sizes for floating types
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<
     is_array<T>::value && std::is_floating_point<typename T::value_type>::value,
     T>::type
@@ -196,7 +196,7 @@ find(toml::value const &v, Key const &k) {
 }
 
 // Checks std::array sizes and forwards for non floating types
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<
     is_array<T>::value &&
         !std::is_floating_point<typename T::value_type>::value,
@@ -214,7 +214,7 @@ find(toml::value const &v, Key const &k) {
 }
 
 // Allows certain string values to be interpreted as bools
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<std::is_same<T, bool>::value, T>::type
 find(toml::value const &v, Key const &k) {
 
@@ -239,7 +239,7 @@ find(toml::value const &v, Key const &k) {
 }
 
 // Allows implicit cast for integer to floating point
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<std::is_floating_point<T>::value, T>::type
 find(toml::value const &v, Key const &k) {
 
@@ -251,14 +251,14 @@ find(toml::value const &v, Key const &k) {
 }
 
 // default non specialized forwarder for single keys
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 typename std::enable_if<!find_is_specialized<T>::value, T>::type
 find(toml::value const &v, Key const &k) {
   return toml::find<T>(v, k);
 }
 
 // forwarder for vectors of keys
-template <typename T = toml::value, typename Key = std::string>
+template <typename T, typename Key>
 T find_rec(toml::value const &v, std::vector<Key> const &ks) {
   if (!v.contains(ks.front())) {
     std::cout << "[ERROR]: Key " << ks.front() << " not found." << std::endl;
@@ -274,7 +274,7 @@ T find_rec(toml::value const &v, std::vector<Key> const &ks) {
 
 //****** Other helper methods
 
-template <typename T, typename Key = std::string>
+template <typename T, typename Key>
 T find_or_rec(toml::value const &v, std::vector<Key> const &ks, T const &def) {
 
   if (!v.contains(ks.front())) {
@@ -288,7 +288,7 @@ T find_or_rec(toml::value const &v, std::vector<Key> const &ks, T const &def) {
   return toml_h::find<T>(v, ks.front());
 }
 
-template <typename T, typename Key = std::string>
+template <typename T, typename Key>
 T find_or(toml::value const &v, Key const &k, T const &def) {
 
   if (!v.contains(k)) {
@@ -317,7 +317,7 @@ T ensure_valid_string_option(std::string const &val,
   abort();
 }
 
-template <typename Key = std::string, typename T>
+template <typename Key, typename T>
 T ensure_valid_string_option(toml::value const &v, Key const &k,
                              std::map<std::string, T> const &options) {
 
@@ -341,14 +341,14 @@ inline int ensure_valid_string_option(std::string const &val,
   abort();
 }
 
-template <typename Key = std::string>
+template <typename Key>
 int ensure_valid_string_option(toml::value const &v, Key const &k,
                                std::vector<std::string> const &options) {
 
   return ensure_valid_string_option(toml::find<std::string>(v, k), options);
 }
 
-template <typename T, typename Key = std::string>
+template <typename T, typename Key>
 void set_if_present(T &target, toml::value const &v, Key const &k) {
 
   if (!v.contains(k)) {
@@ -357,7 +357,7 @@ void set_if_present(T &target, toml::value const &v, Key const &k) {
   target = toml_h::find<T>(v, k);
 }
 
-template <typename T, typename Key = std::string>
+template <typename T, typename Key>
 void set_if_present_rec(T &target, toml::value const &v,
                         std::vector<Key> const &ks) {
 
@@ -374,7 +374,7 @@ void set_if_present_rec(T &target, toml::value const &v,
   target = toml_h::find<T>(v, ks.front());
 }
 
-template <typename T, typename Key = std::string, typename OptCollection>
+template <typename T, typename Key, typename OptCollection>
 void set_option_if_present(T &target, toml::value const &v, Key const &k,
                            OptCollection const &options) {
 
@@ -385,7 +385,7 @@ void set_option_if_present(T &target, toml::value const &v, Key const &k,
   target = toml_h::ensure_valid_string_option(opt_val, options);
 }
 
-template <typename T, typename Key = std::string, typename OptCollection>
+template <typename T, typename Key, typename OptCollection>
 void set_option_if_present_rec(T &target, toml::value const &v,
                                std::vector<Key> const &ks,
                                OptCollection const &options) {
@@ -403,12 +403,12 @@ void set_option_if_present_rec(T &target, toml::value const &v,
   target = toml_h::ensure_valid_string_option(opt_val, options);
 }
 
-template <typename Key = std::string>
+template <typename Key>
 bool contains(toml::value const &v, Key const &k) {
   return v.contains(k);
 }
 
-template <typename Key = std::string>
+template <typename Key>
 bool contains_rec(toml::value const &v, std::vector<Key> const &ks) {
   if (!v.contains(ks.front())) {
     return false;

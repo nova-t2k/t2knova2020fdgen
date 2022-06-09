@@ -1,3 +1,5 @@
+#define T2KNOVARW_MERGED_CC0PI
+
 #include "ChannelHistCollections.h"
 #include "T2KNOvA/TrueSelectionHelper.hxx"
 #include "T2KNOvATruthTreeReader.h"
@@ -30,16 +32,22 @@ SelectionHists<TH1F> *Enu;
 SelectionHists<TH1F> *ERecQE;
 SelectionHists<TH1F> *PLep;
 SelectionHists<TH1F> *ThetaLep;
+SelectionHists<TH1F> *CosThetaLep;
 SelectionHists<TH2F> *PThetaLep;
 SelectionHists<TH2F> *PThetaLep_outlier_low;
 SelectionHists<TH2F> *PThetaLep_outlier_high;
 SelectionHists<TH1F> *EAvHad;
 SelectionHists<TH1F> *PtLep;
 SelectionHists<TH1F> *Q2;
+SelectionHists<TH1F> *q0;
+SelectionHists<TH1F> *yrec;
+SelectionHists<TH2F> *Enuyrec;
 SelectionHists<TH2F> *EnuQ2;
 SelectionHists<TH2F> *EnuQ2_outlier_low;
 SelectionHists<TH2F> *EnuQ2_outlier_high;
 SelectionHists<TH2F> *EnuERecQE;
+SelectionHists<TH2F> *EnuERecQEBias;
+SelectionHists<TH2F> *EnuERecAvBias;
 SelectionHists<TH2F> *q0q3_high_outlier_low;
 SelectionHists<TH2F> *q0q3_high_outlier_high;
 SelectionHists<TH2F> *q0q3_low;
@@ -49,6 +57,10 @@ SelectionHists<TH1F> *hmfscpip;
 SelectionHists<TH1F> *hmfspi0p;
 SelectionHists<TH1F> *ncpi;
 SelectionHists<TH1F> *npi0;
+SelectionHists<TH1F> *hmfsprotonp;
+SelectionHists<TH1F> *hmfsneutronp;
+SelectionHists<TH1F> *nproton;
+SelectionHists<TH1F> *nneutron;
 SelectionHists<TH1F> *EGamma;
 SelectionHists<TH1F> *EGamma_DeExcite;
 
@@ -90,12 +102,19 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   Q2 = SelectionHistsFromTOML<TH1F>("Q2", plots_config);
   EnuQ2 = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
   EnuERecQE = SelectionHistsFromTOML<TH2F>("EnuERecQE", plots_config);
+  EnuERecQEBias = SelectionHistsFromTOML<TH2F>("EnuERecQEBias", plots_config);
+  EnuERecAvBias = SelectionHistsFromTOML<TH2F>("EnuERecAvBias", plots_config);
 
   q0q3_low = SelectionHistsFromTOML<TH2F>("q0q3_low", plots_config);
   q0q3_high = SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
   EnuEAvHad = SelectionHistsFromTOML<TH2F>("EnuEAvHad", plots_config);
 
+  q0 = SelectionHistsFromTOML<TH1F>("q0", plots_config);
+  yrec = SelectionHistsFromTOML<TH1F>("yrec", plots_config);
+  Enuyrec = SelectionHistsFromTOML<TH2F>("Enuyrec", plots_config);
+
   ThetaLep = SelectionHistsFromTOML<TH1F>("ThetaLep", plots_config);
+  CosThetaLep = SelectionHistsFromTOML<TH1F>("CosThetaLep", plots_config);
 
   PThetaLep = SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
 
@@ -107,6 +126,11 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   hmfspi0p = SelectionHistsFromTOML<TH1F>("hmfspi0p", plots_config);
   ncpi = SelectionHistsFromTOML<TH1F>("ncpi", plots_config);
   npi0 = SelectionHistsFromTOML<TH1F>("npi0", plots_config);
+
+  hmfsprotonp = SelectionHistsFromTOML<TH1F>("hmfsprotonp", plots_config);
+  hmfsneutronp = SelectionHistsFromTOML<TH1F>("hmfsneutronp", plots_config);
+  nproton = SelectionHistsFromTOML<TH1F>("nproton", plots_config);
+  nneutron = SelectionHistsFromTOML<TH1F>("nneutron", plots_config);
 
   EGamma = SelectionHistsFromTOML<TH1F>("EGamma", plots_config);
   EGamma_DeExcite =
@@ -218,13 +242,27 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
                            rdr.PDGNu() > 0);
     ERecQE->Fill(w, sels, rdr.Mode(), erec);
     EnuERecQE->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), erec);
+
+    float ERecQEBias = (erec / rdr.Enu_true()) - 1;
+    EnuERecQEBias->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), ERecQEBias);
+    float ERecAvBias =
+        ((rdr.Eav_NOvA() + rdr.FSLepP4().E()) / rdr.Enu_true()) - 1;
+    EnuERecAvBias->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), ERecAvBias);
+
     PLep->Fill(w, sels, rdr.Mode(), rdr.PLep());
     ThetaLep->Fill(w, sels, rdr.Mode(), rdr.AngLep_deg());
+    CosThetaLep->Fill(w, sels, rdr.Mode(), rdr.CosLep());
     PThetaLep->Fill(w, sels, rdr.Mode(), rdr.PLep(), rdr.AngLep_deg());
     EAvHad->Fill(w, sels, rdr.Mode(), rdr.Eav_NOvA());
     PtLep->Fill(w, sels, rdr.Mode(),
                 rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)));
     Q2->Fill(w, sels, rdr.Mode(), rdr.Q2());
+
+    q0->Fill(w, sels, rdr.Mode(), rdr.q0());
+    float yrecf = rdr.Eav_NOvA() / (rdr.Eav_NOvA() + rdr.FSLepP4().E());
+    yrec->Fill(w, sels, rdr.Mode(), yrecf);
+    Enuyrec->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), yrecf);
+
     EnuQ2->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
     q0q3_low->Fill(w, sels, rdr.Mode(), rdr.q3(), rdr.q0());
     q0q3_high->Fill(w, sels, rdr.Mode(), rdr.q3(), rdr.q0());
@@ -233,7 +271,10 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     hmfspi0p->Fill(w, sels, rdr.Mode(), rdr.hmfspi0p());
     ncpi->Fill(w, sels, rdr.Mode(), rdr.ncpi());
     npi0->Fill(w, sels, rdr.Mode(), rdr.npi0());
-
+    hmfsprotonp->Fill(w, sels, rdr.Mode(), rdr.hmfsprotonp());
+    hmfsneutronp->Fill(w, sels, rdr.Mode(), rdr.hmfsneutronp());
+    nproton->Fill(w, sels, rdr.Mode(), rdr.nproton());
+    nneutron->Fill(w, sels, rdr.Mode(), rdr.nneutron());
     EGamma->Fill(w, sels, rdr.Mode(), rdr.EGamma());
     EGamma_DeExcite->Fill(w, sels, rdr.Mode(), rdr.EGamma());
 
@@ -406,6 +447,7 @@ int main(int argc, char const *argv[]) {
   ERecQE->Write(dout, true);
   PLep->Write(dout, true);
   ThetaLep->Write(dout, true);
+  CosThetaLep->Write(dout, true);
   PThetaLep->Write(dout, true);
   PThetaLep_outlier_low->Write(dout, true);
   PThetaLep_outlier_high->Write(dout, true);
@@ -418,16 +460,27 @@ int main(int argc, char const *argv[]) {
   EnuQ2_outlier_high->Write(dout, true);
 
   EnuERecQE->Write(dout, true);
+  EnuERecQEBias->Write(dout, true);
+  EnuERecAvBias->Write(dout, true);
   q0q3_low->Write(dout, true);
   q0q3_high->Write(dout, true);
   q0q3_high_outlier_low->Write(dout, true);
   q0q3_high_outlier_high->Write(dout, true);
   EnuEAvHad->Write(dout, true);
 
+  q0->Write(dout, true);
+  yrec->Write(dout, true);
+  Enuyrec->Write(dout, true);
+
   hmfscpip->Write(dout, true);
   hmfspi0p->Write(dout, true);
   ncpi->Write(dout, true);
   npi0->Write(dout, true);
+
+  hmfsprotonp->Write(dout, true);
+  hmfsneutronp->Write(dout, true);
+  nproton->Write(dout, true);
+  nneutron->Write(dout, true);
 
   EGamma->Write(dout, true);
   EGamma_DeExcite->Write(dout, true);

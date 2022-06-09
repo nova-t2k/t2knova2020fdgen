@@ -2,18 +2,17 @@
 
 if [ "${1}" = "force" ]; then
     rm -rf FDSValid
-    mkdir -p FDSValid
 fi
+mkdir -p FDSValid
 
 set -e
 set -x
 
-SPECIES=( numu numub nue nueb )
+# SPECIES=( numu numub nue nueb )
 SPECIES=( numu numub )
 # SPECIES=( numu )
+
 DETECTORS=( NOvAND ND280 )
-# DETECTORS=( ND280 )
-# DETECTORS=( NOvAND )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
@@ -28,12 +27,13 @@ MAT_ELEMENTS["H2O"]="H O"
 # MAT_ELEMENTS["CH"]=""
 # MAT_ELEMENTS["H2O"]=""
 
-DO_MAIN=0
-DO_MAT_ELEMENTS=1
+DO_MAIN=1
+DO_MAIN_MAT_ELEMENTS=0
+DO_MAT_ELEMENTS=0
 DO_OSC=0
 DO_UNTUNED=1
 DO_ND280=1
-DO_NOvAND=1
+DO_NOvAND=0
 
 for DET in ${DETECTORS[@]}; do
     for TGT in ${DET_MATS[${DET}]}; do
@@ -113,7 +113,7 @@ for DET in ${DETECTORS[@]}; do
                 if [ "${DO_MAT_ELEMENTS}" == "1" ]; then 
                     for ELE in ${MAT_ELEMENTS["${TGT}"]}; do
 
-                        if [ "${DO_MAIN}" == "1" ]; then
+                        if [ "${DO_MAIN_MAT_ELEMENTS}" == "1" ]; then
                             bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${SPC}.root \
                                                 -F FDSInputs/FakeDataInputs.root \
                                                 -M -H config/FakeDataValidConfig_${DET}.toml \
@@ -208,7 +208,7 @@ for DET in ${DETECTORS[@]}; do
                 if [ "${DO_MAT_ELEMENTS}" == "1" ]; then
 
                     for ELE in ${MAT_ELEMENTS["${TGT}"]}; do
-                        if [ "${DO_MAIN}" == "1" ]; then
+                        if [ "${DO_MAIN_MAT_ELEMENTS}" == "1" ]; then
                             bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.${SPC}.root \
                                                 -F FDSInputs/FakeDataInputs.root \
                                                 -M -H config/FakeDataValidConfig_${DET}.toml \
@@ -259,7 +259,7 @@ for DET in ${DETECTORS[@]}; do
     done
 done
 
-rm FDSValid/FakeDataValid.root
+rm -f FDSValid/FakeDataValid.root
 hadd -j 2 FDSValid/FakeDataValid.root \
           FDSValid/FakeDataValid_*.root
 
