@@ -16,6 +16,7 @@ TUNE=""
 GENERATOR=""
 PROBE=""
 OUTFILESTUB=""
+TARGET=""
 
 declare -a OPTARRAY
 
@@ -30,7 +31,15 @@ while [[ ${#} -gt 0 ]]; do
         shift # past argument
       ;;
 
-      -g|--generator)
+      -t|--target)
+        TARGET="$2"
+        echo "[OPT]: Generating on ${TARGET} target"
+        OPTARRAY+=("${key}")
+        OPTARRAY+=("${TARGET}")
+        shift # past argument
+      ;;
+
+      -G|--generator)
         GENERATOR="$2"
         echo "[OPT]: Using Generator: ${GENERATOR}"
         shift # past argument
@@ -38,9 +47,9 @@ while [[ ${#} -gt 0 ]]; do
 
       -p|--probe)
         PROBE="$2"
-        echo "[OPT]: Using Probe PDG: ${PROBE}"
+        echo "[OPT]: Using Probe: ${PROBE}"
         OPTARRAY+=("${key}")
-        OPTARRAY+=("${2}")
+        OPTARRAY+=("${PROBE}")
         shift # past argument
       ;;
       
@@ -64,8 +73,8 @@ while [[ ${#} -gt 0 ]]; do
   shift
 done
 
-if [[ -z ${TUNE} ]] || [[ -z ${PROBE} ]] || [[ -z ${GENERATOR} ]]; then
-  echo "[ERROR]: Not all required options passed, each of: -T, -p, and -g are required."
+if [[ -z ${TUNE} ]] || [[ -z ${PROBE} ]] || [[ -z ${TARGET} ]] || [[ -z ${GENERATOR} ]]; then
+  echo "[ERROR]: Not all required options passed, each of: -T, -t, -p, and -g are required."
   exit 1
 fi
 
@@ -89,7 +98,7 @@ echo ${PWD}
 date
 
 if [[ -z ${OUTFILESTUB} ]]; then
-  OUTFILESTUB=${GENERATOR}.nupdg_${PROBE}.${TUNE}
+  OUTFILESTUB=${GENERATOR}.${PROBE}
 fi
 
 OUTFILENAME=${OUTFILESTUB}.${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.root
@@ -97,8 +106,27 @@ OUTFILENAME=${OUTFILESTUB}.${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.root
 OPTARRAY+=("-o")
 OPTARRAY+=("${OUTFILENAME}")
 
+if [ "${GENERATOR}" == "NEUT" ]; then #ensure that the generation options match T2K production
+  OPTARRAY+=("-x")
+  OPTARRAY+=("NEUT-MAQE=1.21")
+  OPTARRAY+=("-x")
+  OPTARRAY+=("NEUT-MVSPI=0.84")
+  OPTARRAY+=("-x")
+  OPTARRAY+=("NEUT-IFF=1")
+  OPTARRAY+=("-x")
+  OPTARRAY+=("NEUT-MASPI=0.95")
+  OPTARRAY+=("-x")
+  OPTARRAY+=("NEUT-BGSCL=1.3")
+  OPTARRAY+=("-x")
+  OPTARRAY+=("NEUT-NRTYPE=1")
+  OPTARRAY+=("-x")
+  OPTARRAY+=("NEUT-CA5=1.01")
+  OPTARRAY+=("-x")
+  OPTARRAY+=("NEUT-MDLQE=402")
+fi
+
 echo "Running: singularity run ${IMAGE} ${OPTARRAY[@]}"
-singularity run ${IMAGE} ${OPTARRAY[@]} &> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log
+singularity run ${IMAGE} nuis gen ${GENERATOR} ${OPTARRAY[@]} &> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log
 
 date
 
@@ -106,8 +134,8 @@ T=$(( RANDOM % 10 )).$(( RANDOM % 1000 )); echo sleep $T; sleep $T
 
 FLATFILENAME=${OUTFILESTUB}.flattree.${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.root
 
-echo "Running: singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -p ${PROBE} -T ${TUNE} -o ${FLATFILENAME}"
-singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -p ${PROBE} -T ${TUNE} -o ${FLATFILENAME}  &>> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log
+echo "Running: singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -p ${PROBE} -T ${TUNE} -t ${TARGET} -o ${FLATFILENAME}"
+singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -p ${PROBE} -T ${TUNE} -t ${TARGET} -o ${FLATFILENAME}  &>> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log
 
 cat *.card
 

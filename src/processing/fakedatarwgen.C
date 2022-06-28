@@ -12,6 +12,7 @@ using namespace t2knova;
 
 bool DoExtra = false;
 bool DoNEUT = true;
+bool DoFDS = true;
 bool DoNOvA = true;
 
 int fakedatarwgen(std::string const &ifile, std::string const &ofile) {

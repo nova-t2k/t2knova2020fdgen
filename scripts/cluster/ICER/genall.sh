@@ -39,11 +39,11 @@ NEVS["NEUT_nue_ND280"]=200000
 NEVS["NEUT_nueb_ND280"]=200000
 
 declare -A NJOBS
-NJOBS["GENIE_numu_NOvAND"]=0 #200
-NJOBS["GENIE_numub_NOvAND"]=0 #200
-NJOBS["GENIE_nue_NOvAND"]=0 #200
-NJOBS["GENIE_nueb_NOvAND"]=0 #200
-NJOBS["GENIE_numu_ND280"]=0 #200
+NJOBS["GENIE_numu_NOvAND"]=200
+NJOBS["GENIE_numub_NOvAND"]=200
+NJOBS["GENIE_nue_NOvAND"]=200
+NJOBS["GENIE_nueb_NOvAND"]=200
+NJOBS["GENIE_numu_ND280"]=200
 NJOBS["GENIE_numub_ND280"]=400
 NJOBS["GENIE_nue_ND280"]=400
 NJOBS["GENIE_nueb_ND280"]=400
@@ -59,14 +59,14 @@ NJOBS["NEUT_nueb_ND280"]=200 #200
 
 declare -A TUNES
 
-TUNES["NEUT_CH_numu"]="BANFF_POST_C_NU"
-TUNES["NEUT_CH_numub"]="BANFF_POST_C_NUB"
-TUNES["NEUT_CH_nue"]="BANFF_POST_C_NU"
-TUNES["NEUT_CH_nueb"]="BANFF_POST_C_NUB"
-TUNES["NEUT_H2O_numu"]="BANFF_POST_O_NU"
-TUNES["NEUT_H2O_numub"]="BANFF_POST_O_NUB"
-TUNES["NEUT_H2O_nue"]="BANFF_POST_O_NU"
-TUNES["NEUT_H2O_nueb"]="BANFF_POST_O_NUB"
+TUNES["NEUT_CH_numu"]="BANFF_PRE BANFF_POST"
+TUNES["NEUT_CH_numub"]="BANFF_PRE BANFF_POST"
+TUNES["NEUT_CH_nue"]="BANFF_PRE BANFF_POST"
+TUNES["NEUT_CH_nueb"]="BANFF_PRE BANFF_POST"
+TUNES["NEUT_H2O_numu"]="BANFF_PRE BANFF_POST"
+TUNES["NEUT_H2O_numub"]="BANFF_PRE BANFF_POST"
+TUNES["NEUT_H2O_nue"]="BANFF_PRE BANFF_POST"
+TUNES["NEUT_H2O_nueb"]="BANFF_PRE BANFF_POST"
 TUNES["GENIE_CH_numu"]="2020"
 TUNES["GENIE_CH_numub"]="2020"
 TUNES["GENIE_CH_nue"]="2020"
@@ -79,35 +79,25 @@ TUNES["GENIE_H2O_nueb"]="2020"
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
 DET_MATS["ND280"]="CH H2O"
-#DET_MATS["ND280"]="CH"
-
-declare -A SCRIPTS
-SCRIPTS["NEUT"]=nuis_genev_neut
-SCRIPTS["GENIE"]=nuis_genev_genie
-
-declare -A SPEC_PDG
-SPEC_PDG["numu"]=14
-SPEC_PDG["numub"]=-14
-SPEC_PDG["nue"]=12
-SPEC_PDG["nueb"]=-12
 
 for gen in ${GENERATORS[@]}; do
   for spec in ${SPECIES[@]}; do
     for det in ${DETECTORS[@]}; do
       for mat in ${DET_MATS[${det}]}; do
+        for tune in ${TUNES["${gen}_${mat}_${spec}"]}; do
 
-      ./genone.sh --nfiles ${NJOBS["${gen}_${spec}_${det}"]} \
-          ${SCRIPTS["${gen}"]} \
-              -g ${gen} \
-              -t ${mat} \
-              -p ${SPEC_PDG["${spec}"]} \
-              -n ${NEVS["${gen}_${spec}_${det}"]} \
+          ./genone.sh --nfiles ${NJOBS["${gen}_${spec}_${det}"]} \
+            -G ${gen} \
               -f ${FLUXES["${det}_${spec}"]} \
+              -t ${mat} \
+              -n ${NEVS["${gen}_${spec}_${det}"]} \
+              -P ${spec} \
             -S ${DO_SUBMIT} \
-            -T ${TUNES["${gen}_${mat}_${spec}"]} \
-            --out-dir t2knova/${gen}/${det}/${mat}/${spec} \
+            -T  ${tune} \
+            --out-dir t2knova/${gen}/${det}/${mat}/${tune}/${spec} \
             --out-file-stub t2knova.flattree.${gen}.${det}.${mat}.${spec}
 
+        done
       done
     done
   done
