@@ -19,7 +19,7 @@ bool bymode = false;
 
 using namespace t2knova;
 
-enum FDS { kNominal, kMnv1Pi, kNonQE };
+enum FDS { kGenerated, kNDTuned, kMnv1Pi, kNonQE };
 
 ///\note See https://arxiv.org/abs/1903.01558
 inline double GetMINERvASPPLowQ2SuppressionWeight(double Q2_True_GeV,
@@ -159,7 +159,7 @@ inline double GetnonQEWeight(int nuPDG, double Q2_Reco_GeV) {
 SelectionHists<TH3F> *EnuPLepThetaLep;
 SelectionHists<TH3F> *EnuPtLepEAvHad;
 TrueChannelHist<TH1F> *XSecs;
-FDS FDSSet = kNominal;
+FDS FDSSet = kGenerated;
 
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
           int tgta_select = 0) {
@@ -196,7 +196,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
       continue;
     }
 
-    double w = rdr.fScaleFactor() * rdr.RWWeight();
+    double w = rdr.fScaleFactor();
 
     std::vector<int> sels = rdr.GetSelections();
 
@@ -205,17 +205,22 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
       continue;
     }
 
-    if (FDSSet == kMnv1Pi) {
-      if ((std::find(sels.begin(), sels.end(), kCC1cpi) != sels.end()) ||
-          (std::find(sels.begin(), sels.end(), kCC1pi0) != sels.end())) {
-        w *= GetMINERvASPPLowQ2SuppressionWeight(rdr.Q2());
+    if (FDSSet != kGenerated) {
+      w *= rdr.RWWeight();
+
+      if (FDSSet == kMnv1Pi) {
+        if ((std::find(sels.begin(), sels.end(), kCC1cpi) != sels.end()) ||
+            (std::find(sels.begin(), sels.end(), kCC1pi0) != sels.end())) {
+          w *= GetMINERvASPPLowQ2SuppressionWeight(rdr.Q2());
+        }
+      } else if (FDSSet == kNonQE) {
+        if (rdr.Mode() == 1) {
+          w *= UnWeightQ2BinWeights_T2K2020(rdr.Q2());
+        } else if (std::find(sels.begin(), sels.end(), kCC0pi) != sels.end()) {
+          w *= GetnonQEWeight(rdr.PDGNu(), GetQ2QE(rdr));
+        }
       }
-    } else if (FDSSet == kNonQE) {
-      if (rdr.Mode() == 1) {
-        w *= UnWeightQ2BinWeights_T2K2020(rdr.Q2());
-      } else if (std::find(sels.begin(), sels.end(), kCC0pi) != sels.end()) {
-        w *= GetnonQEWeight(rdr.PDGNu(), GetQ2QE(rdr));
-      }
+
     }
 
     if (ist2k) {
@@ -296,8 +301,10 @@ void handleOpts(int argc, char const *argv[]) {
       }
     } else if (std::string(argv[opt]) == "--FDS") {
       std::string arg = std::string(argv[++opt]);
-      if (arg == "None") {
-        FDSSet = kNominal;
+      if (arg == "Generated") {
+        FDSSet = kGenerated;
+      } else if (arg == "NDTuned") {
+        FDSSet = kNDTuned;
       } else if (arg == "Mnv1Pi") {
         FDSSet = kMnv1Pi;
       } else if (arg == "NonQE") {

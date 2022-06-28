@@ -59,22 +59,8 @@ NJOBS["NEUT_nueb_ND280"]=200 #200
 
 declare -A TUNES
 
-TUNES["NEUT_CH_numu"]="BANFF_PRE BANFF_POST"
-TUNES["NEUT_CH_numub"]="BANFF_PRE BANFF_POST"
-TUNES["NEUT_CH_nue"]="BANFF_PRE BANFF_POST"
-TUNES["NEUT_CH_nueb"]="BANFF_PRE BANFF_POST"
-TUNES["NEUT_H2O_numu"]="BANFF_PRE BANFF_POST"
-TUNES["NEUT_H2O_numub"]="BANFF_PRE BANFF_POST"
-TUNES["NEUT_H2O_nue"]="BANFF_PRE BANFF_POST"
-TUNES["NEUT_H2O_nueb"]="BANFF_PRE BANFF_POST"
-TUNES["GENIE_CH_numu"]="2020"
-TUNES["GENIE_CH_numub"]="2020"
-TUNES["GENIE_CH_nue"]="2020"
-TUNES["GENIE_CH_nueb"]="2020"
-TUNES["GENIE_H2O_numu"]="2020"
-TUNES["GENIE_H2O_numub"]="2020"
-TUNES["GENIE_H2O_nue"]="2020"
-TUNES["GENIE_H2O_nueb"]="2020"
+TUNES["NEUT"]="BANFF_PRE BANFF_POST"
+TUNES["GENIE"]="2020"
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
@@ -84,7 +70,7 @@ for gen in ${GENERATORS[@]}; do
   for spec in ${SPECIES[@]}; do
     for det in ${DETECTORS[@]}; do
       for mat in ${DET_MATS[${det}]}; do
-        for tune in ${TUNES["${gen}_${mat}_${spec}"]}; do
+        for tune in ${TUNES["${gen}"]}; do
 
           ./genone.sh --nfiles ${NJOBS["${gen}_${spec}_${det}"]} \
             -G ${gen} \
