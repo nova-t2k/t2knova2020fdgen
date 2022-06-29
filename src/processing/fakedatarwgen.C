@@ -47,9 +47,12 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
                                                 FDSToTunes[1], FDSToTunes[2]}
                      : std::vector<std::string>{ToNOvATUNE}) {
 
-            std::unique_ptr<TH3> neut_nd280_EnuPLepThetaLep = GetTH<TH3>(
-                fin, "NEUT/ND280/" + targetnuc + "/" + species + "/" +
-                         FromT2KTUNE + "/EnuPLepThetaLep_" + selection);
+            std::string FromT2KHistName = "NEUT/ND280/" + targetnuc + "/" +
+                                          species + "/" + FromT2KTUNE +
+                                          "/EnuPLepThetaLep_" + selection;
+
+            std::unique_ptr<TH3> neut_nd280_EnuPLepThetaLep =
+                GetTH<TH3>(fin, FromT2KHistName);
             if (neut_nd280_EnuPLepThetaLep) { // ND280
               neut_nd280_EnuPLepThetaLep->SetDirectory(nullptr);
 
@@ -72,9 +75,7 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
               dir->WriteTObject(rat.get(), rat->GetName());
 
             } else {
-              std::cout << "[WARN]: Expected to find "
-                        << "NEUT/ND280/" + targetnuc + "/" + species +
-                               "/EnuPLepThetaLep_" + selection
+              std::cout << "[WARN]: Expected to find " << FromT2KHistName
                         << std::endl;
             }
           }
@@ -93,9 +94,11 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
                                                 FDSToTunes[1], FDSToTunes[2]}
                      : std::vector<std::string>{ToT2KTUNE}) {
 
-            std::unique_ptr<TH3> neut_novand_plep = GetTH<TH3>(
-                fin, "NEUT/NOvAND/" + targetnuc + "/" + species + "/" + TOTUNE +
-                         "/EnuPtLepEAvHad_" + selection);
+            std::string FromNOvAHistName = "NEUT/NOvAND/" + targetnuc + "/" +
+                                           species + "/" + TOTUNE +
+                                           "/EnuPtLepEAvHad_" + selection;
+            std::unique_ptr<TH3> neut_novand_plep =
+                GetTH<TH3>(fin, FromNOvAHistName);
             if (neut_novand_plep) { // NOvAND
               neut_novand_plep->SetDirectory(nullptr);
 
@@ -117,9 +120,7 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
               rat->SetDirectory(nullptr);
               dir->WriteTObject(rat.get(), rat->GetName());
             } else {
-              std::cout << "[WARN]: Expected to find "
-                        << "NEUT/NOvAND/" + targetnuc + "/" + species +
-                               "/EnuPtLepEAvHad_" + selection
+              std::cout << "[WARN]: Expected to find " << FromNOvAHistName
                         << std::endl;
             }
           }
