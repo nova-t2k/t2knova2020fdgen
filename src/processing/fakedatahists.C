@@ -116,6 +116,11 @@ inline double GetnonQEWeight(int nuPDG, double Q2_Reco_GeV) {
   if (first) {
     char *T2KNOVA_INPUTS = getenv("T2KNOVA_INPUTS");
 
+    if(!T2KNOVA_INPUTS){
+      std::cout << "[ERROR]: Expected T2KNOVA_INPUTS environment variable to be defined." << std::endl;
+      abort();
+    }
+
     TFile *fin = new TFile(
         (std::string(T2KNOVA_INPUTS) + "/ScalingHisto_nu_antinu.root").c_str());
     if (!fin || !fin->IsOpen()) {
