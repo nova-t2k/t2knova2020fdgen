@@ -12,18 +12,18 @@ TGTEL["NOvAND_CH"]="C H"
 TGTEL["ND280_CH"]="C"
 TGTEL["ND280_H2O"]="H O"
 
-GENERATORS=( GENIE NEUT )
+GENERATORS=( NEUT GENIE )
+#GENERATORS=( NEUT )
 
 SPECIES=( numu numub nue nueb )
-# SPECIES=( numu numub )
+#SPECIES=( numu )
 
 DETECTORS=( NOvAND ND280 )
-# DETECTORS=( ND280 )
+#DETECTORS=( ND280 )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
 DET_MATS["ND280"]="H2O CH"
-# DET_MATS["ND280"]="CH"
 
 declare -A TUNES
 TUNES["NEUT"]="BANFF_PRE BANFF_POST"
@@ -33,6 +33,8 @@ declare -A FakeDataSets
 FakeDataSets["BANFF_PRE"]="Generated NDTuned Mnv1Pi NonQE"
 FakeDataSets["BANFF_POST"]="NDTuned"
 FakeDataSets["2020"]="Generated NDTuned"
+
+export T2KNOVA_INPUTS=$(readlink -f inputs)
 
 for gen in ${GENERATORS[@]}; do
   for det in ${DETECTORS[@]}; do

@@ -3,10 +3,10 @@
 IDIR=/mnt/research/NuInt/generation/
 
 GENERATORS=( NEUT GENIE )
-GENERATORS=( NEUT )
+GENERATORS=( GENIE )
 SPECIES=( numu numub nue nueb )
 DETECTORS=( NOvAND ND280 )
-DETECTORS=( ND280 )
+#DETECTORS=( ND280 )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
