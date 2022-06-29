@@ -47,9 +47,13 @@ mkdir -p ${ODIR}
 
 NFILES=$(find $ODIR -name "${OUTFILESTUB}.*.root" | wc -l)
 
-echo "Dir: $ODIR contains $NFILES ${OUTFILESTUB}.*.root out of ${NTARGETFILES} target files."
-
 JTORUN=$(( NTARGETFILES - NFILES ))
+
+if [ ${JTORUN} -lt 1 ]; then 
+  echo -e "\u001b[32m[DONE]\u001b[0m: $ODIR contains ${NFILES}/${NTARGETFILES} (${OUTFILESTUB}.*.root) files."
+else
+  echo -e "\u001b[31m[GENE]\u001b[0m: Will generate \u001b[31m${JTORUN}\u001b[0m new files: $ODIR contains ${NFILES}/${NTARGETFILES} (${OUTFILESTUB}.*.root) files."
+fi
 
 if [ $DO_SUBMIT -gt 0 ] && [ $JTORUN -gt 0 ]; then
   CMD="--array=1-${JTORUN} $(readlink -f t2knovagen.sh) ${OPTARRAY[@]}"

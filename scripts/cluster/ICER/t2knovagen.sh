@@ -9,7 +9,7 @@
 
 #set -x
 
-IMAGE=~/t2k-nova-mc-tools_oa2020_debian_bullseye-slim.sif
+IMAGE=~/t2k-nova-mc-tools_oa2020_latest.sif
 
 OUTDIR=""
 TUNE=""
@@ -45,8 +45,15 @@ while [[ ${#} -gt 0 ]]; do
         shift # past argument
       ;;
 
-      -p|--probe)
-        PROBE="$2"
+      -P|--probe)
+        if [ "${2}" == "nueb" ]; then
+          PROBE=nuebar
+        elif [ "${2}" == "numub" ]; then
+          PROBE=numubar
+        else
+          PROBE="$2"
+        fi
+           
         echo "[OPT]: Using Probe: ${PROBE}"
         OPTARRAY+=("${key}")
         OPTARRAY+=("${PROBE}")
@@ -134,8 +141,8 @@ T=$(( RANDOM % 10 )).$(( RANDOM % 1000 )); echo sleep $T; sleep $T
 
 FLATFILENAME=${OUTFILESTUB}.flattree.${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.root
 
-echo "Running: singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -p ${PROBE} -T ${TUNE} -t ${TARGET} -o ${FLATFILENAME}"
-singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -p ${PROBE} -T ${TUNE} -t ${TARGET} -o ${FLATFILENAME}  &>> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log
+echo "Running: singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -P ${PROBE} -T ${TUNE} -t ${TARGET} -o ${FLATFILENAME}"
+singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -P ${PROBE} -T ${TUNE} -t ${TARGET} -o ${FLATFILENAME}  &>> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log
 
 cat *.card
 

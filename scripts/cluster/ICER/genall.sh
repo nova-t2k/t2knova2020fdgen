@@ -71,6 +71,7 @@ for gen in ${GENERATORS[@]}; do
     for det in ${DETECTORS[@]}; do
       for mat in ${DET_MATS[${det}]}; do
         for tune in ${TUNES["${gen}"]}; do
+#          NJOBS["${gen}_${spec}_${det}"]=1
 
           ./genone.sh --nfiles ${NJOBS["${gen}_${spec}_${det}"]} \
             -G ${gen} \
