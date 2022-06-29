@@ -42,8 +42,8 @@ for gen in ${GENERATORS[@]}; do
           for fds in ${FakeDataSets["${tune}"]}; do
             for spec in ${SPECIES[@]}; do
 
-              if [ ! -e "flattrees/t2knova.flattree.${gen}.${det}.${mat}.${spec}.root" ]; then
-                echo "Failed to find: flattrees/t2knova.flattree.${gen}.${det}.${mat}.${spec}.root"
+              if [ ! -e "flattrees/t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root" ]; then
+                echo "Failed to find: flattrees/t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root"
                 continue
               fi
 
