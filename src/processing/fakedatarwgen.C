@@ -94,11 +94,11 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
                                                 FDSToTunes[1], FDSToTunes[2]}
                      : std::vector<std::string>{ToT2KTUNE}) {
 
-            std::string FromNOvAHistName = "NEUT/NOvAND/" + targetnuc + "/" +
+            std::string ToNOvAHistName = "NEUT/NOvAND/" + targetnuc + "/" +
                                            species + "/" + TOTUNE +
                                            "/EnuPtLepEAvHad_" + selection;
             std::unique_ptr<TH3> neut_novand_plep =
-                GetTH<TH3>(fin, FromNOvAHistName);
+                GetTH<TH3>(fin, ToNOvAHistName);
             if (neut_novand_plep) { // NOvAND
               neut_novand_plep->SetDirectory(nullptr);
 
@@ -120,7 +120,7 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
               rat->SetDirectory(nullptr);
               dir->WriteTObject(rat.get(), rat->GetName());
             } else {
-              std::cout << "[WARN]: Expected to find " << FromNOvAHistName
+              std::cout << "[WARN]: Expected to find " << ToNOvAHistName
                         << std::endl;
             }
           }

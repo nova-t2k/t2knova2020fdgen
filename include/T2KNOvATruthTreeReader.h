@@ -247,14 +247,14 @@ public:
     return t2knova::GetSelections(
         T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress(),
                                            (float *)_E.GetAddress()),
-        Mode());
+        *_Mode);
   }
 
   int GetPrimarySelection() {
     return t2knova::GetPrimarySelection(
         T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress(),
                                            (float *)_E.GetAddress()),
-        Mode());
+        *_Mode);
   }
 
 private:

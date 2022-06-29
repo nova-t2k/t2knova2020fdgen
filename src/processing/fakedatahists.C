@@ -116,8 +116,10 @@ inline double GetnonQEWeight(int nuPDG, double Q2_Reco_GeV) {
   if (first) {
     char *T2KNOVA_INPUTS = getenv("T2KNOVA_INPUTS");
 
-    if(!T2KNOVA_INPUTS){
-      std::cout << "[ERROR]: Expected T2KNOVA_INPUTS environment variable to be defined." << std::endl;
+    if (!T2KNOVA_INPUTS) {
+      std::cout << "[ERROR]: Expected T2KNOVA_INPUTS environment variable to "
+                   "be defined."
+                << std::endl;
       abort();
     }
 
@@ -183,9 +185,6 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
                                     AllSelectionList.size());
 
   T2KNOvATruthTreeReader rdr(ttrdr);
-  if (!bymode) {
-    rdr.SetNoModeInfo();
-  }
 
   size_t nents = ttrdr.GetEntries(true);
   size_t ent_it = 0;
@@ -226,20 +225,19 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
           w *= GetnonQEWeight(rdr.PDGNu(), GetQ2QE(rdr));
         }
       }
-
     }
 
     if (ist2k) {
-      EnuPLepThetaLep->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.PLep(),
-                            rdr.AngLep_deg());
+      EnuPLepThetaLep->Fill(w, sels, bymode ? rdr.Mode() : 0, rdr.Enu_true(),
+                            rdr.PLep(), rdr.AngLep_deg());
     } else {
-      EnuPtLepEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(),
+      EnuPtLepEAvHad->Fill(w, sels, bymode ? rdr.Mode() : 0, rdr.Enu_true(),
                            rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)),
                            rdr.Eav_NOvA());
     }
 
     for (auto sel : sels) {
-      XSecs->Fill(w, rdr.Mode(), sel);
+      XSecs->Fill(w, bymode ? rdr.Mode() : 0, sel);
     }
 
     ent_it++;

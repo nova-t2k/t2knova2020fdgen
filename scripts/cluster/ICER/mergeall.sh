@@ -3,10 +3,8 @@
 IDIR=/mnt/research/NuInt/generation/
 
 GENERATORS=( NEUT GENIE )
-GENERATORS=( GENIE )
 SPECIES=( numu numub nue nueb )
 DETECTORS=( NOvAND ND280 )
-#DETECTORS=( ND280 )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
@@ -23,6 +21,9 @@ for gen in ${GENERATORS[@]}; do
       for mat in ${DET_MATS[${det}]}; do
         for tune in ${TUNES["${gen}"]}; do
 
+          if [ -e t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root ]; then
+            continue
+          fi
 
           INPAT="${IDIR}/t2knova/${gen}/${det}/${mat}/${tune}/${spec}/t2knova.flattree.${gen}.${det}.${mat}.${spec}.*.root"
           NFILES=$(ls ${INPAT} | wc -l)
