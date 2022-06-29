@@ -152,6 +152,7 @@ inline double GetnonQEWeight(int nuPDG, double Q2_Reco_GeV) {
 
     fin->Close();
     delete fin;
+    first = false;
   }
 
   TH1 *h = nuPDG > 0 ? nuWeights : nubWeights;
