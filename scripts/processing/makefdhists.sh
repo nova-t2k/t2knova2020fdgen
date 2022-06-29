@@ -52,7 +52,7 @@ for gen in ${GENERATORS[@]}; do
                 LASTDIRNAME=${tune}
               fi
 
-              CMD="bin/fakedatahists.exe -i flattrees/t2knova.flattree.${gen}.${det}.${mat}.${spec}.root \
+              CMD="bin/fakedatahists.exe -i flattrees/t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root \
                                          -H config/FakeDataConfig.toml \
                                          -e ${det} \
                                          --FDS ${fds} \
