@@ -59,12 +59,13 @@ for gen in ${GENERATORS[@]}; do
                                          -e ${det} \
                                          --FDS ${fds} \
                                          -o FDSInputs/FakeDataHists_${spec}.root \
-                                         -M \
                                          -a ${tgtel} \
                                          -d ${gen}/${det}/${tgtel}/${spec}/${LASTDIRNAME}"
               echo $CMD
               ${CMD} &
 
+              wait
+              exit 0
             done
             wait
           done

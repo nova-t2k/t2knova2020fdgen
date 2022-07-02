@@ -221,12 +221,27 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     if (weightconfig == t2knova::kT2KND_to_NOvA) {
       rw_w *= t2knova::GetFakeDataWeight_ND280ToNOvA(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
-          rdr.AngLep_deg(), primary_selection, false);
+          rdr.AngLep_deg(), primary_selection);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
-      rw_w *= t2knova::GetFakeDataWeight_NOvAToT2K_PtLep(
+      rw_w *= t2knova::GetFakeDataWeight_NOvAToT2KND_PtLep(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
           (rdr.PLep()) * sqrt(1 - pow(rdr.CosLep(), 2)), rdr.Eav_NOvA(),
-          primary_selection, false);
+          primary_selection);
+    } else if (weightconfig == t2knova::kNOvA_to_T2KPre_ptlep) {
+      rw_w *= t2knova::GetFakeDataWeight_NOvAToT2KPre_PtLep(
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
+          (rdr.PLep()) * sqrt(1 - pow(rdr.CosLep(), 2)), rdr.Eav_NOvA(),
+          primary_selection);
+    } else if (weightconfig == t2knova::kNOvA_to_T2KMnv1Pi_ptlep) {
+      rw_w *= t2knova::GetFakeDataWeight_NOvAToT2KMnv1Pi_PtLep(
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
+          (rdr.PLep()) * sqrt(1 - pow(rdr.CosLep(), 2)), rdr.Eav_NOvA(),
+          primary_selection);
+    } else if (weightconfig == t2knova::kNOvA_to_T2KNonQE_ptlep) {
+      rw_w *= t2knova::GetFakeDataWeight_NOvAToT2KNonQE_PtLep(
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
+          (rdr.PLep()) * sqrt(1 - pow(rdr.CosLep(), 2)), rdr.Eav_NOvA(),
+          primary_selection);
     }
     w *= rw_w;
 
@@ -322,6 +337,9 @@ void SayUsage(char const *argv[]) {
                "\n\t         Configs:"
                "\n\t              * T2KND_to_NOvA"
                "\n\t              * NOvA_to_T2KND_ptlep"
+               "\n\t              * NOvA_to_T2KPre_ptlep"
+               "\n\t              * NOvA_to_T2KMnv1Pi_ptlep"
+               "\n\t              * NOvA_to_T2KNonQE_ptlep"
                "\n\t-d </sub/dir/to/use>   : Output sub directory"
                " input tree. \n"
             << std::endl;
@@ -368,6 +386,12 @@ void handleOpts(int argc, char const *argv[]) {
         wconfig = t2knova::kT2KND_to_NOvA;
       } else if (arg == "NOvA_to_T2KND_ptlep") {
         wconfig = t2knova::kNOvA_to_T2KND_ptlep;
+      } else if (arg == "NOvA_to_T2KPre_ptlep") {
+        wconfig = t2knova::kNOvA_to_T2KPre_ptlep;
+      } else if (arg == "NOvA_to_T2KMnv1Pi_ptlep") {
+        wconfig = t2knova::kNOvA_to_T2KMnv1Pi_ptlep;
+      } else if (arg == "NOvA_to_T2KNonQE_ptlep") {
+        wconfig = t2knova::kNOvA_to_T2KNonQE_ptlep;
       } else {
         std::cout << "Invalid weight config selector passed: " << arg
                   << std::endl;
@@ -410,6 +434,13 @@ int main(int argc, char const *argv[]) {
   gStyle->SetOptStat(false);
 
   handleOpts(argc, argv);
+
+  if (dotune && (wconfig != t2knova::kNoWeight)) {
+    std::cout
+        << "[ERROR]: Tuning and applying FDS weights, this is not correct."
+        << std::endl;
+    return 1;
+  }
 
   t2knova::LoadHists(FDSInputs);
 
