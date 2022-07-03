@@ -65,17 +65,18 @@ struct hblob {
 
     From =
         GetTH1(fin,
-               std::string(t2kbase ? "ND280/T2KNDTune" : "NOvAND/NOvATune") +
+               std::string(t2kbase ? "ND280/NEUT/Generated"
+                                   : "NOvAND/GENIE/Generated") +
                    (isosc ? "_osc" : "") + "/" + tgtstr + "/" +
                    all_nuspecies[nuspec] + "/" + varname + sel_str + mode_str,
                false);
 
-    Target =
-        GetTH1(fin,
-               std::string(t2kbase ? "ND280/NOvATune" : "NOvAND/T2KNDTune") +
-                   (isosc ? "_osc" : "") + "/" + tgtstr + "/" +
-                   all_nuspecies[nuspec] + "/" + varname + sel_str + mode_str,
-               false);
+    Target = GetTH1(
+        fin,
+        std::string(t2kbase ? "ND280/GENIE/2020" : "NOvAND/NEUT/BANFF_POST") +
+            (isosc ? "_osc" : "") + "/" + tgtstr + "/" + all_nuspecies[nuspec] +
+            "/" + varname + sel_str + mode_str,
+        false);
 
     if (From) {
       From->SetName("FROM");
@@ -88,15 +89,15 @@ struct hblob {
 
     if (ist2kbase) {
       ReWeightHists = std::vector<std::string>{
-          std::string("ND280/T2KND_to_NOvA") + (isosc ? "_osc" : "") + "/" +
-              tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname + sel_str +
-              mode_str,
+          std::string("ND280/NEUT/Generated_to_2020") + (isosc ? "_osc" : "") +
+              "/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
+              sel_str + mode_str,
       };
     } else {
       ReWeightHists = std::vector<std::string>{
-          std::string("NOvAND/NOvA_to_T2KND_ptlep") + (isosc ? "_osc" : "") +
-              "/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
-              sel_str + mode_str,
+          std::string("NOvAND/GENIE/Generated_to_BANFF_PRE") +
+              (isosc ? "_osc" : "") + "/" + tgtstr + "/" +
+              all_nuspecies[nuspec] + "/" + varname + sel_str + mode_str,
       };
     }
 
@@ -116,25 +117,25 @@ struct hblob {
     if (ReWeights.size() && ReWeights[0]) {
       if (ist2kbase) {
         std::string Outlier_high_name =
-            std::string("ND280/T2KND_to_NOvA") + (isosc ? "_osc" : "") + "/" +
-            tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
-            "_outlier_high" + sel_str + mode_str;
+            std::string("ND280/NEUT/Generated_to_2020") +
+            (isosc ? "_osc" : "") + "/" + tgtstr + "/" + all_nuspecies[nuspec] +
+            "/" + varname + "_outlier_high" + sel_str + mode_str;
         std::string Outlier_low_name =
-            std::string("ND280/T2KND_to_NOvA") + (isosc ? "_osc" : "") + "/" +
-            tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
-            "_outlier_low" + sel_str + mode_str;
+            std::string("ND280/NEUT/Generated_to_2020") +
+            (isosc ? "_osc" : "") + "/" + tgtstr + "/" + all_nuspecies[nuspec] +
+            "/" + varname + "_outlier_low" + sel_str + mode_str;
 
         Outlier_low = GetTH1(fin, Outlier_low_name, false);
         Outlier_high = GetTH1(fin, Outlier_high_name, false);
       } else {
         std::string Outlier_high_name =
-            std::string("NOvAND/NOvA_to_T2KND_ptlep") + (isosc ? "_osc" : "") +
-            "/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
-            "_outlier_high" + sel_str + mode_str;
+            std::string("NOvAND/GENIE/Generated_to_BANFF_PRE") +
+            (isosc ? "_osc" : "") + "/" + tgtstr + "/" + all_nuspecies[nuspec] +
+            "/" + varname + "_outlier_high" + sel_str + mode_str;
         std::string Outlier_low_name =
-            std::string("NOvAND/NOvA_to_T2KND_ptlep") + (isosc ? "_osc" : "") +
-            "/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
-            "_outlier_low" + sel_str + mode_str;
+            std::string("NOvAND/GENIE/Generated_to_BANFF_PRE") +
+            (isosc ? "_osc" : "") + "/" + tgtstr + "/" + all_nuspecies[nuspec] +
+            "/" + varname + "_outlier_low" + sel_str + mode_str;
 
         Outlier_low = GetTH1(fin, Outlier_low_name, false);
         Outlier_high = GetTH1(fin, Outlier_high_name, false);

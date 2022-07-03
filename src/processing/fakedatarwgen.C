@@ -137,6 +137,38 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
   return 0;
 }
 
+void SayUsage(char const *argv[]) {
+  std::cout << "[USAGE]: " << argv[0]
+            << "<input hist file> <output file> [opts]"
+            << "\n"
+               "\t--from-ND280 <tune>      : Denominator tune"
+               "\t--to-ND280 <tune>        : Numerator tune"
+               "\t--from-NOvAND <tune>     : Denominator tune"
+               "\t--to-NOvAND <tune>       : Numerator tune"
+            << std::endl;
+}
+
+void handleOpts(int argc, char const *argv[]) {
+  int opt = 1;
+  while (opt < argc) {
+    if ((std::string(argv[opt]) == "-?") ||
+        (std::string(argv[opt]) == "--help")) {
+      SayUsage(argv);
+      exit(0);
+    } else if (std::string(argv[opt]) == "--from-ND280-NEUT") {
+      FromT2KTUNE = argv[++opt];
+    } else if (std::string(argv[opt]) == "--to-ND280-GENIE") {
+      ToNOvATUNE = argv[++opt];
+    } else if (std::string(argv[opt]) == "--from-NOvAND-GENIE") {
+      FromNOvATUNE = argv[++opt];
+    } else if (std::string(argv[opt]) == "--to-NOvAND-NEUT") {
+      ToT2KTUNE = argv[++opt];
+    }
+    opt++;
+  }
+}
+
 int main(int argc, char const *argv[]) {
+  handleOpts(argc, argv);
   return fakedatarwgen(argv[1], argv[2]);
 }
