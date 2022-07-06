@@ -50,12 +50,6 @@ enum reweightconfig {
   kNoWeight
 };
 
-const char *all_rwconfig[] = {"Generated_to_2020/EnuPLepThetaLep",
-                              "Generated_to_BANFF_POST/EnuPtLepEAvHad",
-                              "Generated_to_BANFF_PRE/EnuPtLepEAvHad",
-                              "Generated_to_Mnv1Pi/EnuPtLepEAvHad",
-                              "Generated_to_NonQE/EnuPtLepEAvHad"};
-
 const char *all_tgta_str[] = {"H", "C", "O"};
 const int all_tgta[] = {1, 12, 16};
 
@@ -67,9 +61,10 @@ static std::unordered_map<
 template <typename T, size_t N> inline size_t arrsize(T (&arr)[N]) { return N; }
 template <typename T> inline size_t arrsize(T arr) { return arr.size(); }
 
-inline void LoadHists(std::string const &inputfile = "FakeDataInputs.root") {
+inline void LoadHists(std::string const &inputfile,
+                      std::map<reweightconfig, std::string> const &inputhists) {
   std::unique_ptr<TFile> fin(new TFile(inputfile.c_str()));
-  if (fin->IsZombie()) {
+  if (fin->IsZombie() || !fin->IsOpen()) {
     std::cout << "Failed to read \"" << inputfile << "\"" << std::endl;
     abort();
   }
@@ -78,10 +73,10 @@ inline void LoadHists(std::string const &inputfile = "FakeDataInputs.root") {
     nuspecies nuspec = nuspecies(i);
     std::string nuspec_str = all_nuspecies[i];
 
-    for (size_t j = 0; j < arrsize(all_rwconfig); ++j) {
-      reweightconfig rwconfig = reweightconfig(j);
+    for (auto &rwconfighistname : inputhists) {
+      reweightconfig rwconfig = rwconfighistname.first;
 
-      std::string rwconfig_str = all_rwconfig[j];
+      std::string rwconfig_str = rwconfighistname.second;
 
       for (selection sel : ReWeightSelectionList) {
         std::string sel_str = SelectionList[sel];
@@ -128,7 +123,9 @@ GetFakeDataWeight_NOvAToT2K_PtLep(reweightconfig conf, int nu_pdg, int lep_pdg,
                                   int tgta, double E_nu_GeV, double PtLep_GeV,
                                   double EVisHadronic_GeV, int PrimSel) {
   if (!loaded) {
-    LoadHists();
+    std::cout << "[ERROR]: Have not loaded t2knova reweight histogram ratios."
+              << std::endl;
+    abort();
   }
 
   if (PrimSel == kNoPrimarySel) {
@@ -195,7 +192,9 @@ inline double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg, int tgta,
                                             double E_nu_GeV, double PLep_GeV,
                                             double ThetaLep, int PrimSel) {
   if (!loaded) {
-    LoadHists();
+    std::cout << "[ERROR]: Have not loaded t2knova reweight histogram ratios."
+              << std::endl;
+    abort();
   }
 
   if (PrimSel == kNoPrimarySel) {

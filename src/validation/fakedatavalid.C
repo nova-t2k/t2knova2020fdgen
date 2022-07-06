@@ -315,25 +315,44 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   }
 }
 
-std::string input_file, output_file, output_dir;
-std::string hist_config_file;
-std::string FDSInputs;
+std::string input_file = "", output_file = "", output_dir = "";
+std::string hist_config_file = "";
+std::string FDSInputs = "";
 
 t2knova::reweightconfig wconfig = t2knova::kNoWeight;
 int tgta_select = 0;
 
+bool FromGenerated = true;
+
+std::map<reweightconfig, std::string> inputhistnames_FromGenerated = {
+    {kT2KND_to_NOvA, "Generated_to_2020/EnuPLepThetaLep"},
+    {kNOvA_to_T2KND_ptlep, "Generated_to_BANFF_POST/EnuPtLepEAvHad"},
+    {kNOvA_to_T2KPre_ptlep, "Generated_to_BANFF_PRE/EnuPtLepEAvHad"},
+    {kNOvA_to_T2KMnv1Pi_ptlep, "Generated_to_Mnv1Pi/EnuPtLepEAvHad"},
+    {kNOvA_to_T2KNonQE_ptlep, "Generated_to_NonQE/EnuPtLepEAvHad"},
+};
+
+std::map<reweightconfig, std::string> inputhistnames_FromTuned = {
+    {kT2KND_to_NOvA, "BANFF_POST_to_2020/EnuPLepThetaLep"},
+    {kNOvA_to_T2KND_ptlep, "2020_to_BANFF_POST/EnuPtLepEAvHad"},
+    {kNOvA_to_T2KPre_ptlep, "2020_to_BANFF_PRE/EnuPtLepEAvHad"},
+    {kNOvA_to_T2KMnv1Pi_ptlep, "2020_to_Mnv1Pi/EnuPtLepEAvHad"},
+    {kNOvA_to_T2KNonQE_ptlep, "2020_to_NonQE/EnuPtLepEAvHad"},
+};
+
 void SayUsage(char const *argv[]) {
   std::cout << "[USAGE]: " << argv[0]
             << "\n"
-               "\n\t-i <inp.root>          : Input file"
-               "\n\t-F <FDSInputs.root>    : FDS Weighting file"
-               "\n\t-H <config.toml>       : RWHist config file"
-               "\n\t-o <out.root>          : Output file"
-               "\n\t-M                     : Separate by Mode"
-               "\n\t--oscillate            : Apply oscillation weights"
-               "\n\t--No-Tune              : Don't apply tune weights"
-               "\n\t-a <[C|H|O|any]>       : Target descriptor"
-               "\n\t-W <Config>            : ReWeight Config"
+               "\n\t-i <inp.root>            : Input file"
+               "\n\t-F <FDSInputs.root>      : FDS Weighting file"
+               "\n\t-H <config.toml>         : RWHist config file"
+               "\n\t-o <out.root>            : Output file"
+               "\n\t-M                       : Separate by Mode"
+               "\n\t--oscillate              : Apply oscillation weights"
+               "\n\t--No-Tune                : Don't apply tune weights"
+               "\n\t--From <Tuned|Generated> : Weight as if Tuned/Not Tuned"
+               "\n\t-a <[C|H|O|any]>         : Target descriptor"
+               "\n\t-W <Config>              : ReWeight Config"
                "\n\t         Configs:"
                "\n\t              * T2KND_to_NOvA"
                "\n\t              * NOvA_to_T2KND_ptlep"
@@ -362,6 +381,18 @@ void handleOpts(int argc, char const *argv[]) {
       output_file = argv[++opt];
     } else if (std::string(argv[opt]) == "--No-Tune") {
       dotune = false;
+    } else if (std::string(argv[opt]) == "--From") {
+      std::string arg = std::string(argv[++opt]);
+
+      if (arg == "Tuned") {
+        FromGenerated = false;
+      } else if (arg != "Generated") {
+        std::cout << "[ERROR]: Invalid option passed to --From, should be "
+                     "Tuned or Generated."
+                  << std::endl;
+        abort();
+      }
+
     } else if (std::string(argv[opt]) == "--oscillate") {
       doosc = true;
     } else if (std::string(argv[opt]) == "-a") {
@@ -435,14 +466,30 @@ int main(int argc, char const *argv[]) {
 
   handleOpts(argc, argv);
 
-  if (dotune && (wconfig != t2knova::kNoWeight)) {
-    std::cout
-        << "[ERROR]: Tuning and applying FDS weights, this is not correct."
-        << std::endl;
+  if (FromGenerated) {
+    if ((wconfig != t2knova::kNoWeight) && dotune) {
+      std::cout << "[ERROR]: Tuning and applying FDS weights, when using "
+                   "unweighted denominator. This is not correct."
+                << std::endl;
+      return 1;
+    }
+  } else if ((wconfig != t2knova::kNoWeight) && !dotune) {
+    std::cout << "[ERROR]: Not tuning and applying FDS weights, when using "
+                 "Tuned denominator. This is not correct."
+              << std::endl;
     return 1;
   }
 
-  t2knova::LoadHists(FDSInputs);
+  if ((wconfig != t2knova::kNoWeight) && !FDSInputs.length()) {
+    std::cout << "[ERROR]: Asked to perform weighting, but no inputs passed."
+              << std::endl;
+    return 1;
+  }
+
+  if (FDSInputs.length()) {
+    t2knova::LoadHists(FDSInputs, FromGenerated ? inputhistnames_FromGenerated
+                                                : inputhistnames_FromTuned);
+  }
 
   toml::value const &plots_config_file = toml_h::parse_card(hist_config_file);
   toml::value const &plots_config =

@@ -7,10 +7,13 @@
 
 using namespace t2knova;
 
-bool const kT2K = true;
-bool const kNOvAND = false;
+enum Detector { kT2K, kNOvAND };
+
+enum ReWeightDenominator { kGenerated, kTuned };
+
+ReWeightDenominator denom = kGenerated;
+
 bool bymode = false;
-bool doosc = false;
 
 std::vector<std::string> output_files_opened;
 
@@ -38,15 +41,14 @@ struct hblob {
   std::vector<std::unique_ptr<TH1>> ReWeights;
 
   bool is2D;
-  bool ist2kbase;
+  Detector _det;
 
   std::string varname;
   selection sel;
 
-  void Load(std::unique_ptr<TFile> &fin, bool t2kbase, bool isosc,
-            std::string varname, nuspecies nuspec, std::string tgtstr,
-            selection sel, int mode = 0) {
-    this->ist2kbase = t2kbase;
+  void Load(std::unique_ptr<TFile> &fin, Detector det, std::string varname,
+            nuspecies nuspec, std::string tgtstr, selection sel, int mode = 0) {
+    _det = det;
     this->varname = varname;
     this->sel = sel;
 
@@ -63,20 +65,29 @@ struct hblob {
       sel_str = std::string("_") + SelectionList[sel];
     }
 
-    From =
-        GetTH1(fin,
-               std::string(t2kbase ? "ND280/NEUT/Generated"
-                                   : "NOvAND/GENIE/Generated") +
-                   (isosc ? "_osc" : "") + "/" + tgtstr + "/" +
-                   all_nuspecies[nuspec] + "/" + varname + sel_str + mode_str,
-               false);
+    std::string fromhist_name = "";
+    std::string targethist_name = "";
 
-    Target = GetTH1(
-        fin,
-        std::string(t2kbase ? "ND280/GENIE/2020" : "NOvAND/NEUT/BANFF_POST") +
-            (isosc ? "_osc" : "") + "/" + tgtstr + "/" + all_nuspecies[nuspec] +
-            "/" + varname + sel_str + mode_str,
-        false);
+    std::string tgtspecvar_str =
+        +"/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname;
+    std::string selmode_str = sel_str + mode_str;
+
+    if (det == kT2K) {
+      fromhist_name = std::string("ND280/NEUT/") +
+                      ((denom == kGenerated) ? "Generated" : "BANFF_POST");
+
+      targethist_name = "ND280/GENIE/2020";
+    } else {
+      fromhist_name = std::string("NOvAND/GENIE/") +
+                      ((denom == kGenerated) ? "Generated" : "2020");
+
+      targethist_name = "NOvAND/NEUT/BANFF_POST";
+    }
+    fromhist_name += tgtspecvar_str + selmode_str;
+    targethist_name += tgtspecvar_str + selmode_str;
+
+    From = GetTH1(fin, fromhist_name, false);
+    Target = GetTH1(fin, targethist_name, false);
 
     if (From) {
       From->SetName("FROM");
@@ -87,17 +98,15 @@ struct hblob {
 
     std::vector<std::string> ReWeightHists;
 
-    if (ist2kbase) {
+    if (det == kT2K) {
       ReWeightHists = std::vector<std::string>{
-          std::string("ND280/NEUT/Generated_to_2020") + (isosc ? "_osc" : "") +
-              "/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname +
-              sel_str + mode_str,
+          std::string("ND280/NEUT/ReWeighted_to_2020") + tgtspecvar_str +
+              selmode_str,
       };
     } else {
       ReWeightHists = std::vector<std::string>{
-          std::string("NOvAND/GENIE/Generated_to_BANFF_PRE") +
-              (isosc ? "_osc" : "") + "/" + tgtstr + "/" +
-              all_nuspecies[nuspec] + "/" + varname + sel_str + mode_str,
+          std::string("NOvAND/GENIE/ReWeighted_to_BANFF_POST") +
+              tgtspecvar_str + selmode_str,
       };
     }
 
@@ -115,27 +124,23 @@ struct hblob {
     }
 
     if (ReWeights.size() && ReWeights[0]) {
-      if (ist2kbase) {
+      if (det == kT2K) {
         std::string Outlier_high_name =
-            std::string("ND280/NEUT/Generated_to_2020") +
-            (isosc ? "_osc" : "") + "/" + tgtstr + "/" + all_nuspecies[nuspec] +
-            "/" + varname + "_outlier_high" + sel_str + mode_str;
+            std::string("ND280/NEUT/ReWeighted_to_2020") + tgtspecvar_str +
+            "_outlier_high" + selmode_str;
         std::string Outlier_low_name =
-            std::string("ND280/NEUT/Generated_to_2020") +
-            (isosc ? "_osc" : "") + "/" + tgtstr + "/" + all_nuspecies[nuspec] +
-            "/" + varname + "_outlier_low" + sel_str + mode_str;
+            std::string("ND280/NEUT/ReWeighted_to_2020") + tgtspecvar_str +
+            "_outlier_low" + selmode_str;
 
         Outlier_low = GetTH1(fin, Outlier_low_name, false);
         Outlier_high = GetTH1(fin, Outlier_high_name, false);
       } else {
         std::string Outlier_high_name =
-            std::string("NOvAND/GENIE/Generated_to_BANFF_PRE") +
-            (isosc ? "_osc" : "") + "/" + tgtstr + "/" + all_nuspecies[nuspec] +
-            "/" + varname + "_outlier_high" + sel_str + mode_str;
+            std::string("NOvAND/GENIE/ReWeighted_to_BANFF_POST") +
+            tgtspecvar_str + "_outlier_high" + selmode_str;
         std::string Outlier_low_name =
-            std::string("NOvAND/GENIE/Generated_to_BANFF_PRE") +
-            (isosc ? "_osc" : "") + "/" + tgtstr + "/" + all_nuspecies[nuspec] +
-            "/" + varname + "_outlier_low" + sel_str + mode_str;
+            std::string("NOvAND/GENIE/ReWeighted_to_BANFF_POST") +
+            tgtspecvar_str + "_outlier_low" + selmode_str;
 
         Outlier_low = GetTH1(fin, Outlier_low_name, false);
         Outlier_high = GetTH1(fin, Outlier_high_name, false);
@@ -288,19 +293,24 @@ struct hblob {
 
     c1->cd();
 
+    std::string FromTitle = (denom == kGenerated)
+                                ? "Untuned"
+                                : ((_det == kT2K) ? "BANFF" : "NOvA2020");
+    std::string TargetTitle = (_det == kT2K) ? "NOvA2020" : "BANFF ND280";
+
     TLegend *leg = new TLegend(0.125, 0.81, 0.925, 1);
     leg->SetNColumns(2);
     leg->SetTextSize(0.06);
     leg->SetBorderSize(0);
     leg->SetFillStyle(4001);
 
-    leg->AddEntry(From.get(), ist2kbase ? "BANFF" : "NOvA2020", "l");
-    leg->AddEntry(Target.get(), ist2kbase ? "NOvA2020" : "BANFF ND280", "l");
+    leg->AddEntry(From.get(), FromTitle.c_str(), "l");
+    leg->AddEntry(Target.get(), TargetTitle.c_str(), "l");
 
     if (HaveReWeight) {
       leg->AddEntry(ReWeights[0].get(),
-                    ist2kbase ? "NOvA r/w (E_{#nu}, p_{l}, #theta_{l})"
-                              : "BANFF r/w (Enu PtLep EVisHad)",
+                    (_det == kT2K) ? "R/W to NOvA (E_{#nu}, p_{l}, #theta_{l})"
+                                   : "R/W to BANFF (Enu PtLep EVisHad)",
                     "l");
     }
 
@@ -320,6 +330,11 @@ struct hblob {
 
   void Print2D(std::string fname, std::string title = "",
                std::string mode_line = "") {
+
+    std::string FromTitle = (denom == kGenerated)
+                                ? "Untuned"
+                                : ((_det == kT2K) ? "BANFF" : "NOvA2020");
+    std::string TargetTitle = (_det == kT2K) ? "NOvA2020" : "BANFF ND280";
 
     static const long unsigned int BWRPalette =
         (long unsigned int)GetBWRPalette();
@@ -370,7 +385,7 @@ struct hblob {
       p->RedrawAxis("g");
 
       c1->cd();
-      ttl.DrawLatexNDC(0.33, 0.92, ist2kbase ? "BANFF" : "NOvA2020");
+      ttl.DrawLatexNDC(0.33, 0.92, FromTitle.c_str());
     }
 
     if (Target) {
@@ -403,7 +418,7 @@ struct hblob {
       p->RedrawAxis("g");
 
       c1->cd();
-      ttl.DrawLatexNDC(0.7, 0.92, ist2kbase ? "NOvA2020" : "BANFF");
+      ttl.DrawLatexNDC(0.7, 0.92, TargetTitle.c_str());
     }
 
     if (HaveBoth) {
@@ -481,8 +496,7 @@ struct hblob {
 
       c1->cd();
 
-      ttl.DrawLatexNDC(0.33, 0.55,
-                       ist2kbase ? "BANFF/NOvA2020" : "NOvA2020/ND280");
+      ttl.DrawLatexNDC(0.33, 0.55, (TargetTitle + "/" + FromTitle).c_str());
       ttl.DrawLatexNDC(0.7, 0.55, "RW/Gen.");
     }
     OpenPDF(fname);
@@ -524,7 +538,7 @@ struct hblob {
         Outlier_low->DrawClone("BOX SAME");
 
         c1->cd();
-        ttl.DrawLatexNDC(0.33, 0.92, ist2kbase ? "BANFF Low" : "NOvA2020 Low");
+        ttl.DrawLatexNDC(0.33, 0.92, (FromTitle + " Low").c_str());
       }
 
       if (Outlier_high) {
@@ -566,8 +580,7 @@ struct hblob {
         Outlier_high->DrawClone("BOX SAME");
 
         c1->cd();
-        ttl.DrawLatexNDC(0.33, 0.55,
-                         ist2kbase ? "BANFF High" : "NOvA2020 High");
+        ttl.DrawLatexNDC(0.33, 0.55, (FromTitle + " High").c_str());
       }
     }
 
@@ -604,7 +617,7 @@ struct hblob {
         Outlier_low->DrawClone("BOX SAME");
 
         c1->cd();
-        ttl.DrawLatexNDC(0.7, 0.92, !ist2kbase ? "BANFF Low" : "NOvA2020 Low");
+        ttl.DrawLatexNDC(0.7, 0.92, (TargetTitle + " Low").c_str());
       }
 
       if (Outlier_high) {
@@ -644,8 +657,7 @@ struct hblob {
         Outlier_high->DrawClone("BOX SAME");
 
         c1->cd();
-        ttl.DrawLatexNDC(0.7, 0.55,
-                         !ist2kbase ? "BANFF High" : "NOvA2020 High");
+        ttl.DrawLatexNDC(0.7, 0.55, (TargetTitle + " High").c_str());
       }
     }
 
@@ -668,37 +680,24 @@ struct hblob {
     }
   }
 
-  static void LoadAndPrint(std::unique_ptr<TFile> &fin, bool t2kbase,
+  static void LoadAndPrint(std::unique_ptr<TFile> &fin, Detector det,
                            std::string varname, nuspecies nuspec,
                            std::string tgtstr, selection sel, std::string fname,
                            std::string title) {
     hblob h;
-    h.Load(fin, t2kbase, false, varname, nuspec, tgtstr, sel);
+    h.Load(fin, det, varname, nuspec, tgtstr, sel);
     h.Print(fname, title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
             "");
-
-    if (doosc) {
-      h.Load(fin, t2kbase, true, varname, nuspec, tgtstr, sel);
-      h.Print(fname + "_osc",
-              title + " " + tgtstr + " " + all_nuspecies_latex[nuspec], "");
-    }
 
     if (bymode) {
       for (int i = -60; i < 60; ++i) {
         if (i == 0) {
           continue;
         }
-        h.Load(fin, t2kbase, false, varname, nuspec, tgtstr, sel, i);
+        h.Load(fin, det, varname, nuspec, tgtstr, sel, i);
         h.Print(fname + "_Modes",
                 title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
                 "True mode:" + std::to_string(i));
-
-        if (doosc) {
-          h.Load(fin, t2kbase, true, varname, nuspec, tgtstr, sel, i);
-          h.Print(fname + "_Modes_osc",
-                  title + " " + tgtstr + " " + all_nuspecies_latex[nuspec],
-                  "True mode:" + std::to_string(i));
-        }
       }
     }
   }
@@ -733,19 +732,12 @@ void ValidPlots(std::string const &finname) {
         for (auto t2k_proj : {
                  "Enu", "ERecQE", "PLep",
                  // "ThetaLep",
-                 "CosThetaLep", "PThetaLep", "Q2",
-                 // "EnuQ2",
-                 "EnuERecQE", "q0q3_low", "q0q3_high",
-                 // "hmfscpip",
-                 // "hmfspi0p",
-                 // "ncpi",
-                 // "npi0",
-                 "hmfsprotonp", "hmfsneutronp", "nproton", "nneutron",
+                 "CosThetaLep", "PThetaLep", "Q2", "EnuQ2", "EnuERecQE",
+                 "q0q3_low", "q0q3_high", "hmfscpip", "hmfspi0p", "ncpi",
+                 "npi0", "hmfsprotonp", "hmfsneutronp", "nproton", "nneutron",
                  // "EGamma",
                  // "EGamma_DeExcite",
-                 // "q0",
-                 // "yrec",
-                 // "Enuyrec",
+                 "q0", "yrec", "Enuyrec",
                  // "EvWeights"
              }) {
 
@@ -789,8 +781,49 @@ void ValidPlots(std::string const &finname) {
   ClosePDFs();
 }
 
+void SayUsage(char const *argv[]) {
+  std::cout << "[USAGE]: " << argv[0]
+            << "\n"
+               "\n\t-i <inp.root>            : Input file"
+               "\n\t--From <Tuned|Generated> : Weight as if Tuned/Not Tuned"
+            << std::endl;
+}
+
+std::string input_file = "";
+
+void handleOpts(int argc, char const *argv[]) {
+  int opt = 1;
+  while (opt < argc) {
+    if ((std::string(argv[opt]) == "-?") ||
+        (std::string(argv[opt]) == "--help")) {
+      SayUsage(argv);
+      exit(0);
+    } else if (std::string(argv[opt]) == "-i") {
+      input_file = argv[++opt];
+    } else if (std::string(argv[opt]) == "--From") {
+      std::string arg = std::string(argv[++opt]);
+
+      if (arg == "Tuned") {
+        denom = kTuned;
+      } else if (arg != "Generated") {
+        std::cout << "[ERROR]: Invalid option passed to --From, should be "
+                     "Tuned or Generated."
+                  << std::endl;
+        abort();
+      }
+
+    } else if (std::string(argv[opt]) == "-M") {
+      bymode = true;
+    }
+    opt++;
+  }
+}
+
 int main(int argc, char const *argv[]) {
   DeclareColors();
+
+  handleOpts(argc, argv);
+
   gStyle->SetOptStat(false);
-  ValidPlots(argv[1]);
+  ValidPlots(input_file);
 }

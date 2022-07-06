@@ -166,12 +166,14 @@ inline double GetnonQEWeight(int nuPDG, double Q2_Reco_GeV) {
 
 SelectionHists<TH3F> *EnuPLepThetaLep;
 SelectionHists<TH3F> *EnuPtLepEAvHad;
+SelectionHists<TH1F> *Enu;
 TrueChannelHist<TH1F> *XSecs;
 FDS FDSSet = kGenerated;
 
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
           int tgta_select = 0) {
 
+  Enu = SelectionHistsFromTOML<TH1F>("Enu", plots_config);
   if (ist2k) {
     EnuPLepThetaLep =
         SelectionHistsFromTOML<TH3F>("EnuPLepThetaLep", plots_config);
@@ -235,6 +237,8 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
                            rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)),
                            rdr.Eav_NOvA());
     }
+
+    Enu->Fill(w, sels, bymode ? rdr.Mode() : 0, rdr.Enu_true());
 
     for (auto sel : sels) {
       XSecs->Fill(w, bymode ? rdr.Mode() : 0, sel);
@@ -365,6 +369,8 @@ int main(int argc, char const *argv[]) {
   } else {
     EnuPtLepEAvHad->Write(dout, true);
   }
+
+  Enu->Write(dout, true);
 
   XSecs->Write(dout);
 

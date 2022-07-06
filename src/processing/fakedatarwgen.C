@@ -5,8 +5,7 @@
 #include "ChannelHistCollections.h"
 #include "T2KNOvA/FakeDataHelper.hxx"
 #include "TFile.h"
-#include "TH2.h"
-#include "TH3.h"
+#include "TH1.h"
 
 using namespace t2knova;
 
@@ -21,8 +20,8 @@ const double MaxFracError = 1.0 / std::sqrt(NMinEvs);
 std::string FromT2KTUNE = "Generated";
 std::string ToNOvATUNE = "2020";
 
-std::string ToT2KTUNE = "BANFF_POST";
 std::string FromNOvATUNE = "Generated";
+std::string ToT2KTUNE = "BANFF_POST";
 
 std::vector<std::string> FDSToTunes = {"BANFF_PRE", "Mnv1Pi", "NonQE"};
 
@@ -38,48 +37,47 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
     std::cout << "Failed to write " << ofile.c_str() << std::endl;
     return 2;
   }
-
   for (std::string const &species : {"numu", "numub", "nue", "nueb"}) {
     for (t2knova::selection sel_id : AllSelectionList) {
       std::string selection = SelectionList[sel_id];
 
       if (DoNEUT) {
-        for (std::string const &targetnuc : {"C", "H", "O"}) {
-          for (std::string const &TOTUNE :
-               DoFDS ? std::vector<std::string>{ToNOvATUNE, FDSToTunes[0],
-                                                FDSToTunes[1], FDSToTunes[2]}
-                     : std::vector<std::string>{ToNOvATUNE}) {
+        for (std::string const &proj : {"EnuPLepThetaLep", "Enu"}) {
+          for (std::string const &targetnuc : {"C", "H", "O"}) {
+            for (std::string const &TOTUNE :
+                 DoFDS ? std::vector<std::string>{ToNOvATUNE, FDSToTunes[0],
+                                                  FDSToTunes[1], FDSToTunes[2]}
+                       : std::vector<std::string>{ToNOvATUNE}) {
 
-            std::string FromT2KHistName = "NEUT/ND280/" + targetnuc + "/" +
-                                          species + "/" + FromT2KTUNE +
-                                          "/EnuPLepThetaLep_" + selection;
+              std::string FromT2KHistName = "NEUT/ND280/" + targetnuc + "/" +
+                                            species + "/" + FromT2KTUNE + "/" +
+                                            proj + "_" + selection;
 
-            std::unique_ptr<TH3> neut_nd280_EnuPLepThetaLep =
-                GetTH<TH3>(fin, FromT2KHistName);
-            if (neut_nd280_EnuPLepThetaLep) { // ND280
-              neut_nd280_EnuPLepThetaLep->SetDirectory(nullptr);
-
-              std::unique_ptr<TH3> genie_nd280 = GetTH<TH3>(
+              std::unique_ptr<TH1> neut_nd280_EnuPLepThetaLep =
+                  GetTH<TH1>(fin, FromT2KHistName);
+              std::unique_ptr<TH1> genie_nd280 = GetTH<TH1>(
                   fin, "GENIE/ND280/" + targetnuc + "/" + species + "/" +
-                           ToNOvATUNE + "/EnuPLepThetaLep_" + selection);
-              genie_nd280->SetDirectory(nullptr);
+                           TOTUNE + "/" + proj + "_" + selection);
+              if (neut_nd280_EnuPLepThetaLep && genie_nd280) { // ND280
+                neut_nd280_EnuPLepThetaLep->SetDirectory(nullptr);
+                genie_nd280->SetDirectory(nullptr);
 
-              TDirectory *dir = MakeDirectoryStructure(
-                  fout.get(), FromT2KTUNE + "_to_" + ToNOvATUNE +
-                                  "/EnuPLepThetaLep/" + targetnuc + "/" +
-                                  species + "/");
+                TDirectory *dir = MakeDirectoryStructure(
+                    fout.get(), FromT2KTUNE + "_to_" + TOTUNE + "/" + proj +
+                                    "/" + targetnuc + "/" + species + "/");
 
-              std::unique_ptr<TH3> rat(
-                  dynamic_cast<TH3 *>(genie_nd280->Clone(selection.c_str())));
-              rat->Divide(neut_nd280_EnuPLepThetaLep.get());
-              ScrubLowStatsBins(genie_nd280, neut_nd280_EnuPLepThetaLep, rat,
-                                MaxFracError);
-              rat->SetDirectory(nullptr);
-              dir->WriteTObject(rat.get(), rat->GetName());
+                std::unique_ptr<TH1> rat(
+                    dynamic_cast<TH1 *>(genie_nd280->Clone(selection.c_str())));
+                rat->Divide(neut_nd280_EnuPLepThetaLep.get());
+                ScrubLowStatsBins(genie_nd280, neut_nd280_EnuPLepThetaLep, rat,
+                                  MaxFracError);
+                rat->SetDirectory(nullptr);
+                dir->WriteTObject(rat.get(), rat->GetName());
 
-            } else {
-              std::cout << "[WARN]: Expected to find " << FromT2KHistName
-                        << std::endl;
+              } else {
+                std::cout << "[WARN]: Expected to find " << FromT2KHistName
+                          << std::endl;
+              }
             }
           }
         }
@@ -90,41 +88,40 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
       std::string selection = SelectionList[sel_id];
 
       if (DoNOvA) {
-        for (std::string const &targetnuc : {"C", "H"}) {
+        for (std::string const &proj : {"EnuPtLepEAvHad", "Enu"}) {
+          for (std::string const &targetnuc : {"C", "H"}) {
+            for (std::string const &TOTUNE :
+                 DoFDS ? std::vector<std::string>{ToT2KTUNE, FDSToTunes[0],
+                                                  FDSToTunes[1], FDSToTunes[2]}
+                       : std::vector<std::string>{ToT2KTUNE}) {
 
-          for (std::string const &TOTUNE :
-               DoFDS ? std::vector<std::string>{ToT2KTUNE, FDSToTunes[0],
-                                                FDSToTunes[1], FDSToTunes[2]}
-                     : std::vector<std::string>{ToT2KTUNE}) {
-
-            std::string ToNOvAHistName = "NEUT/NOvAND/" + targetnuc + "/" +
-                                         species + "/" + TOTUNE +
-                                         "/EnuPtLepEAvHad_" + selection;
-            std::unique_ptr<TH3> neut_novand_plep =
-                GetTH<TH3>(fin, ToNOvAHistName);
-            if (neut_novand_plep) { // NOvAND
-              neut_novand_plep->SetDirectory(nullptr);
-
-              std::unique_ptr<TH3> genie_novand = GetTH<TH3>(
+              std::string ToNOvAHistName = "NEUT/NOvAND/" + targetnuc + "/" +
+                                           species + "/" + TOTUNE + "/" + proj +
+                                           "_" + selection;
+              std::unique_ptr<TH1> neut_novand_plep =
+                  GetTH<TH1>(fin, ToNOvAHistName);
+              std::unique_ptr<TH1> genie_novand = GetTH<TH1>(
                   fin, "GENIE/NOvAND/" + targetnuc + "/" + species + "/" +
-                           FromNOvATUNE + "/EnuPtLepEAvHad_" + selection);
-              genie_novand->SetDirectory(nullptr);
+                           FromNOvATUNE + "/" + proj + "_" + selection);
+              if (neut_novand_plep && genie_novand) { // NOvAND
+                neut_novand_plep->SetDirectory(nullptr);
+                genie_novand->SetDirectory(nullptr);
 
-              TDirectory *dir = MakeDirectoryStructure(
-                  fout.get(), FromNOvATUNE + "_to_" + TOTUNE +
-                                  "/EnuPtLepEAvHad/" + targetnuc + "/" +
-                                  species + "/");
+                TDirectory *dir = MakeDirectoryStructure(
+                    fout.get(), FromNOvATUNE + "_to_" + TOTUNE + "/" + proj +
+                                    "/" + targetnuc + "/" + species + "/");
 
-              std::unique_ptr<TH3> rat(dynamic_cast<TH3 *>(
-                  neut_novand_plep->Clone(selection.c_str())));
-              rat->Divide(genie_novand.get());
-              ScrubLowStatsBins(neut_novand_plep, genie_novand, rat,
-                                MaxFracError);
-              rat->SetDirectory(nullptr);
-              dir->WriteTObject(rat.get(), rat->GetName());
-            } else {
-              std::cout << "[WARN]: Expected to find " << ToNOvAHistName
-                        << std::endl;
+                std::unique_ptr<TH1> rat(dynamic_cast<TH1 *>(
+                    neut_novand_plep->Clone(selection.c_str())));
+                rat->Divide(genie_novand.get());
+                ScrubLowStatsBins(neut_novand_plep, genie_novand, rat,
+                                  MaxFracError);
+                rat->SetDirectory(nullptr);
+                dir->WriteTObject(rat.get(), rat->GetName());
+              } else {
+                std::cout << "[WARN]: Expected to find " << ToNOvAHistName
+                          << std::endl;
+              }
             }
           }
         }

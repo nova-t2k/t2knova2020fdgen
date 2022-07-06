@@ -285,11 +285,9 @@ double IntegralTH2(std::unique_ptr<TH2> const &H,
   return sum;
 }
 
-void ScrubLowStatsBins(std::unique_ptr<TH3> const &num,
-                       std::unique_ptr<TH3> const &denom,
+void ScrubLowStatsBins(std::unique_ptr<TH3> &num, std::unique_ptr<TH3> &denom,
                        std::unique_ptr<TH3> &ratio,
                        double frac_error_threshold) {
-  // return;
   for (int i = 0; i < num->GetXaxis()->GetNbins(); ++i) {
     for (int j = 0; j < num->GetYaxis()->GetNbins(); ++j) {
       for (int k = 0; k < num->GetZaxis()->GetNbins(); ++k) {
@@ -311,11 +309,9 @@ void ScrubLowStatsBins(std::unique_ptr<TH3> const &num,
   }
 }
 
-void ScrubLowStatsBins(std::unique_ptr<TH2> const &num,
-                       std::unique_ptr<TH2> const &denom,
+void ScrubLowStatsBins(std::unique_ptr<TH2> &num, std::unique_ptr<TH2> &denom,
                        std::unique_ptr<TH2> &ratio,
                        double frac_error_threshold) {
-  // return;
   for (int i = 0; i < num->GetXaxis()->GetNbins(); ++i) {
     for (int j = 0; j < num->GetYaxis()->GetNbins(); ++j) {
       double num_frac_error =
@@ -334,10 +330,30 @@ void ScrubLowStatsBins(std::unique_ptr<TH2> const &num,
   }
 }
 
-void ScrubLowStatsBins(std::unique_ptr<TH1> const &num,
-                       std::unique_ptr<TH1> const &denom,
+void ScrubLowStatsBins(std::unique_ptr<TH1> &num, std::unique_ptr<TH1> &denom,
                        std::unique_ptr<TH1> &ratio,
                        double frac_error_threshold) {
+
+  if (num->GetDimension() == 2) { // this is awful, I know
+    std::unique_ptr<TH2> num_2(dynamic_cast<TH2 *>(num.get()));
+    std::unique_ptr<TH2> denom_2(dynamic_cast<TH2 *>(denom.get()));
+    std::unique_ptr<TH2> ratio_2(dynamic_cast<TH2 *>(ratio.get()));
+    ScrubLowStatsBins(num_2, denom_2, ratio_2, frac_error_threshold);
+    num_2.release();
+    denom_2.release();
+    ratio_2.release();
+    return;
+  } else if (num->GetDimension() == 3) {
+    std::unique_ptr<TH3> num_3(dynamic_cast<TH3 *>(num.get()));
+    std::unique_ptr<TH3> denom_3(dynamic_cast<TH3 *>(denom.get()));
+    std::unique_ptr<TH3> ratio_3(dynamic_cast<TH3 *>(ratio.get()));
+    ScrubLowStatsBins(num_3, denom_3, ratio_3, frac_error_threshold);
+    num_3.release();
+    denom_3.release();
+    ratio_3.release();
+    return;
+  }
+
   for (int i = 0; i < num->GetXaxis()->GetNbins(); ++i) {
     double num_frac_error = num->GetBinError(i + 1) / num->GetBinContent(i + 1);
     double denom_frac_error =

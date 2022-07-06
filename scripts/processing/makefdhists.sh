@@ -16,19 +16,18 @@ GENERATORS=( NEUT GENIE )
 #GENERATORS=( NEUT )
 
 SPECIES=( numu numub nue nueb )
-SPECIES=( numu )
+# SPECIES=( numu )
 
 DETECTORS=( NOvAND ND280 )
-DETECTORS=( ND280 )
+# DETECTORS=( ND280 )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
-# DET_MATS["ND280"]="H2O CH"
-DET_MATS["ND280"]="CH"
+DET_MATS["ND280"]="H2O CH"
+# DET_MATS["ND280"]="CH"
 
 declare -A TUNES
 TUNES["NEUT"]="BANFF_PRE BANFF_POST"
-TUNES["NEUT"]="BANFF_POST"
 TUNES["GENIE"]="2020"
 
 declare -A FakeDataSets
@@ -66,8 +65,6 @@ for gen in ${GENERATORS[@]}; do
               echo $CMD
               ${CMD} &
 
-              wait
-              exit 0
             done
             wait
           done
@@ -93,31 +90,23 @@ echo bin/fakedatarwgen.exe \
   FDSInputs/FakeDataHists.root \
   FDSInputs/FakeDataInputs_FromGenerated.root \
   --from-ND280-NEUT Generated \
-  --to-ND280-GENIE 2020 \
-  --from-NOvAND-GENIE Generated \
-  --to-NOvAND-NEUT BANFF_POST
+  --from-NOvAND-GENIE Generated
 
 bin/fakedatarwgen.exe \
   FDSInputs/FakeDataHists.root \
   FDSInputs/FakeDataInputs_FromGenerated.root \
   --from-ND280-NEUT Generated \
-  --to-ND280-GENIE 2020 \
-  --from-NOvAND-GENIE Generated \
-  --to-NOvAND-NEUT BANFF_POST
+  --from-NOvAND-GENIE Generated
 
 echo bin/fakedatarwgen.exe \
   FDSInputs/FakeDataHists.root \
   FDSInputs/FakeDataInputs_FromTuned.root \
   --from-ND280-NEUT BANFF_POST \
-  --to-ND280-GENIE 2020 \
-  --from-NOvAND-GENIE 2020 \
-  --to-NOvAND-NEUT BANFF_POST
+  --from-NOvAND-GENIE 2020
  
 bin/fakedatarwgen.exe \
   FDSInputs/FakeDataHists.root \
   FDSInputs/FakeDataInputs_FromTuned.root \
   --from-ND280-NEUT BANFF_POST \
-  --to-ND280-GENIE 2020 \
-  --from-NOvAND-GENIE 2020 \
-  --to-NOvAND-NEUT BANFF_POST
+  --from-NOvAND-GENIE 2020
  
