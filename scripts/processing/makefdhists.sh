@@ -40,20 +40,21 @@ export T2KNOVA_INPUTS=$(readlink -f inputs)
 for gen in ${GENERATORS[@]}; do
   for det in ${DETECTORS[@]}; do
     for mat in ${DET_MATS[${det}]}; do
-      for tgtel in ${TGTEL["${det}_${mat}"]}; do
-        for tune in ${TUNES["${gen}"]}; do
-          for fds in ${FakeDataSets["${tune}"]}; do
-            for spec in ${SPECIES[@]}; do
+      for tune in ${TUNES["${gen}"]}; do
+        for fds in ${FakeDataSets["${tune}"]}; do
+          for spec in ${SPECIES[@]}; do
 
-              if [ ! -e "flattrees/t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root" ]; then
-                echo "Failed to find: flattrees/t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root"
-                continue
-              fi
+            if [ ! -e "flattrees/t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root" ]; then
+              echo "Failed to find: flattrees/t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root"
+              continue
+            fi
 
-              LASTDIRNAME="${fds}"
-              if [ "${LASTDIRNAME}" = "NDTuned" ]; then
-                LASTDIRNAME=${tune}
-              fi
+            LASTDIRNAME="${fds}"
+            if [ "${LASTDIRNAME}" = "NDTuned" ]; then
+              LASTDIRNAME=${tune}
+            fi
+
+            for tgtel in ${TGTEL["${det}_${mat}"]}; do
 
               CMD="bin/fakedatahists.exe -i flattrees/t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root \
                                          -H config/FakeDataConfig.toml \
@@ -64,8 +65,19 @@ for gen in ${GENERATORS[@]}; do
                                          -d ${gen}/${det}/${tgtel}/${spec}/${LASTDIRNAME}"
               echo $CMD
               ${CMD} &
-
             done
+
+            CMD="bin/fakedatahists.exe -i flattrees/t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root \
+                                       -H config/FakeDataConfig.toml \
+                                       -e ${det} \
+                                       --FDS ${fds} \
+                                       -o FDSInputs/FakeDataHists_${spec}.root \
+                                       -a any \
+                                       -d ${gen}/${det}/${mat}/${spec}/${LASTDIRNAME}"
+            echo $CMD
+            ${CMD} &
+
+          
             wait
           done
         done
