@@ -60,7 +60,7 @@ for gen in ${GENERATORS[@]}; do
                                          -H config/FakeDataConfig.toml \
                                          -e ${det} \
                                          --FDS ${fds} \
-                                         -o FDSInputs/FakeDataHists_${spec}.root \
+                                         -o FDSInputs/FakeDataHists_${spec}_${tgtel}.root \
                                          -a ${tgtel} \
                                          -d ${gen}/${det}/${tgtel}/${spec}/${LASTDIRNAME}"
               echo $CMD
