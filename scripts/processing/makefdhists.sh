@@ -13,18 +13,17 @@ TGTEL["ND280_CH"]="C"
 TGTEL["ND280_H2O"]="H O"
 
 GENERATORS=( NEUT GENIE )
-#GENERATORS=( NEUT )
 
 SPECIES=( numu numub nue nueb )
-# SPECIES=( numu )
+SPECIES=( numu )
 
 DETECTORS=( NOvAND ND280 )
-# DETECTORS=( ND280 )
+DETECTORS=( ND280 )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
 DET_MATS["ND280"]="H2O CH"
-# DET_MATS["ND280"]="CH"
+DET_MATS["ND280"]="CH"
 
 declare -A TUNES
 TUNES["NEUT"]="BANFF_PRE BANFF_POST"
@@ -88,7 +87,7 @@ done
 
 HADD_CMD="hadd -j 4 FDSInputs/FakeDataHists.root"
 for spec in ${SPECIES[@]}; do
-  HADD_CMD="${HADD_CMD} FDSInputs/FakeDataHists_${spec}.root"
+  HADD_CMD="${HADD_CMD} FDSInputs/FakeDataHists_${spec}*.root"
 done
 echo $HADD_CMD
 ${HADD_CMD}
