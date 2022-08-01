@@ -111,13 +111,25 @@ bin/fakedatarwgen.exe \
 
 echo bin/fakedatarwgen.exe \
   FDSInputs/FakeDataHists.root \
-  FDSInputs/FakeDataInputs_FromTuned.root \
+  FDSInputs/FakeDataInputs_FromTuned_BANFFPost.root \
   --from-ND280-NEUT BANFF_POST \
   --from-NOvAND-GENIE 2020
  
 bin/fakedatarwgen.exe \
   FDSInputs/FakeDataHists.root \
-  FDSInputs/FakeDataInputs_FromTuned.root \
+  FDSInputs/FakeDataInputs_FromTuned_BANFFPost.root \
   --from-ND280-NEUT BANFF_POST \
+  --from-NOvAND-GENIE 2020
+
+echo bin/fakedatarwgen.exe \
+  FDSInputs/FakeDataHists.root \
+  FDSInputs/FakeDataInputs_FromTuned_BANFFPre.root \
+  --from-ND280-NEUT BANFF_PRE \
+  --from-NOvAND-GENIE 2020
+ 
+bin/fakedatarwgen.exe \
+  FDSInputs/FakeDataHists.root \
+  FDSInputs/FakeDataInputs_FromTuned_BANFFPre.root \
+  --from-ND280-NEUT BANFF_PRE \
   --from-NOvAND-GENIE 2020
  
