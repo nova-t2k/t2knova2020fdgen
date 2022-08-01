@@ -43,7 +43,7 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
 
       if (DoNEUT) {
         for (std::string const &proj : {"EnuPLepThetaLep", "Enu"}) {
-          for (std::string const &targetnuc : {"C", "H", "O"}) {
+          for (std::string const &targetnuc : {"C", "H", "O", "CH", "H2O"}) {
             for (std::string const &TOTUNE :
                  DoFDS ? std::vector<std::string>{ToNOvATUNE, FDSToTunes[0],
                                                   FDSToTunes[1], FDSToTunes[2]}
