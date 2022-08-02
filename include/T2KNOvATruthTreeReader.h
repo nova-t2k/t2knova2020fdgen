@@ -199,6 +199,35 @@ public:
     return Esum;
   }
 
+  // BANFFEventBase::
+  float GetTrueEnuQE() {
+    static double const proton_mass = 0.938272;  // GeV
+    static double const neutron_mass = 0.939566; // GeV
+    bool nu = (PDGNu() > 0);
+    double Eb = 27. * 0.001; // GeV
+    double m_in = neutron_mass - Eb * 1.e-3;
+    double m_out = proton_mass;
+    if (!nu) {
+      m_in = proton_mass - Eb * 1.e-3;
+      m_out = neutron_mass;
+    }
+    auto pfslep = FSLepP4();
+    double muon_energy = pfslep.E();
+    return (2. * m_in * muon_energy - pfslep.Mag2() - m_in * m_in +
+            m_out * m_out) /
+           (2. * (m_in - muon_energy +
+                  pfslep.Vect().Mag() * pfslep.Vect().CosTheta()));
+  }
+
+  // BANFFEventBase::
+  float GetQ2QE() {
+    auto pfslep = FSLepP4();
+    double muon_energy = pfslep.E();
+    return -pfslep.Mag2() +
+           2. * GetTrueEnuQE() *
+               (muon_energy - pfslep.Vect().Mag() * pfslep.Vect().CosTheta());
+  }
+
   std::string PrintStack() {
     std::stringstream ss;
     ss << "NFSP: " << (*_nfsp) << "\n";

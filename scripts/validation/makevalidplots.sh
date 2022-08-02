@@ -1,6 +1,7 @@
 #!/bin/bash
 
-FDSDENOMTYPE=Tuned
+FDSDENOMTYPE=Tuned_BANFFPre
+FDSDENOMTYPE=Tuned_BANFFPost
 # FDSDENOMTYPE=Generated
 
 mkdir -p ValidPlots_${FDSDENOMTYPE}

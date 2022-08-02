@@ -3,19 +3,19 @@
 # FDSINPUTS=FDSInputs/FakeDataInputs_FromTuned_BANFFPost.root
 # FDSDENOMTYPE=BANFFPost
 # OUTDIR=FDSValid_FromTuned_BANFFPost
-# NOTUNEFLAG=""
+# BASETUNEFLAG="NDTuned"
 # NEUTBASEGEN="BANFF_POST"
 
 FDSINPUTS=FDSInputs/FakeDataInputs_FromTuned_BANFFPre.root
 FDSDENOMTYPE=BANFFPre
 OUTDIR=FDSValid_FromTuned_BANFFPre
-NOTUNEFLAG=""
+BASETUNEFLAG="NDTuned"
 NEUTBASEGEN="BANFF_PRE"
 
 # FDSINPUTS=FDSInputs/FakeDataInputs_FromGenerated.root
 # FDSDENOMTYPE=Generated
 # OUTDIR=FDSValid_FromGenerated
-# NOTUNEFLAG="--No-Tune"
+# BASETUNEFLAG="Generated"
 # NEUTBASEGEN="BANFF_PRE"
 
 if [ "${1}" = "force" ]; then
@@ -60,33 +60,49 @@ for DET in ${DETECTORS[@]}; do
                 if [ "${DO_MAIN}" == "1" ]; then
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
                                         -H config/FakeDataValidConfig_ND280.toml \
-                                        -a any --No-Tune \
+                                        -a any -T Generated \
                                         -o ${OUTDIR}/FakeDataValid_Generated.root \
                                         -d ND280/NEUT/Generated/${TGT}/${SPC} &
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
                                         -H config/FakeDataValidConfig_ND280.toml \
-                                        -a any \
+                                        -a any -T NDTuned \
                                         -o ${OUTDIR}/FakeDataValid_BANFF_PRE.root \
                                         -d ND280/NEUT/BANFF_PRE/${TGT}/${SPC} &
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_POST.${SPC}.root \
                                         -H config/FakeDataValidConfig_ND280.toml \
-                                        -a any \
+                                        -a any -T NDTuned \
                                         -o ${OUTDIR}/FakeDataValid_BANFF_POST.root \
                                         -d ND280/NEUT/BANFF_POST/${TGT}/${SPC} &
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${NEUTBASEGEN}.${SPC}.root \
                                         --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                         -H config/FakeDataValidConfig_ND280.toml \
-                                        -a any ${NOTUNEFLAG} \
+                                        -a any -T ${BASETUNEFLAG} \
                                         -W T2KND_to_NOvA \
                                         -o ${OUTDIR}/FakeDataValid_ReWeighted_to_2020.root \
                                         -d ND280/NEUT/ReWeighted_to_2020/${TGT}/${SPC} &
 
+                    if [ "${NEUTBASEGEN}" == "BANFF_PRE" ]; then
+                        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
+                                            --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
+                                            -H config/FakeDataValidConfig_ND280.toml \
+                                            -a any -T NDTuned \
+                                            -W kT2KND_to_T2KNonQE \
+                                            -o ${OUTDIR}/FakeDataValid_ReWeighted_to_NonQE.root \
+                                            -d ND280/NEUT/ReWeighted_to_NonQE/${TGT}/${SPC} &
+
+                        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
+                                            -H config/FakeDataValidConfig_ND280.toml \
+                                            -a any -T NonQE \
+                                            -o ${OUTDIR}/FakeDataValid_NonQE.root \
+                                            -d ND280/NEUT/NonQE/${TGT}/${SPC} &
+                    fi
+
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.ND280.${TGT}.2020.${SPC}.root \
                                         -H config/FakeDataValidConfig_ND280.toml \
-                                        -a any \
+                                        -a any -T NDTuned \
                                         -o ${OUTDIR}/FakeDataValid_GENIE.root \
                                         -d ND280/GENIE/2020/${TGT}/${SPC} &
 
@@ -97,33 +113,49 @@ for DET in ${DETECTORS[@]}; do
                     for ELE in ${MAT_ELEMENTS["${TGT}"]}; do
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
                                             -H config/FakeDataValidConfig_ND280.toml \
-                                            -a ${ELE} --No-Tune \
+                                            -a ${ELE} -T Generated \
                                             -o ${OUTDIR}/FakeDataValid_Generated.root \
                                             -d ND280/NEUT/Generated/${ELE}/${SPC} &
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
                                             -H config/FakeDataValidConfig_ND280.toml \
-                                            -a ${ELE} \
+                                            -a ${ELE} -T NDTuned \
                                             -o ${OUTDIR}/FakeDataValid_BANFF_PRE.root \
                                             -d ND280/NEUT/BANFF_PRE/${ELE}/${SPC} &
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_POST.${SPC}.root \
                                             -H config/FakeDataValidConfig_ND280.toml \
-                                            -a ${ELE} \
+                                            -a ${ELE} -T NDTuned \
                                             -o ${OUTDIR}/FakeDataValid_BANFF_POST.root \
                                             -d ND280/NEUT/BANFF_POST/${ELE}/${SPC} &
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.${NEUTBASEGEN}.${SPC}.root \
                                             --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                             -H config/FakeDataValidConfig_ND280.toml \
-                                            -a ${ELE} ${NOTUNEFLAG} \
+                                            -a ${ELE} -T ${BASETUNEFLAG} \
                                             -W T2KND_to_NOvA \
                                             -o ${OUTDIR}/FakeDataValid_ReWeighted_to_2020.root \
                                             -d ND280/NEUT/ReWeighted_to_2020/${ELE}/${SPC} &
 
+                        if [ "${NEUTBASEGEN}" == "BANFF_PRE" ]; then
+                            bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
+                                                --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
+                                                -H config/FakeDataValidConfig_ND280.toml \
+                                                -a ${ELE} -T NDTuned \
+                                                -W kT2KND_to_T2KNonQE \
+                                                -o ${OUTDIR}/FakeDataValid_ReWeighted_to_NonQE.root \
+                                                -d ND280/NEUT/ReWeighted_to_NonQE/${ELE}/${SPC} &
+
+                            bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
+                                                -H config/FakeDataValidConfig_ND280.toml \
+                                                -a ${ELE} -T NonQE \
+                                                -o ${OUTDIR}/FakeDataValid_NonQE.root \
+                                                -d ND280/NEUT/NonQE/${ELE}/${SPC} &
+                        fi
+
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.ND280.${TGT}.2020.${SPC}.root \
                                             -H config/FakeDataValidConfig_ND280.toml \
-                                            -a ${ELE} \
+                                            -a ${ELE} -T NDTuned \
                                             -o ${OUTDIR}/FakeDataValid_GENIE.root \
                                             -d ND280/GENIE/2020/${ELE}/${SPC} &
 
@@ -136,56 +168,53 @@ for DET in ${DETECTORS[@]}; do
                 if [ "${DO_MAIN}" == "1" ]; then
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                         -H config/FakeDataValidConfig_NOvAND.toml \
-                                        -a any --No-Tune \
+                                        -a any -T Generated \
                                         -o ${OUTDIR}/FakeDataValid_Generated.root \
                                         -d NOvAND/GENIE/Generated/${TGT}/${SPC} &
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                         -H config/FakeDataValidConfig_NOvAND.toml \
-                                        -a any \
+                                        -a any -T NDTuned \
                                         -o ${OUTDIR}/FakeDataValid_2020.root \
                                         -d NOvAND/GENIE/2020/${TGT}/${SPC} &
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.NOvAND.${TGT}.BANFF_PRE.${SPC}.root \
                                         -H config/FakeDataValidConfig_NOvAND.toml \
-                                        -a any \
+                                        -a any -T NDTuned \
                                         -o ${OUTDIR}/FakeDataValid_BANFF_PRE.root \
                                         -d NOvAND/NEUT/BANFF_PRE/${TGT}/${SPC} &
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.NOvAND.${TGT}.BANFF_POST.${SPC}.root \
                                         -H config/FakeDataValidConfig_NOvAND.toml \
-                                        -a any \
+                                        -a any -T NDTuned \
                                         -o ${OUTDIR}/FakeDataValid_BANFF_POST.root \
                                         -d NOvAND/NEUT/BANFF_POST/${TGT}/${SPC} &
-
-                    wait
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                         --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                         -H config/FakeDataValidConfig_NOvAND.toml \
-                                        -a any ${NOTUNEFLAG} -W NOvA_to_T2KND_ptlep \
+                                        -a any -T ${BASETUNEFLAG} -W NOvA_to_T2KND_ptlep \
                                         -o ${OUTDIR}/FakeDataValid_ReWeighted_to_BANFF_POST.root \
                                         -d NOvAND/GENIE/ReWeighted_to_BANFF_POST/${TGT}/${SPC} &
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                         --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                         -H config/FakeDataValidConfig_NOvAND.toml \
-                                        -a any ${NOTUNEFLAG} -W NOvA_to_T2KPre_ptlep \
+                                        -a any -T ${BASETUNEFLAG} -W NOvA_to_T2KPre_ptlep \
                                         -o ${OUTDIR}/FakeDataValid_ReWeighted_to_BANFF_PRE.root \
                                         -d NOvAND/GENIE/ReWeighted_to_BANFF_PRE/${TGT}/${SPC} &
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                         --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                         -H config/FakeDataValidConfig_NOvAND.toml \
-                                        -a any ${NOTUNEFLAG} -W NOvA_to_T2KMnv1Pi_ptlep \
+                                        -a any -T ${BASETUNEFLAG} -W NOvA_to_T2KMnv1Pi_ptlep \
                                         -o ${OUTDIR}/FakeDataValid_ReWeighted_to_Mnv1Pi.root \
                                         -d NOvAND/GENIE/ReWeighted_to_Mnv1Pi/${TGT}/${SPC} &
-
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                         --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                         -H config/FakeDataValidConfig_NOvAND.toml \
-                                        -a any ${NOTUNEFLAG} -W NOvA_to_T2KNonQE_ptlep \
+                                        -a any -T ${BASETUNEFLAG} -W NOvA_to_T2KNonQE_ptlep \
                                         -o ${OUTDIR}/FakeDataValid_ReWeighted_to_NonQE.root \
                                         -d NOvAND/GENIE/ReWeighted_to_NonQE/${TGT}/${SPC} &
 
@@ -199,56 +228,53 @@ for DET in ${DETECTORS[@]}; do
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                             -H config/FakeDataValidConfig_NOvAND.toml \
-                                            -a ${ELE} --No-Tune \
+                                            -a ${ELE} -T Generated \
                                             -o ${OUTDIR}/FakeDataValid_Generated.root \
                                             -d NOvAND/GENIE/Generated/${ELE}/${SPC} &
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                             -H config/FakeDataValidConfig_NOvAND.toml \
-                                            -a ${ELE} \
+                                            -a ${ELE} -T NDTuned \
                                             -o ${OUTDIR}/FakeDataValid_2020.root \
                                             -d NOvAND/GENIE/2020/${ELE}/${SPC} &
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.NOvAND.${TGT}.BANFF_PRE.${SPC}.root \
                                             -H config/FakeDataValidConfig_NOvAND.toml \
-                                            -a ${ELE} \
+                                            -a ${ELE} -T NDTuned \
                                             -o ${OUTDIR}/FakeDataValid_BANFF_PRE.root \
                                             -d NOvAND/NEUT/BANFF_PRE/${ELE}/${SPC} &
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.NOvAND.${TGT}.BANFF_POST.${SPC}.root \
                                             -H config/FakeDataValidConfig_NOvAND.toml \
-                                            -a ${ELE} \
+                                            -a ${ELE} -T NDTuned \
                                             -o ${OUTDIR}/FakeDataValid_BANFF_POST.root \
                                             -d NOvAND/NEUT/BANFF_POST/${ELE}/${SPC} &
-
-                        wait
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                             --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                             -H config/FakeDataValidConfig_NOvAND.toml \
-                                            -a ${ELE} --No-Tune -W NOvA_to_T2KND_ptlep \
+                                            -a ${ELE} -T Generated -W NOvA_to_T2KND_ptlep \
                                             -o ${OUTDIR}/FakeDataValid_ReWeighted_to_BANFF_POST.root \
                                             -d NOvAND/GENIE/ReWeighted_to_BANFF_POST/${ELE}/${SPC} &
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                             --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                             -H config/FakeDataValidConfig_NOvAND.toml \
-                                            -a ${ELE} --No-Tune -W NOvA_to_T2KPre_ptlep \
+                                            -a ${ELE} -T Generated -W NOvA_to_T2KPre_ptlep \
                                             -o ${OUTDIR}/FakeDataValid_ReWeighted_to_BANFF_PRE.root \
                                             -d NOvAND/GENIE/ReWeighted_to_BANFF_PRE/${ELE}/${SPC} &
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                             --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                             -H config/FakeDataValidConfig_NOvAND.toml \
-                                            -a ${ELE} --No-Tune -W NOvA_to_T2KMnv1Pi_ptlep \
+                                            -a ${ELE} -T Generated -W NOvA_to_T2KMnv1Pi_ptlep \
                                             -o ${OUTDIR}/FakeDataValid_ReWeighted_to_Mnv1Pi.root \
                                             -d NOvAND/GENIE/ReWeighted_to_Mnv1Pi/${ELE}/${SPC} &
-
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.NOvAND.${TGT}.2020.${SPC}.root \
                                             --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                             -H config/FakeDataValidConfig_NOvAND.toml \
-                                            -a ${ELE} --No-Tune -W NOvA_to_T2KNonQE_ptlep \
+                                            -a ${ELE} -T Generated -W NOvA_to_T2KNonQE_ptlep \
                                             -o ${OUTDIR}/FakeDataValid_ReWeighted_to_NonQE.root \
                                             -d NOvAND/GENIE/ReWeighted_to_NonQE/${ELE}/${SPC} &
 

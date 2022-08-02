@@ -22,8 +22,10 @@
 using namespace t2knova;
 
 bool bymode = false;
-bool dotune = true;
 bool doosc = false;
+
+enum FDS { kGenerated, kNDTuned, kMnv1Pi, kNonQE };
+FDS FDSSet = kGenerated;
 
 TrueChannelHist<TH1F> *XSecs;
 SelectionHists<TH1F> *EvWeights;
@@ -190,7 +192,32 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
       continue;
     }
 
-    double w = rdr.fScaleFactor() * (dotune ? rdr.RWWeight() : 1);
+    double w = rdr.fScaleFactor();
+
+    std::vector<int> sels = rdr.GetSelections();
+
+    if (!sels.size()) {
+      ent_it++;
+      continue;
+    }
+
+    if (FDSSet != kGenerated) {
+      w *= rdr.RWWeight();
+
+      if (FDSSet == kMnv1Pi) {
+        if ((std::find(sels.begin(), sels.end(), kCC1cpi) != sels.end()) ||
+            (std::find(sels.begin(), sels.end(), kCC1pi0) != sels.end())) {
+          w *= GetMINERvASPPLowQ2SuppressionWeight(rdr.Q2());
+        }
+      } else if (FDSSet == kNonQE) {
+        if (rdr.Mode() == 1) {
+          w *= UnWeightQ2BinWeights_T2K2020(rdr.Q2());
+        } else if (std::find(sels.begin(), sels.end(), kCC0pi) != sels.end()) {
+          w *= GetnonQEWeight(rdr.PDGNu(), rdr.GetQ2QE());
+        }
+      }
+    }
+
 
     if (doosc && (std::abs(rdr.Mode()) < 30)) { // Oscillate CC events if
                                                 // enabled
@@ -222,6 +249,10 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
       rw_w *= t2knova::GetFakeDataWeight_ND280ToNOvA(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
           rdr.AngLep_deg(), primary_selection);
+    } else if (weightconfig == t2knova::kT2KND_to_T2KNonQE) {
+      rw_w *= t2knova::GetFakeDataWeight_ND280ToT2KNonQE(
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
+          rdr.AngLep_deg(), primary_selection);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
       rw_w *= t2knova::GetFakeDataWeight_NOvAToT2KND_PtLep(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
@@ -244,13 +275,6 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
           primary_selection);
     }
     w *= rw_w;
-
-    std::vector<int> sels = rdr.GetSelections();
-
-    if (!sels.size()) {
-      ent_it++;
-      continue;
-    }
 
     Enu->Fill(w, sels, rdr.Mode(), rdr.Enu_true());
     double erec = EnuQErec(rdr.FSLepP4().E(), rdr.PLep(), rdr.CosLep(), 0,
@@ -297,7 +321,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
       XSecs->Fill(w, rdr.Mode(), sel);
     }
 
-    EvWeights->Fill(1, sels, rdr.Mode(), (dotune ? rdr.RWWeight() : 1) * rw_w);
+    EvWeights->Fill(1, sels, rdr.Mode(), w);
 
     if (rw_w <= 0.1) {
       PThetaLep_outlier_low->Fill(1, sels, rdr.Mode(), rdr.PLep(),
@@ -328,6 +352,7 @@ std::map<reweightconfig, std::string> inputhistnames;
 
 std::map<reweightconfig, std::string> inputhistnames_FromGenerated = {
     {kT2KND_to_NOvA, "Generated_to_2020/EnuPLepThetaLep"},
+    {kT2KND_to_T2KNonQE, "Generated_to_NonQE/EnuPLepThetaLep"},
     {kNOvA_to_T2KND_ptlep, "Generated_to_BANFF_POST/EnuPtLepEAvHad"},
     {kNOvA_to_T2KPre_ptlep, "Generated_to_BANFF_PRE/EnuPtLepEAvHad"},
     {kNOvA_to_T2KMnv1Pi_ptlep, "Generated_to_Mnv1Pi/EnuPtLepEAvHad"},
@@ -336,6 +361,7 @@ std::map<reweightconfig, std::string> inputhistnames_FromGenerated = {
 
 std::map<reweightconfig, std::string> inputhistnames_FromBANFF_POST = {
     {kT2KND_to_NOvA, "BANFF_POST_to_2020/EnuPLepThetaLep"},
+    {kT2KND_to_T2KNonQE, "BANFF_POST_to_NonQE/EnuPLepThetaLep"},
     {kNOvA_to_T2KND_ptlep, "2020_to_BANFF_POST/EnuPtLepEAvHad"},
     {kNOvA_to_T2KPre_ptlep, "2020_to_BANFF_PRE/EnuPtLepEAvHad"},
     {kNOvA_to_T2KMnv1Pi_ptlep, "2020_to_Mnv1Pi/EnuPtLepEAvHad"},
@@ -344,6 +370,7 @@ std::map<reweightconfig, std::string> inputhistnames_FromBANFF_POST = {
 
 std::map<reweightconfig, std::string> inputhistnames_FromBANFF_PRE = {
     {kT2KND_to_NOvA, "BANFF_PRE_to_2020/EnuPLepThetaLep"},
+    {kT2KND_to_T2KNonQE, "BANFF_PRE_to_NonQE/EnuPLepThetaLep"},
     {kNOvA_to_T2KND_ptlep, "2020_to_BANFF_POST/EnuPtLepEAvHad"},
     {kNOvA_to_T2KPre_ptlep, "2020_to_BANFF_PRE/EnuPtLepEAvHad"},
     {kNOvA_to_T2KMnv1Pi_ptlep, "2020_to_Mnv1Pi/EnuPtLepEAvHad"},
@@ -390,8 +417,6 @@ void handleOpts(int argc, char const *argv[]) {
       hist_config_file = argv[++opt];
     } else if (std::string(argv[opt]) == "-o") {
       output_file = argv[++opt];
-    } else if (std::string(argv[opt]) == "--No-Tune") {
-      dotune = false;
     } else if (std::string(argv[opt]) == "--From") {
       std::string arg = std::string(argv[++opt]);
       inputhistnames = inputhistnames_FromGenerated;
@@ -426,10 +451,27 @@ void handleOpts(int argc, char const *argv[]) {
         SayUsage(argv);
         exit(1);
       }
-    } else if (std::string(argv[opt]) == "-W") {
+    } else if (std::string(argv[opt]) == "-T") {
+      std::string arg = std::string(argv[++opt]);
+      if (arg == "Generated") {
+        FDSSet = kGenerated;
+      } else if (arg == "NDTuned") {
+        FDSSet = kNDTuned;
+      } else if (arg == "Mnv1Pi") {
+        FDSSet = kMnv1Pi;
+      } else if (arg == "NonQE") {
+        FDSSet = kNonQE;
+      } else {
+        std::cout << "Invalid FDS selector passed: " << argv[4]
+                  << ". Should be None/Mnv1Pi/NonQE." << std::endl;
+        abort();
+      }
+    }else if (std::string(argv[opt]) == "-W") {
       std::string arg = std::string(argv[++opt]);
       if (arg == "T2KND_to_NOvA") {
         wconfig = t2knova::kT2KND_to_NOvA;
+      } else if (arg == "kT2KND_to_T2KNonQE") {
+        wconfig = t2knova::kT2KND_to_T2KNonQE;
       } else if (arg == "NOvA_to_T2KND_ptlep") {
         wconfig = t2knova::kNOvA_to_T2KND_ptlep;
       } else if (arg == "NOvA_to_T2KPre_ptlep") {
@@ -480,20 +522,6 @@ int main(int argc, char const *argv[]) {
   gStyle->SetOptStat(false);
 
   handleOpts(argc, argv);
-
-  if (FromGenerated) {
-    if ((wconfig != t2knova::kNoWeight) && dotune) {
-      std::cout << "[ERROR]: Tuning and applying FDS weights, when using "
-                   "unweighted denominator. This is not correct."
-                << std::endl;
-      return 1;
-    }
-  } else if ((wconfig != t2knova::kNoWeight) && !dotune) {
-    std::cout << "[ERROR]: Not tuning and applying FDS weights, when using "
-                 "Tuned denominator. This is not correct."
-              << std::endl;
-    return 1;
-  }
 
   if ((wconfig != t2knova::kNoWeight) && !FDSInputs.length()) {
     std::cout << "[ERROR]: Asked to perform weighting, but no inputs passed."

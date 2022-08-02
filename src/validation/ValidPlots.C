@@ -9,9 +9,25 @@ using namespace t2knova;
 
 enum Detector { kT2K, kNOvAND };
 
-enum ReWeightDenominator { kGenerated, kTuned };
+enum class ReWeightDenominator {
+  kGenerated,
+  kTuned,
+  kTuned_BANFFPre,
+  kTuned_BANFFPost
+};
 
-ReWeightDenominator denom = kGenerated;
+ReWeightDenominator denom = ReWeightDenominator::kGenerated;
+
+enum class TargetTuneType {
+  kGenerated,
+  kTuned,
+  kTuned_BANFFPre,
+  kTuned_BANFFPost,
+  kMnv1Pi,
+  kNonQE
+};
+
+TargetTuneType tgttune = TargetTuneType::kTuned;
 
 bool bymode = false;
 
@@ -69,20 +85,99 @@ struct hblob {
     std::string targethist_name = "";
 
     std::string tgtspecvar_str =
-        +"/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname;
+        "/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname;
     std::string selmode_str = sel_str + mode_str;
 
     if (det == kT2K) {
-      fromhist_name = std::string("ND280/NEUT/") +
-                      ((denom == kGenerated) ? "Generated" : "BANFF_POST");
 
-      targethist_name = "ND280/GENIE/2020";
+      switch (denom) {
+      case ReWeightDenominator::kGenerated: {
+        fromhist_name = "ND280/NEUT/Generated";
+        break;
+      }
+      case ReWeightDenominator::kTuned_BANFFPre: {
+        fromhist_name = "ND280/NEUT/BANFF_PRE";
+        break;
+      }
+      case ReWeightDenominator::kTuned:
+      case ReWeightDenominator::kTuned_BANFFPost: {
+        fromhist_name = "ND280/NEUT/BANFF_POST";
+        break;
+      }
+      }
+
+      switch (tgttune) {
+      case TargetTuneType::kGenerated: {
+        targethist_name = "ND280/GENIE/Generated";
+        break;
+      }
+      case TargetTuneType::kTuned: {
+        targethist_name = "ND280/GENIE/2020";
+        break;
+      }
+      case TargetTuneType::kTuned_BANFFPre: {
+        targethist_name = "ND280/NEUT/BANFF_PRE";
+        break;
+      }
+      case TargetTuneType::kTuned_BANFFPost: {
+        targethist_name = "ND280/NEUT/BANFF_POST";
+        break;
+      }
+      case TargetTuneType::kMnv1Pi: {
+        targethist_name = "ND280/NEUT/Mnv1Pi";
+        break;
+      }
+      case TargetTuneType::kNonQE: {
+        targethist_name = "ND280/NEUT/NonQE";
+        break;
+      }
+      }
+
     } else {
-      fromhist_name = std::string("NOvAND/GENIE/") +
-                      ((denom == kGenerated) ? "Generated" : "2020");
 
-      targethist_name = "NOvAND/NEUT/BANFF_POST";
+      switch (denom) {
+      case ReWeightDenominator::kGenerated: {
+        fromhist_name = "NOvAND/NEUT/Generated";
+        break;
+      }
+      case ReWeightDenominator::kTuned: {
+        fromhist_name = "NOvAND/GENIE/2020";
+        break;
+      }
+      case ReWeightDenominator::kTuned_BANFFPre:
+      case ReWeightDenominator::kTuned_BANFFPost: {
+        std::cout << "[ERROR]: Invalid reweight denominator for NOvAND "
+                     "validation plots."
+                  << std::endl;
+        throw;
+      }
+      }
+
+      switch (tgttune) {
+      case TargetTuneType::kGenerated: {
+        targethist_name = "NOvAND/NEUT/Generated";
+        break;
+      }
+      case TargetTuneType::kTuned_BANFFPre: {
+        targethist_name = "NOvAND/NEUT/BANFF_PRE";
+        break;
+      }
+      case TargetTuneType::kTuned:
+      case TargetTuneType::kTuned_BANFFPost: {
+        targethist_name = "NOvAND/NEUT/BANFF_POST";
+        break;
+      }
+      case TargetTuneType::kMnv1Pi: {
+        targethist_name = "NOvAND/NEUT/Mnv1Pi";
+        break;
+      }
+      case TargetTuneType::kNonQE: {
+        targethist_name = "NOvAND/NEUT/NonQE";
+        break;
+      }
+      }
     }
+
     fromhist_name += tgtspecvar_str + selmode_str;
     targethist_name += tgtspecvar_str + selmode_str;
 
@@ -293,10 +388,91 @@ struct hblob {
 
     c1->cd();
 
-    std::string FromTitle = (denom == kGenerated)
-                                ? "Untuned"
-                                : ((_det == kT2K) ? "BANFF" : "NOvA2020");
-    std::string TargetTitle = (_det == kT2K) ? "NOvA2020" : "BANFF ND280";
+    std::string FromTitle = "";
+    std::string TargetTitle = "";
+
+    if (_det == kT2K) {
+
+      switch (denom) {
+      case ReWeightDenominator::kGenerated: {
+        FromTitle = "Untuned NEUT";
+        break;
+      }
+      case ReWeightDenominator::kTuned_BANFFPre: {
+        FromTitle = "BANFF Pre";
+        break;
+      }
+      case ReWeightDenominator::kTuned:
+      case ReWeightDenominator::kTuned_BANFFPost: {
+        FromTitle = "BANFF Post";
+        break;
+      }
+      }
+
+      switch (tgttune) {
+      case TargetTuneType::kGenerated: {
+        TargetTitle = "Untuned GENIE";
+        break;
+      }
+      case TargetTuneType::kTuned: {
+        TargetTitle = "NOvA2020";
+        break;
+      }
+      case TargetTuneType::kTuned_BANFFPre: {
+        TargetTitle = "BANFF Prefit";
+        break;
+      }
+      case TargetTuneType::kTuned_BANFFPost: {
+        TargetTitle = "BANFF Postfit";
+        break;
+      }
+      case TargetTuneType::kMnv1Pi: {
+        TargetTitle = "T2K Mnv1Pi";
+        break;
+      }
+      case TargetTuneType::kNonQE: {
+        TargetTitle = "T2K NonQE";
+        break;
+      }
+      }
+
+    } else {
+
+      switch (denom) {
+      case ReWeightDenominator::kGenerated: {
+        FromTitle = "Untuned GENIE";
+        break;
+      }
+      case ReWeightDenominator::kTuned: {
+        FromTitle = "NOvA2020";
+        break;
+      }
+      }
+
+      switch (tgttune) {
+      case TargetTuneType::kGenerated: {
+        TargetTitle = "Untuned NEUT";
+        break;
+      }
+      case TargetTuneType::kTuned_BANFFPre: {
+        TargetTitle = "BANFF Prefit";
+        break;
+      }
+      case TargetTuneType::kTuned:
+      case TargetTuneType::kTuned_BANFFPost: {
+        TargetTitle = "BANFF Postfit";
+        break;
+      }
+      case TargetTuneType::kMnv1Pi: {
+        TargetTitle = "T2K Mnv1Pi";
+        break;
+      }
+      case TargetTuneType::kNonQE: {
+        TargetTitle = "T2K NonQE";
+        break;
+      }
+      }
+    }
 
     TLegend *leg = new TLegend(0.125, 0.81, 0.925, 1);
     leg->SetNColumns(2);
@@ -331,10 +507,91 @@ struct hblob {
   void Print2D(std::string fname, std::string title = "",
                std::string mode_line = "") {
 
-    std::string FromTitle = (denom == kGenerated)
-                                ? "Untuned"
-                                : ((_det == kT2K) ? "BANFF" : "NOvA2020");
-    std::string TargetTitle = (_det == kT2K) ? "NOvA2020" : "BANFF ND280";
+    std::string FromTitle = "";
+    std::string TargetTitle = "";
+
+    if (_det == kT2K) {
+
+      switch (denom) {
+      case ReWeightDenominator::kGenerated: {
+        FromTitle = "Untuned NEUT";
+        break;
+      }
+      case ReWeightDenominator::kTuned_BANFFPre: {
+        FromTitle = "BANFF Pre";
+        break;
+      }
+      case ReWeightDenominator::kTuned:
+      case ReWeightDenominator::kTuned_BANFFPost: {
+        FromTitle = "BANFF Post";
+        break;
+      }
+      }
+
+      switch (tgttune) {
+      case TargetTuneType::kGenerated: {
+        TargetTitle = "Untuned GENIE";
+        break;
+      }
+      case TargetTuneType::kTuned: {
+        TargetTitle = "NOvA2020";
+        break;
+      }
+      case TargetTuneType::kTuned_BANFFPre: {
+        TargetTitle = "BANFF Prefit";
+        break;
+      }
+      case TargetTuneType::kTuned_BANFFPost: {
+        TargetTitle = "BANFF Postfit";
+        break;
+      }
+      case TargetTuneType::kMnv1Pi: {
+        TargetTitle = "T2K Mnv1Pi";
+        break;
+      }
+      case TargetTuneType::kNonQE: {
+        TargetTitle = "T2K NonQE";
+        break;
+      }
+      }
+
+    } else {
+
+      switch (denom) {
+      case ReWeightDenominator::kGenerated: {
+        FromTitle = "Untuned GENIE";
+        break;
+      }
+      case ReWeightDenominator::kTuned: {
+        FromTitle = "NOvA2020";
+        break;
+      }
+      }
+
+      switch (tgttune) {
+      case TargetTuneType::kGenerated: {
+        TargetTitle = "Untuned NEUT";
+        break;
+      }
+      case TargetTuneType::kTuned_BANFFPre: {
+        TargetTitle = "BANFF Prefit";
+        break;
+      }
+      case TargetTuneType::kTuned:
+      case TargetTuneType::kTuned_BANFFPost: {
+        TargetTitle = "BANFF Postfit";
+        break;
+      }
+      case TargetTuneType::kMnv1Pi: {
+        TargetTitle = "T2K Mnv1Pi";
+        break;
+      }
+      case TargetTuneType::kNonQE: {
+        TargetTitle = "T2K NonQE";
+        break;
+      }
+      }
+    }
 
     static const long unsigned int BWRPalette =
         (long unsigned int)GetBWRPalette();
@@ -804,10 +1061,34 @@ void handleOpts(int argc, char const *argv[]) {
       std::string arg = std::string(argv[++opt]);
 
       if (arg == "Tuned") {
-        denom = kTuned;
-      } else if (arg != "Generated") {
-        std::cout << "[ERROR]: Invalid option passed to --From, should be "
-                     "Tuned or Generated."
+        denom = ReWeightDenominator::kTuned;
+      } else if (arg == "Tuned_BANFFPre") {
+        denom = ReWeightDenominator::kTuned_BANFFPre;
+      } else if (arg == "Tuned_BANFFPost") {
+        denom = ReWeightDenominator::kTuned_BANFFPost;
+      } else {
+        std::cout << "[ERROR]: Invalid option passed to --From " << arg
+                  << std::endl;
+        abort();
+      }
+
+    } else if (std::string(argv[opt]) == "--To") {
+      std::string arg = std::string(argv[++opt]);
+
+      if (arg == "Generated") {
+        tgttune = TargetTuneType::kGenerated;
+      } else if (arg == "Tuned") {
+        tgttune = TargetTuneType::kTuned;
+      } else if (arg == "Tuned_BANFFPre") {
+        tgttune = TargetTuneType::kTuned_BANFFPre;
+      } else if (arg == "Tuned_BANFFPost") {
+        tgttune = TargetTuneType::kTuned_BANFFPost;
+      } else if (arg == "Mnv1Pi") {
+        tgttune = TargetTuneType::kMnv1Pi;
+      } else if (arg == "NonQE") {
+        tgttune = TargetTuneType::kNonQE;
+      } else {
+        std::cout << "[ERROR]: Invalid option passed to --To " << arg
                   << std::endl;
         abort();
       }
