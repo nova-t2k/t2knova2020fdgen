@@ -43,7 +43,14 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
       std::string selection = SelectionList[sel_id];
 
       if (DoNEUT) {
-        for (std::string const &proj : {"EnuPLepThetaLep", }) {
+        for (std::string const &proj : {
+                 "EnuPLepThetaLep",
+                 "Enu",
+             }) {
+
+          std::string out_proj_name =
+              (proj == "Enu") ? "Enu_NEUT" : proj.c_str();
+
           for (std::string const &targetnuc : {"C", "H", "O", "CH", "H2O"}) {
             for (std::string const &TOTUNE :
                  DoFDS ? std::vector<std::string>{ToNOvATUNE}
@@ -63,8 +70,9 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
                 genie_nd280->SetDirectory(nullptr);
 
                 TDirectory *dir = MakeDirectoryStructure(
-                    fout.get(), FromT2KTUNE + "_to_" + TOTUNE + "/" + proj +
-                                    "/" + targetnuc + "/" + species + "/");
+                    fout.get(), FromT2KTUNE + "_to_" + TOTUNE + "/" +
+                                    out_proj_name + "/" + targetnuc + "/" +
+                                    species + "/");
 
                 std::unique_ptr<TH1> rat(
                     dynamic_cast<TH1 *>(genie_nd280->Clone(selection.c_str())));
@@ -82,11 +90,10 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
 
             for (std::string const &TOTUNE :
                  DoNEUTToFDS
-                     ? std::vector<std::string>{FDSToTunes[0], FDSToTunes[1],
-                                                FDSToTunes[2]}
+                     ? std::vector<std::string>{FDSToTunes[1], FDSToTunes[2]}
                      : std::vector<std::string>{}) {
 
-              if(TOTUNE == FromT2KTUNE){
+              if (TOTUNE == FromT2KTUNE) {
                 continue;
               }
 
@@ -104,8 +111,9 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
                 FDS_nd280->SetDirectory(nullptr);
 
                 TDirectory *dir = MakeDirectoryStructure(
-                    fout.get(), FromT2KTUNE + "_to_" + TOTUNE + "/" + proj +
-                                    "/" + targetnuc + "/" + species + "/");
+                    fout.get(), FromT2KTUNE + "_to_" + TOTUNE + "/" +
+                                    out_proj_name + "/" + targetnuc + "/" +
+                                    species + "/");
 
                 std::unique_ptr<TH1> rat(
                     dynamic_cast<TH1 *>(FDS_nd280->Clone(selection.c_str())));
@@ -129,7 +137,10 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
       std::string selection = SelectionList[sel_id];
 
       if (DoNOvA) {
-        for (std::string const &proj : {"EnuPtLepEAvHad", }) {
+        for (std::string const &proj : {"EnuPtLepEAvHad", "Enu"}) {
+          std::string out_proj_name =
+              (proj == "Enu") ? "Enu_GENIE" : proj.c_str();
+
           for (std::string const &targetnuc : {"C", "H", "CH"}) {
             for (std::string const &TOTUNE :
                  DoFDS ? std::vector<std::string>{ToT2KTUNE, FDSToTunes[0],
@@ -149,8 +160,9 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
                 genie_novand->SetDirectory(nullptr);
 
                 TDirectory *dir = MakeDirectoryStructure(
-                    fout.get(), FromNOvATUNE + "_to_" + TOTUNE + "/" + proj +
-                                    "/" + targetnuc + "/" + species + "/");
+                    fout.get(), FromNOvATUNE + "_to_" + TOTUNE + "/" +
+                                    out_proj_name + "/" + targetnuc + "/" +
+                                    species + "/");
 
                 std::unique_ptr<TH1> rat(dynamic_cast<TH1 *>(
                     neut_novand_plep->Clone(selection.c_str())));
