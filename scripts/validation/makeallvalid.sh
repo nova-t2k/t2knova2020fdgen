@@ -86,8 +86,8 @@ for DET in ${DETECTORS[@]}; do
                                         -o ${OUTDIR}/FakeDataValid_ReWeighted_to_2020.root \
                                         -d ND280/NEUT/ReWeighted_to_2020/${TGT}/${SPC} &
 
-                    if [ "${NEUTBASEGEN}" == "BANFF_PRE" ]; then
-                        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
+                    if [ "${NEUTBASEGEN}" == "BANFF_POST" ]; then
+                        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_POST.${SPC}.root \
                                             --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
                                             -H config/FakeDataValidConfig_ND280.toml \
                                             -a any -T NDTuned \
@@ -95,11 +95,27 @@ for DET in ${DETECTORS[@]}; do
                                             -o ${OUTDIR}/FakeDataValid_ReWeighted_to_NonQE.root \
                                             -d ND280/NEUT/ReWeighted_to_NonQE/${TGT}/${SPC} &
 
-                        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
+                        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_POST.${SPC}.root \
                                             -H config/FakeDataValidConfig_ND280.toml \
                                             -a any -T NonQE \
                                             -o ${OUTDIR}/FakeDataValid_NonQE.root \
                                             -d ND280/NEUT/NonQE/${TGT}/${SPC} &
+                    fi
+
+                    if [ "${NEUTBASEGEN}" == "BANFF_PRE" ]; then
+                        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
+                                            --From ${FDSDENOMTYPE} -F ${FDSINPUTS} \
+                                            -H config/FakeDataValidConfig_ND280.toml \
+                                            -a any -T NDTuned \
+                                            -W kT2KND_to_T2KMnv1Pi \
+                                            -o ${OUTDIR}/FakeDataValid_ReWeighted_to_Mnv1Pi.root \
+                                            -d ND280/NEUT/ReWeighted_to_Mnv1Pi/${TGT}/${SPC} &
+
+                        bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
+                                            -H config/FakeDataValidConfig_ND280.toml \
+                                            -a any -T Mnv1Pi \
+                                            -o ${OUTDIR}/FakeDataValid_Mnv1Pi.root \
+                                            -d ND280/NEUT/Mnv1Pi/${TGT}/${SPC} &
                     fi
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.GENIE.ND280.${TGT}.2020.${SPC}.root \

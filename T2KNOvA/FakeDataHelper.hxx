@@ -41,6 +41,10 @@ double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg, int tgta,
 double GetFakeDataWeight_ND280ToT2KNonQE(int nu_pdg, int lep_pdg, int tgta,
                                          double E_nu_GeV, double PLep_GeV,
                                          double ThetaLep, int PrimSel = -1);
+
+double GetFakeDataWeight_ND280ToT2KMnv1Pi(int nu_pdg, int lep_pdg, int tgta,
+                                          double E_nu_GeV, double PLep_GeV,
+                                          double ThetaLep, int PrimSel = -1);
 } // namespace t2knova
 
 namespace t2knova {
@@ -49,6 +53,7 @@ enum reweightconfig {
   kNoWeight = 0,
   kT2KND_to_NOvA,
   kT2KND_to_T2KNonQE,
+  kT2KND_to_T2KMnv1Pi,
   kNOvA_to_T2KND_ptlep,
   kNOvA_to_T2KPre_ptlep,
   kNOvA_to_T2KMnv1Pi_ptlep,
@@ -244,6 +249,31 @@ inline double GetFakeDataWeight_ND280ToT2KNonQE(int nu_pdg, int lep_pdg,
   return 1;
 }
 
+inline double GetFakeDataWeight_ND280ToT2KMnv1Pi(int nu_pdg, int lep_pdg,
+                                                 int tgta, double E_nu_GeV,
+                                                 double PLep_GeV,
+                                                 double ThetaLep, int PrimSel) {
+  if (!loaded) {
+    std::cout << "[ERROR]: Have not loaded t2knova reweight histogram ratios."
+              << std::endl;
+    abort();
+  }
+
+  if (PrimSel == kNoPrimarySel) {
+    return 1;
+  }
+
+  nuspecies nuspec = getnuspec(nu_pdg);
+
+  std::unique_ptr<TH1> &rathist =
+      rwhists[nuspec][kT2KND_to_T2KMnv1Pi][(tgta * 100) + PrimSel];
+
+  if (rathist) {
+    return EvalHist3D(rathist, E_nu_GeV, PLep_GeV, ThetaLep, false);
+  }
+
+  return 1;
+}
 
 ///\note See https://arxiv.org/abs/1903.01558
 inline double GetMINERvASPPLowQ2SuppressionWeight(double Q2_True_GeV,

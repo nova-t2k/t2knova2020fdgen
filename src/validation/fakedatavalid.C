@@ -253,6 +253,10 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
       rw_w *= t2knova::GetFakeDataWeight_ND280ToT2KNonQE(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
           rdr.AngLep_deg(), primary_selection);
+    } else if (weightconfig == t2knova::kT2KND_to_T2KMnv1Pi) {
+      rw_w *= t2knova::GetFakeDataWeight_ND280ToT2KMnv1Pi(
+          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
+          rdr.AngLep_deg(), primary_selection);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
       rw_w *= t2knova::GetFakeDataWeight_NOvAToT2KND_PtLep(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
@@ -353,6 +357,7 @@ std::map<reweightconfig, std::string> inputhistnames;
 std::map<reweightconfig, std::string> inputhistnames_FromGenerated = {
     {kT2KND_to_NOvA, "Generated_to_2020/EnuPLepThetaLep"},
     {kT2KND_to_T2KNonQE, "Generated_to_NonQE/EnuPLepThetaLep"},
+    {kT2KND_to_T2KMnv1Pi, "Generated_to_Mnv1Pi/EnuPLepThetaLep"},
     {kNOvA_to_T2KND_ptlep, "Generated_to_BANFF_POST/EnuPtLepEAvHad"},
     {kNOvA_to_T2KPre_ptlep, "Generated_to_BANFF_PRE/EnuPtLepEAvHad"},
     {kNOvA_to_T2KMnv1Pi_ptlep, "Generated_to_Mnv1Pi/EnuPtLepEAvHad"},
@@ -362,6 +367,7 @@ std::map<reweightconfig, std::string> inputhistnames_FromGenerated = {
 std::map<reweightconfig, std::string> inputhistnames_FromBANFF_POST = {
     {kT2KND_to_NOvA, "BANFF_POST_to_2020/EnuPLepThetaLep"},
     {kT2KND_to_T2KNonQE, "BANFF_POST_to_NonQE/EnuPLepThetaLep"},
+    {kT2KND_to_T2KMnv1Pi, "BANFF_POST_to_Mnv1Pi/EnuPLepThetaLep"},
     {kNOvA_to_T2KND_ptlep, "2020_to_BANFF_POST/EnuPtLepEAvHad"},
     {kNOvA_to_T2KPre_ptlep, "2020_to_BANFF_PRE/EnuPtLepEAvHad"},
     {kNOvA_to_T2KMnv1Pi_ptlep, "2020_to_Mnv1Pi/EnuPtLepEAvHad"},
@@ -371,6 +377,7 @@ std::map<reweightconfig, std::string> inputhistnames_FromBANFF_POST = {
 std::map<reweightconfig, std::string> inputhistnames_FromBANFF_PRE = {
     {kT2KND_to_NOvA, "BANFF_PRE_to_2020/EnuPLepThetaLep"},
     {kT2KND_to_T2KNonQE, "BANFF_PRE_to_NonQE/EnuPLepThetaLep"},
+    {kT2KND_to_T2KMnv1Pi, "BANFF_PRE_to_NonQE/EnuPLepThetaLep"},
     {kNOvA_to_T2KND_ptlep, "2020_to_BANFF_POST/EnuPtLepEAvHad"},
     {kNOvA_to_T2KPre_ptlep, "2020_to_BANFF_PRE/EnuPtLepEAvHad"},
     {kNOvA_to_T2KMnv1Pi_ptlep, "2020_to_Mnv1Pi/EnuPtLepEAvHad"},
@@ -472,6 +479,8 @@ void handleOpts(int argc, char const *argv[]) {
         wconfig = t2knova::kT2KND_to_NOvA;
       } else if (arg == "kT2KND_to_T2KNonQE") {
         wconfig = t2knova::kT2KND_to_T2KNonQE;
+      } else if (arg == "kT2KND_to_T2KMnv1Pi") {
+        wconfig = t2knova::kT2KND_to_T2KMnv1Pi;
       } else if (arg == "NOvA_to_T2KND_ptlep") {
         wconfig = t2knova::kNOvA_to_T2KND_ptlep;
       } else if (arg == "NOvA_to_T2KPre_ptlep") {
