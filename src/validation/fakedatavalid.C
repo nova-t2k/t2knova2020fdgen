@@ -322,6 +322,8 @@ std::string FDSInputs = "";
 t2knova::reweightconfig wconfig = t2knova::kNoWeight;
 int tgta_select = 0;
 
+bool FromGenerated = true;
+
 std::map<reweightconfig, std::string> inputhistnames;
 
 std::map<reweightconfig, std::string> inputhistnames_FromGenerated = {
@@ -395,8 +397,10 @@ void handleOpts(int argc, char const *argv[]) {
       inputhistnames = inputhistnames_FromGenerated;
       if (arg == "BANFFPre") {
         inputhistnames = inputhistnames_FromBANFF_PRE;
+        FromGenerated = false;
       } else if (arg == "BANFFPost") {
         inputhistnames = inputhistnames_FromBANFF_POST;
+        FromGenerated = false;
       } else if (arg != "Generated") {
         std::cout << "[ERROR]: Invalid option passed to --From, should be "
                      "BANFFPre, BANFFPost, or Generated."
@@ -498,8 +502,7 @@ int main(int argc, char const *argv[]) {
   }
 
   if (FDSInputs.length()) {
-    t2knova::LoadHists(FDSInputs, FromGenerated ? inputhistnames_FromGenerated
-                                                : inputhistnames_FromTuned);
+    t2knova::LoadHists(FDSInputs, inputhistnames);
   }
 
   toml::value const &plots_config_file = toml_h::parse_card(hist_config_file);
