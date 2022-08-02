@@ -43,7 +43,7 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
       std::string selection = SelectionList[sel_id];
 
       if (DoNEUT) {
-        for (std::string const &proj : {"EnuPLepThetaLep", "Enu"}) {
+        for (std::string const &proj : {"EnuPLepThetaLep", }) {
           for (std::string const &targetnuc : {"C", "H", "O", "CH", "H2O"}) {
             for (std::string const &TOTUNE :
                  DoFDS ? std::vector<std::string>{ToNOvATUNE}
@@ -129,8 +129,8 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
       std::string selection = SelectionList[sel_id];
 
       if (DoNOvA) {
-        for (std::string const &proj : {"EnuPtLepEAvHad", "Enu"}) {
-          for (std::string const &targetnuc : {"C", "H"}) {
+        for (std::string const &proj : {"EnuPtLepEAvHad", }) {
+          for (std::string const &targetnuc : {"C", "H", "CH"}) {
             for (std::string const &TOTUNE :
                  DoFDS ? std::vector<std::string>{ToT2KTUNE, FDSToTunes[0],
                                                   FDSToTunes[1], FDSToTunes[2]}

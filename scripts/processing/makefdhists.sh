@@ -132,4 +132,3 @@ bin/fakedatarwgen.exe \
   FDSInputs/FakeDataInputs_FromTuned_BANFFPre.root \
   --from-ND280-NEUT BANFF_PRE \
   --from-NOvAND-GENIE 2020
- 
