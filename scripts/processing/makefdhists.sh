@@ -30,8 +30,8 @@ TUNES["NEUT"]="BANFF_PRE BANFF_POST"
 TUNES["GENIE"]="2020"
 
 declare -A FakeDataSets
-FakeDataSets["BANFF_PRE"]="Generated NDTuned Mnv1Pi NonQE"
-FakeDataSets["BANFF_POST"]="NDTuned"
+FakeDataSets["BANFF_PRE"]="Generated NDTuned Mnv1Pi"
+FakeDataSets["BANFF_POST"]="NDTuned NonQE"
 FakeDataSets["2020"]="Generated NDTuned"
 
 export T2KNOVA_INPUTS=$(readlink -f inputs)
