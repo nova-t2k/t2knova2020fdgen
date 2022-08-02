@@ -1,10 +1,16 @@
 #!/bin/bash
 
-FDSINPUTS=FDSInputs/FakeDataInputs_FromTuned.root
-FDSDENOMTYPE=Tuned
-OUTDIR=FDSValid_FromTuned
+# FDSINPUTS=FDSInputs/FakeDataInputs_FromTuned_BANFFPost.root
+# FDSDENOMTYPE=BANFFPost
+# OUTDIR=FDSValid_FromTuned_BANFFPost
+# NOTUNEFLAG=""
+# NEUTBASEGEN="BANFF_POST"
+
+FDSINPUTS=FDSInputs/FakeDataInputs_FromTuned_BANFFPre.root
+FDSDENOMTYPE=BANFFPre
+OUTDIR=FDSValid_FromTuned_BANFFPre
 NOTUNEFLAG=""
-NEUTBASEGEN="BANFF_POST"
+NEUTBASEGEN="BANFF_PRE"
 
 # FDSINPUTS=FDSInputs/FakeDataInputs_FromGenerated.root
 # FDSDENOMTYPE=Generated
@@ -20,31 +26,30 @@ mkdir -p ${OUTDIR}
 set -e
 set -x
 
-# SPECIES=( numu numub nue nueb )
+SPECIES=( numu numub nue nueb )
 # SPECIES=( numu numub )
-SPECIES=( numu )
+# SPECIES=( numu )
 
 DETECTORS=( NOvAND ND280 )
-DETECTORS=( ND280 )
+# DETECTORS=( ND280 )
 
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
 DET_MATS["ND280"]="H2O CH"
-DET_MATS["ND280"]="CH"
+# DET_MATS["ND280"]="CH"
 # DET_MATS["ND280"]="H2O"
 
 declare -A MAT_ELEMENTS
 MAT_ELEMENTS["CH"]="C H"
-MAT_ELEMENTS["CH"]="C"
+# MAT_ELEMENTS["CH"]="C"
 MAT_ELEMENTS["H2O"]="H O"
 # MAT_ELEMENTS["CH"]=""
 # MAT_ELEMENTS["H2O"]=""
 
-DO_MAIN=0
+DO_MAIN=1
 DO_MAT_ELEMENTS=1
 DO_ND280=1
-DO_NOvAND=0
-
+DO_NOvAND=1
 
 for DET in ${DETECTORS[@]}; do
     for TGT in ${DET_MATS[${DET}]}; do

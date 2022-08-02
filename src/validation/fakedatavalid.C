@@ -322,7 +322,7 @@ std::string FDSInputs = "";
 t2knova::reweightconfig wconfig = t2knova::kNoWeight;
 int tgta_select = 0;
 
-bool FromGenerated = true;
+std::map<reweightconfig, std::string> inputhistnames;
 
 std::map<reweightconfig, std::string> inputhistnames_FromGenerated = {
     {kT2KND_to_NOvA, "Generated_to_2020/EnuPLepThetaLep"},
@@ -332,8 +332,16 @@ std::map<reweightconfig, std::string> inputhistnames_FromGenerated = {
     {kNOvA_to_T2KNonQE_ptlep, "Generated_to_NonQE/EnuPtLepEAvHad"},
 };
 
-std::map<reweightconfig, std::string> inputhistnames_FromTuned = {
+std::map<reweightconfig, std::string> inputhistnames_FromBANFF_POST = {
     {kT2KND_to_NOvA, "BANFF_POST_to_2020/EnuPLepThetaLep"},
+    {kNOvA_to_T2KND_ptlep, "2020_to_BANFF_POST/EnuPtLepEAvHad"},
+    {kNOvA_to_T2KPre_ptlep, "2020_to_BANFF_PRE/EnuPtLepEAvHad"},
+    {kNOvA_to_T2KMnv1Pi_ptlep, "2020_to_Mnv1Pi/EnuPtLepEAvHad"},
+    {kNOvA_to_T2KNonQE_ptlep, "2020_to_NonQE/EnuPtLepEAvHad"},
+};
+
+std::map<reweightconfig, std::string> inputhistnames_FromBANFF_PRE = {
+    {kT2KND_to_NOvA, "BANFF_PRE_to_2020/EnuPLepThetaLep"},
     {kNOvA_to_T2KND_ptlep, "2020_to_BANFF_POST/EnuPtLepEAvHad"},
     {kNOvA_to_T2KPre_ptlep, "2020_to_BANFF_PRE/EnuPtLepEAvHad"},
     {kNOvA_to_T2KMnv1Pi_ptlep, "2020_to_Mnv1Pi/EnuPtLepEAvHad"},
@@ -350,7 +358,8 @@ void SayUsage(char const *argv[]) {
                "\n\t-M                       : Separate by Mode"
                "\n\t--oscillate              : Apply oscillation weights"
                "\n\t--No-Tune                : Don't apply tune weights"
-               "\n\t--From <Tuned|Generated> : Weight as if Tuned/Not Tuned"
+               "\n\t--From <BANFFPre|BANFFPost|Generated> : Weight as if "
+               "Tuned/Not Tuned"
                "\n\t-a <[C|H|O|any]>         : Target descriptor"
                "\n\t-W <Config>              : ReWeight Config"
                "\n\t         Configs:"
@@ -383,12 +392,14 @@ void handleOpts(int argc, char const *argv[]) {
       dotune = false;
     } else if (std::string(argv[opt]) == "--From") {
       std::string arg = std::string(argv[++opt]);
-
-      if (arg == "Tuned") {
-        FromGenerated = false;
+      inputhistnames = inputhistnames_FromGenerated;
+      if (arg == "BANFFPre") {
+        inputhistnames = inputhistnames_FromBANFF_PRE;
+      } else if (arg == "BANFFPost") {
+        inputhistnames = inputhistnames_FromBANFF_POST;
       } else if (arg != "Generated") {
         std::cout << "[ERROR]: Invalid option passed to --From, should be "
-                     "Tuned or Generated."
+                     "BANFFPre, BANFFPost, or Generated."
                   << std::endl;
         abort();
       }
