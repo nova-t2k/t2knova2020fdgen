@@ -26,8 +26,10 @@ mkdir -p ${OUTDIR}
 set -e
 set -x
 
+export T2KNOVA_INPUTS=$(readlink -f inputs)
+
 SPECIES=( numu numub nue nueb )
-# SPECIES=( numu numub )
+SPECIES=( numu numub )
 # SPECIES=( numu )
 
 DETECTORS=( NOvAND ND280 )
@@ -47,7 +49,7 @@ MAT_ELEMENTS["H2O"]="H O"
 # MAT_ELEMENTS["H2O"]=""
 
 DO_MAIN=1
-DO_MAT_ELEMENTS=1
+DO_MAT_ELEMENTS=0
 DO_ND280=1
 DO_NOvAND=1
 

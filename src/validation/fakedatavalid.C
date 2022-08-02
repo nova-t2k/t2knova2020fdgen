@@ -33,11 +33,11 @@ SelectionHists<TH1F> *EvWeights;
 SelectionHists<TH1F> *Enu;
 SelectionHists<TH1F> *ERecQE;
 SelectionHists<TH1F> *PLep;
-SelectionHists<TH1F> *ThetaLep;
+// SelectionHists<TH1F> *ThetaLep;
 SelectionHists<TH1F> *CosThetaLep;
 SelectionHists<TH2F> *PThetaLep;
-SelectionHists<TH2F> *PThetaLep_outlier_low;
-SelectionHists<TH2F> *PThetaLep_outlier_high;
+// SelectionHists<TH2F> *PThetaLep_outlier_low;
+// SelectionHists<TH2F> *PThetaLep_outlier_high;
 SelectionHists<TH1F> *EAvHad;
 SelectionHists<TH1F> *PtLep;
 SelectionHists<TH1F> *Q2;
@@ -45,13 +45,13 @@ SelectionHists<TH1F> *q0;
 SelectionHists<TH1F> *yrec;
 SelectionHists<TH2F> *Enuyrec;
 SelectionHists<TH2F> *EnuQ2;
-SelectionHists<TH2F> *EnuQ2_outlier_low;
-SelectionHists<TH2F> *EnuQ2_outlier_high;
+// SelectionHists<TH2F> *EnuQ2_outlier_low;
+// SelectionHists<TH2F> *EnuQ2_outlier_high;
 SelectionHists<TH2F> *EnuERecQE;
 SelectionHists<TH2F> *EnuERecQEBias;
 SelectionHists<TH2F> *EnuERecAvBias;
-SelectionHists<TH2F> *q0q3_high_outlier_low;
-SelectionHists<TH2F> *q0q3_high_outlier_high;
+// SelectionHists<TH2F> *q0q3_high_outlier_low;
+// SelectionHists<TH2F> *q0q3_high_outlier_high;
 SelectionHists<TH2F> *q0q3_low;
 SelectionHists<TH2F> *q0q3_high;
 SelectionHists<TH2F> *EnuEAvHad;
@@ -63,8 +63,8 @@ SelectionHists<TH1F> *hmfsprotonp;
 SelectionHists<TH1F> *hmfsneutronp;
 SelectionHists<TH1F> *nproton;
 SelectionHists<TH1F> *nneutron;
-SelectionHists<TH1F> *EGamma;
-SelectionHists<TH1F> *EGamma_DeExcite;
+// SelectionHists<TH1F> *EGamma;
+// SelectionHists<TH1F> *EGamma_DeExcite;
 
 OscillationHelper oh_disp, oh_app, oh_dispb, oh_appb;
 
@@ -115,7 +115,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   yrec = SelectionHistsFromTOML<TH1F>("yrec", plots_config);
   Enuyrec = SelectionHistsFromTOML<TH2F>("Enuyrec", plots_config);
 
-  ThetaLep = SelectionHistsFromTOML<TH1F>("ThetaLep", plots_config);
+  // ThetaLep = SelectionHistsFromTOML<TH1F>("ThetaLep", plots_config);
   CosThetaLep = SelectionHistsFromTOML<TH1F>("CosThetaLep", plots_config);
 
   PThetaLep = SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
@@ -134,37 +134,37 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   nproton = SelectionHistsFromTOML<TH1F>("nproton", plots_config);
   nneutron = SelectionHistsFromTOML<TH1F>("nneutron", plots_config);
 
-  EGamma = SelectionHistsFromTOML<TH1F>("EGamma", plots_config);
-  EGamma_DeExcite =
-      SelectionHistsFromTOML<TH1F>("EGamma_DeExcite", plots_config);
+  // EGamma = SelectionHistsFromTOML<TH1F>("EGamma", plots_config);
+  // EGamma_DeExcite =
+  //     SelectionHistsFromTOML<TH1F>("EGamma_DeExcite", plots_config);
 
   XSecs = new TrueChannelHist<TH1F>("SelectionXSecs", ";Selection;Rate",
                                     AllSelectionList.size(), 0,
                                     AllSelectionList.size());
   EvWeights = SelectionHistsFromTOML<TH1F>("EvWeights", plots_config);
 
-  PThetaLep_outlier_low =
-      SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
-  PThetaLep_outlier_low->SetName("PThetaLep_outlier_low");
-  PThetaLep_outlier_low->SetZAxisTitle("Count with w <= 0.1");
-  PThetaLep_outlier_high =
-      SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
-  PThetaLep_outlier_high->SetName("PThetaLep_outlier_high");
-  PThetaLep_outlier_high->SetZAxisTitle("Count with w >= 10");
-  EnuQ2_outlier_low = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
-  EnuQ2_outlier_low->SetName("EnuQ2_outlier_low");
-  EnuQ2_outlier_low->SetZAxisTitle("Count with w <= 0.1");
-  EnuQ2_outlier_high = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
-  EnuQ2_outlier_high->SetName("EnuQ2_outlier_high");
-  EnuQ2_outlier_high->SetZAxisTitle("Count with w >= 10");
-  q0q3_high_outlier_low =
-      SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
-  q0q3_high_outlier_low->SetName("q0q3_high_outlier_low");
-  q0q3_high_outlier_low->SetZAxisTitle("Count with w <= 0.1");
-  q0q3_high_outlier_high =
-      SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
-  q0q3_high_outlier_high->SetName("q0q3_high_outlier_high");
-  q0q3_high_outlier_high->SetZAxisTitle("Count with w >= 10");
+  // PThetaLep_outlier_low =
+  //     SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
+  // PThetaLep_outlier_low->SetName("PThetaLep_outlier_low");
+  // PThetaLep_outlier_low->SetZAxisTitle("Count with w <= 0.1");
+  // PThetaLep_outlier_high =
+  //     SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
+  // PThetaLep_outlier_high->SetName("PThetaLep_outlier_high");
+  // PThetaLep_outlier_high->SetZAxisTitle("Count with w >= 10");
+  // EnuQ2_outlier_low = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
+  // EnuQ2_outlier_low->SetName("EnuQ2_outlier_low");
+  // EnuQ2_outlier_low->SetZAxisTitle("Count with w <= 0.1");
+  // EnuQ2_outlier_high = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
+  // EnuQ2_outlier_high->SetName("EnuQ2_outlier_high");
+  // EnuQ2_outlier_high->SetZAxisTitle("Count with w >= 10");
+  // q0q3_high_outlier_low =
+  //     SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
+  // q0q3_high_outlier_low->SetName("q0q3_high_outlier_low");
+  // q0q3_high_outlier_low->SetZAxisTitle("Count with w <= 0.1");
+  // q0q3_high_outlier_high =
+  //     SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
+  // q0q3_high_outlier_high->SetName("q0q3_high_outlier_high");
+  // q0q3_high_outlier_high->SetZAxisTitle("Count with w >= 10");
 
   T2KNOvATruthTreeReader rdr(ttrdr);
   if (!bymode) {
@@ -289,7 +289,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     EnuERecAvBias->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), ERecAvBias);
 
     PLep->Fill(w, sels, rdr.Mode(), rdr.PLep());
-    ThetaLep->Fill(w, sels, rdr.Mode(), rdr.AngLep_deg());
+    // ThetaLep->Fill(w, sels, rdr.Mode(), rdr.AngLep_deg());
     CosThetaLep->Fill(w, sels, rdr.Mode(), rdr.CosLep());
     PThetaLep->Fill(w, sels, rdr.Mode(), rdr.PLep(), rdr.AngLep_deg());
     EAvHad->Fill(w, sels, rdr.Mode(), rdr.Eav_NOvA());
@@ -314,8 +314,8 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     hmfsneutronp->Fill(w, sels, rdr.Mode(), rdr.hmfsneutronp());
     nproton->Fill(w, sels, rdr.Mode(), rdr.nproton());
     nneutron->Fill(w, sels, rdr.Mode(), rdr.nneutron());
-    EGamma->Fill(w, sels, rdr.Mode(), rdr.EGamma());
-    EGamma_DeExcite->Fill(w, sels, rdr.Mode(), rdr.EGamma());
+    // EGamma->Fill(w, sels, rdr.Mode(), rdr.EGamma());
+    // EGamma_DeExcite->Fill(w, sels, rdr.Mode(), rdr.EGamma());
 
     for (auto sel : sels) {
       XSecs->Fill(w, rdr.Mode(), sel);
@@ -323,17 +323,17 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
 
     EvWeights->Fill(1, sels, rdr.Mode(), w);
 
-    if (rw_w <= 0.1) {
-      PThetaLep_outlier_low->Fill(1, sels, rdr.Mode(), rdr.PLep(),
-                                  rdr.AngLep_deg());
-      EnuQ2_outlier_low->Fill(1, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
-      q0q3_high_outlier_low->Fill(1, sels, rdr.Mode(), rdr.q3(), rdr.q0());
-    } else if (rw_w >= 10) {
-      PThetaLep_outlier_high->Fill(1, sels, rdr.Mode(), rdr.PLep(),
-                                   rdr.AngLep_deg());
-      EnuQ2_outlier_high->Fill(1, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
-      q0q3_high_outlier_high->Fill(1, sels, rdr.Mode(), rdr.q3(), rdr.q0());
-    }
+    // if (rw_w <= 0.1) {
+    //   PThetaLep_outlier_low->Fill(1, sels, rdr.Mode(), rdr.PLep(),
+    //                               rdr.AngLep_deg());
+    //   EnuQ2_outlier_low->Fill(1, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
+    //   q0q3_high_outlier_low->Fill(1, sels, rdr.Mode(), rdr.q3(), rdr.q0());
+    // } else if (rw_w >= 10) {
+    //   PThetaLep_outlier_high->Fill(1, sels, rdr.Mode(), rdr.PLep(),
+    //                                rdr.AngLep_deg());
+    //   EnuQ2_outlier_high->Fill(1, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
+    //   q0q3_high_outlier_high->Fill(1, sels, rdr.Mode(), rdr.q3(), rdr.q0());
+    // }
 
     ent_it++;
   }
@@ -566,26 +566,26 @@ int main(int argc, char const *argv[]) {
   Enu->Write(dout, true);
   ERecQE->Write(dout, true);
   PLep->Write(dout, true);
-  ThetaLep->Write(dout, true);
+  // ThetaLep->Write(dout, true);
   CosThetaLep->Write(dout, true);
   PThetaLep->Write(dout, true);
-  PThetaLep_outlier_low->Write(dout, true);
-  PThetaLep_outlier_high->Write(dout, true);
+  // PThetaLep_outlier_low->Write(dout, true);
+  // PThetaLep_outlier_high->Write(dout, true);
 
   EAvHad->Write(dout, true);
   PtLep->Write(dout, true);
   Q2->Write(dout, true);
   EnuQ2->Write(dout, true);
-  EnuQ2_outlier_low->Write(dout, true);
-  EnuQ2_outlier_high->Write(dout, true);
+  // EnuQ2_outlier_low->Write(dout, true);
+  // EnuQ2_outlier_high->Write(dout, true);
 
   EnuERecQE->Write(dout, true);
   EnuERecQEBias->Write(dout, true);
   EnuERecAvBias->Write(dout, true);
-  q0q3_low->Write(dout, true);
-  q0q3_high->Write(dout, true);
-  q0q3_high_outlier_low->Write(dout, true);
-  q0q3_high_outlier_high->Write(dout, true);
+  // q0q3_low->Write(dout, true);
+  // q0q3_high->Write(dout, true);
+  // q0q3_high_outlier_low->Write(dout, true);
+  // q0q3_high_outlier_high->Write(dout, true);
   EnuEAvHad->Write(dout, true);
 
   q0->Write(dout, true);
@@ -602,8 +602,8 @@ int main(int argc, char const *argv[]) {
   nproton->Write(dout, true);
   nneutron->Write(dout, true);
 
-  EGamma->Write(dout, true);
-  EGamma_DeExcite->Write(dout, true);
+  // EGamma->Write(dout, true);
+  // EGamma_DeExcite->Write(dout, true);
 
   EvWeights->Write(dout, true);
 
