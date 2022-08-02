@@ -43,6 +43,7 @@ namespace t2knova {
 
 enum reweightconfig {
   kT2KND_to_NOvA = 0,
+  kT2KND_to_T2KNonQE,
   kNOvA_to_T2KND_ptlep,
   kNOvA_to_T2KPre_ptlep,
   kNOvA_to_T2KMnv1Pi_ptlep,

@@ -10,6 +10,7 @@
 using namespace t2knova;
 
 bool DoNEUT = true;
+bool DoNEUTToFDS = true;
 bool DoNOvA = true;
 
 bool DoFDS = true;
@@ -45,8 +46,7 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
         for (std::string const &proj : {"EnuPLepThetaLep", "Enu"}) {
           for (std::string const &targetnuc : {"C", "H", "O", "CH", "H2O"}) {
             for (std::string const &TOTUNE :
-                 DoFDS ? std::vector<std::string>{ToNOvATUNE, FDSToTunes[0],
-                                                  FDSToTunes[1], FDSToTunes[2]}
+                 DoFDS ? std::vector<std::string>{ToNOvATUNE}
                        : std::vector<std::string>{ToNOvATUNE}) {
 
               std::string FromT2KHistName = "NEUT/ND280/" + targetnuc + "/" +
@@ -70,6 +70,47 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
                     dynamic_cast<TH1 *>(genie_nd280->Clone(selection.c_str())));
                 rat->Divide(neut_nd280_EnuPLepThetaLep.get());
                 ScrubLowStatsBins(genie_nd280, neut_nd280_EnuPLepThetaLep, rat,
+                                  MaxFracError);
+                rat->SetDirectory(nullptr);
+                dir->WriteTObject(rat.get(), rat->GetName());
+
+              } else {
+                std::cout << "[WARN]: Expected to find " << FromT2KHistName
+                          << std::endl;
+              }
+            }
+
+            for (std::string const &TOTUNE :
+                 DoNEUTToFDS
+                     ? std::vector<std::string>{FDSToTunes[0], FDSToTunes[1],
+                                                FDSToTunes[2]}
+                     : std::vector<std::string>{}) {
+
+              if(TOTUNE == FromT2KTUNE){
+                continue;
+              }
+
+              std::string FromT2KHistName = "NEUT/ND280/" + targetnuc + "/" +
+                                            species + "/" + FromT2KTUNE + "/" +
+                                            proj + "_" + selection;
+
+              std::unique_ptr<TH1> neut_nd280_EnuPLepThetaLep =
+                  GetTH<TH1>(fin, FromT2KHistName);
+              std::unique_ptr<TH1> FDS_nd280 = GetTH<TH1>(
+                  fin, "NEUT/ND280/" + targetnuc + "/" + species + "/" +
+                           TOTUNE + "/" + proj + "_" + selection);
+              if (neut_nd280_EnuPLepThetaLep && FDS_nd280) { // ND280
+                neut_nd280_EnuPLepThetaLep->SetDirectory(nullptr);
+                FDS_nd280->SetDirectory(nullptr);
+
+                TDirectory *dir = MakeDirectoryStructure(
+                    fout.get(), FromT2KTUNE + "_to_" + TOTUNE + "/" + proj +
+                                    "/" + targetnuc + "/" + species + "/");
+
+                std::unique_ptr<TH1> rat(
+                    dynamic_cast<TH1 *>(FDS_nd280->Clone(selection.c_str())));
+                rat->Divide(neut_nd280_EnuPLepThetaLep.get());
+                ScrubLowStatsBins(FDS_nd280, neut_nd280_EnuPLepThetaLep, rat,
                                   MaxFracError);
                 rat->SetDirectory(nullptr);
                 dir->WriteTObject(rat.get(), rat->GetName());
