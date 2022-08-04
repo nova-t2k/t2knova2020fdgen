@@ -85,11 +85,8 @@ for gen in ${GENERATORS[@]}; do
   done
 done
 
-HADD_CMD="hadd -j 4 FDSInputs/FakeDataHists.root"
-for spec in ${SPECIES[@]}; do
-  HADD_CMD="${HADD_CMD} FDSInputs/FakeDataHists_${spec}*.root"
-done
-echo $HADD_CMD
+HADD_CMD="hadd -j 4 FDSInputs/FakeDataHists.root FDSInputs/FakeDataHists_*.root"
+echo ${HADD_CMD}
 ${HADD_CMD}
 
 if [ ! -e FDSInputs/FakeDataHists.root ]; then

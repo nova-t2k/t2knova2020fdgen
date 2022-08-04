@@ -73,8 +73,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
       w *= rdr.RWWeight();
 
       if (FDSSet == kMnv1Pi) {
-        if ((std::find(sels.begin(), sels.end(), kCC1cpi) != sels.end()) ||
-            (std::find(sels.begin(), sels.end(), kCC1pi0) != sels.end())) {
+        if ((rdr.Mode() >= 11) && (rdr.Mode() <= 13)) {
           w *= GetMINERvASPPLowQ2SuppressionWeight(rdr.Q2());
         }
       } else if (FDSSet == kNonQE) {
