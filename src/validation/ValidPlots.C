@@ -960,7 +960,7 @@ struct hblob {
   }
 };
 
-void ValidPlots(std::string const &finname) {
+void ValidPlots(std::string const &finname, bool DoT2K) {
   std::unique_ptr<TFile> fin(new TFile(finname.c_str()));
   if (fin->IsZombie()) {
     std::cout << "Failed to read " << finname << std::endl;
@@ -972,69 +972,72 @@ void ValidPlots(std::string const &finname) {
   for (auto tgtstr : {std::string("CH"), std::string("H2O")}) {
     for (auto nuspec : {kNuMu, kNuMub, kNuE, kNuEb}) {
 
-      hblob::LoadAndPrint(
-          fin, kT2K, "SelectionXSecs", nuspec, tgtstr, kNoPrimarySel,
-          std::string("Valid_ND280_SelectionXSecs_") + all_nuspecies[nuspec],
-          "SelectionXSecs");
+      if (DoT2K) {
+        hblob::LoadAndPrint(
+            fin, kT2K, "SelectionXSecs", nuspec, tgtstr, kNoPrimarySel,
+            std::string("Valid_ND280_SelectionXSecs_") + all_nuspecies[nuspec],
+            "SelectionXSecs");
 
-      for (int sel :
-           {kCCInc,      kCCInc_RW,    kCC0pi,           kCC0pi_QE,
-            kCC0pi_2p2h, kCC0pi_Other, kCC1Gamma,        kCCDeExciteGamma,
-            kCCNGamma,   kCC1cpi,      kCC1pi0,          kCCmultipi,
-            kCCOther,    kCCOther_QE,  kNCInc,           kNCInc_RW,
-            kNC0pi,      kNC1Gamma,    kNCDeExciteGamma, kNCNGamma,
-            kNC1cpi,     kNC1pi0,      kNCmultipi,       kNCOther,
-            kNCOther_QE}) {
+        for (int sel :
+             {kCCInc,      kCCInc_RW,    kCC0pi,           kCC0pi_QE,
+              kCC0pi_2p2h, kCC0pi_Other, kCC1Gamma,        kCCDeExciteGamma,
+              kCCNGamma,   kCC1cpi,      kCC1pi0,          kCCmultipi,
+              kCCOther,    kCCOther_QE,  kNCInc,           kNCInc_RW,
+              kNC0pi,      kNC1Gamma,    kNCDeExciteGamma, kNCNGamma,
+              kNC1cpi,     kNC1pi0,      kNCmultipi,       kNCOther,
+              kNCOther_QE}) {
 
-        for (auto t2k_proj : {
-                 "Enu", "ERecQE", "PLep",
-                 // "ThetaLep",
-                 "CosThetaLep", 
-                 "PThetaLep", "Q2", "EnuQ2", "EnuERecQE", "EnuERecQEBia",
-                 // "q0q3_low", "q0q3_high", 
-                 "hmfscpip", "hmfspi0p", "ncpi",
-                 "npi0", "hmfsprotonp", "hmfsneutronp", "nproton", "nneutron",
-                 // "EGamma",
-                 // "EGamma_DeExcite",
-                 "q0", "yrec", "Enuyrec",
-                 // "EvWeights"
-             }) {
+          for (auto t2k_proj : {
+                   "Enu", "ERecQE", "PLep",
+                   // "ThetaLep",
+                   "CosThetaLep", "PThetaLep", "Q2", "EnuQ2", "EnuERecQE",
+                   "EnuERecQEBias",
+                   // "q0q3_low", "q0q3_high",
+                   "hmfscpip", "hmfspi0p", "ncpi", "npi0", "hmfsprotonp",
+                   "hmfsneutronp", "nproton", "nneutron",
+                   // "EGamma",
+                   // "EGamma_DeExcite",
+                   "q0", "yrec", "Enuyrec",
+                   // "EvWeights"
+               }) {
 
-          hblob::LoadAndPrint(
-              fin, kT2K, t2k_proj, nuspec, tgtstr, selection(sel),
-              "Valid_ND280_" + SelectionList[sel] + "_" + all_nuspecies[nuspec],
-              SelectionList[sel]);
+            hblob::LoadAndPrint(fin, kT2K, t2k_proj, nuspec, tgtstr,
+                                selection(sel),
+                                "Valid_ND280_" + SelectionList[sel] + "_" +
+                                    all_nuspecies[nuspec],
+                                SelectionList[sel]);
+          }
         }
-      }
+      } else {
+        hblob::LoadAndPrint(
+            fin, kNOvAND, "SelectionXSecs", nuspec, tgtstr, kNoPrimarySel,
+            std::string("Valid_NOvAND_SelectionXSecs_") + all_nuspecies[nuspec],
+            "SelectionXSecs");
 
-      hblob::LoadAndPrint(
-          fin, kNOvAND, "SelectionXSecs", nuspec, tgtstr, kNoPrimarySel,
-          std::string("Valid_NOvAND_SelectionXSecs_") +
-          all_nuspecies[nuspec], "SelectionXSecs");
+        for (int sel :
+             {kCCInc,      kCCInc_RW,    kCC0pi,           kCC0pi_QE,
+              kCC0pi_2p2h, kCC0pi_Other, kCC1Gamma,        kCCDeExciteGamma,
+              kCCNGamma,   kCC1cpi,      kCC1pi0,          kCCmultipi,
+              kCCOther,    kCCOther_QE,  kNCInc,           kNCInc_RW,
+              kNC0pi,      kNC1Gamma,    kNCDeExciteGamma, kNCNGamma,
+              kNC1cpi,     kNC1pi0,      kNCmultipi,       kNCOther,
+              kNCOther_QE}) {
 
-      for (int sel :
-           {kCCInc,      kCCInc_RW,    kCC0pi,           kCC0pi_QE,
-            kCC0pi_2p2h, kCC0pi_Other, kCC1Gamma,        kCCDeExciteGamma,
-            kCCNGamma,   kCC1cpi,      kCC1pi0,          kCCmultipi,
-            kCCOther,    kCCOther_QE,  kNCInc,           kNCInc_RW,
-            kNC0pi,      kNC1Gamma,    kNCDeExciteGamma, kNCNGamma,
-            kNC1cpi,     kNC1pi0,      kNCmultipi,       kNCOther,
-            kNCOther_QE}) {
+          for (auto t2k_proj : {
+                   "Enu", "Q2", "PLep", "PtLep", "EAvHad", "EnuEAvHad",
+                   "EnuEAvHadBias",
+                   // "q0q3_low",
+                   //  "q0q3_high",
+                   "CosThetaLep", "hmfscpip", "hmfspi0p", "ncpi", "npi0",
+                   // "EGamma", "EGamma_DeExcite"
+               }) {
 
-        for (auto t2k_proj :
-             {"Enu", "Q2", "PLep", "PtLep", "EAvHad", "EnuEAvHad", "EnuEAvHadBias" ,
-             // "q0q3_low",
-             //  "q0q3_high", 
-              "CosThetaLep", "hmfscpip", "hmfspi0p", "ncpi",
-              "npi0", 
-              // "EGamma", "EGamma_DeExcite"
-            }) {
-
-          hblob::LoadAndPrint(fin, kNOvAND, t2k_proj, nuspec, tgtstr,
-                              selection(sel),
-                              "Valid_NOvAND_" + SelectionList[sel] + "_" +
-                                  all_nuspecies[nuspec],
-                              SelectionList[sel]);
+            hblob::LoadAndPrint(fin, kNOvAND, t2k_proj, nuspec, tgtstr,
+                                selection(sel),
+                                "Valid_NOvAND_" + SelectionList[sel] + "_" +
+                                    all_nuspecies[nuspec],
+                                SelectionList[sel]);
+          }
         }
       }
     }
@@ -1048,10 +1051,13 @@ void SayUsage(char const *argv[]) {
             << "\n"
                "\n\t-i <inp.root>            : Input file"
                "\n\t--From <Tuned|Generated> : Weight as if Tuned/Not Tuned"
+               "\n\t--NOvAND"
             << std::endl;
 }
 
 std::string input_file = "";
+
+bool JustDoT2K = true;
 
 void handleOpts(int argc, char const *argv[]) {
   int opt = 1;
@@ -1062,6 +1068,8 @@ void handleOpts(int argc, char const *argv[]) {
       exit(0);
     } else if (std::string(argv[opt]) == "-i") {
       input_file = argv[++opt];
+    } else if (std::string(argv[opt]) == "--NOvAND") {
+      JustDoT2K = false;
     } else if (std::string(argv[opt]) == "--From") {
       std::string arg = std::string(argv[++opt]);
 
@@ -1111,5 +1119,5 @@ int main(int argc, char const *argv[]) {
   handleOpts(argc, argv);
 
   gStyle->SetOptStat(false);
-  ValidPlots(input_file);
+  ValidPlots(input_file, JustDoT2K);
 }
