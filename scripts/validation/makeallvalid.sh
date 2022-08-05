@@ -87,7 +87,7 @@ for DET in ${DETECTORS[@]}; do
                                         -d ND280/NEUT/ReWeighted_to_2020/${TGT}/${SPC} &
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_POST.${SPC}.root \
-                                        --From BANFFPost -F FDSInputs/FakeDataInputs_FromTuned_BANFFPre.root \
+                                        --From BANFFPost -F FDSInputs/FakeDataInputs_FromTuned_BANFFPost.root \
                                         -H config/FakeDataValidConfig_ND280.toml \
                                         -a any -T NDTuned \
                                         -W kT2KND_to_T2KNonQE \
@@ -101,7 +101,7 @@ for DET in ${DETECTORS[@]}; do
                                         -d ND280/NEUT/NonQE/${TGT}/${SPC} &
 
                     bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
-                                        --From BANFFPre -F FDSInputs/FakeDataInputs_FromTuned_BANFFPost.root \
+                                        --From BANFFPre -F FDSInputs/FakeDataInputs_FromTuned_BANFFPre.root \
                                         -H config/FakeDataValidConfig_ND280.toml \
                                         -a any -T NDTuned \
                                         -W kT2KND_to_T2KMnv1Pi \
@@ -152,7 +152,7 @@ for DET in ${DETECTORS[@]}; do
                                             -d ND280/NEUT/ReWeighted_to_2020/${ELE}/${SPC} &
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_POST.${SPC}.root \
-                                            --From BANFFPost -F FDSInputs/FakeDataInputs_FromTuned_BANFFPre.root \
+                                            --From BANFFPost -F FDSInputs/FakeDataInputs_FromTuned_BANFFPost.root \
                                             -H config/FakeDataValidConfig_ND280.toml \
                                             -a ${ELE} -T NDTuned \
                                             -W kT2KND_to_T2KNonQE \
@@ -166,7 +166,7 @@ for DET in ${DETECTORS[@]}; do
                                             -d ND280/NEUT/NonQE/${ELE}/${SPC} &
 
                         bin/fakedatavalid.exe -i flattrees/t2knova.flattree.NEUT.ND280.${TGT}.BANFF_PRE.${SPC}.root \
-                                            --From BANFFPre -F FDSInputs/FakeDataInputs_FromTuned_BANFFPost.root \
+                                            --From BANFFPre -F FDSInputs/FakeDataInputs_FromTuned_BANFFPre.root \
                                             -H config/FakeDataValidConfig_ND280.toml \
                                             -a ${ELE} -T NDTuned \
                                             -W kT2KND_to_T2KMnv1Pi \
