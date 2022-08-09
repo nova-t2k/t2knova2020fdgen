@@ -20,6 +20,13 @@ while [[ ${#} -gt 0 ]]; do
         shift
       ;;
 
+      -G|--generator)
+        GENERATOR="$2"
+        OPTARRAY+=("${key}")
+        OPTARRAY+=("${2}")
+        shift # past argument
+      ;;
+
       --out-dir)
         OUTDIR="$2"
         OPTARRAY+=("${key}")
@@ -47,22 +54,33 @@ mkdir -p ${ODIR}
 
 NFILES=$(find $ODIR -name "${OUTFILESTUB}.*.root" | wc -l)
 
-JTORUN=$(( NTARGETFILES - NFILES ))
+declare -A TUNES
 
-if [ ${JTORUN} -lt 1 ]; then 
-  echo -e "\u001b[32m[DONE]\u001b[0m: $ODIR contains ${NFILES}/${NTARGETFILES} (${OUTFILESTUB}.*.root) files."
-else
-  echo -e "\u001b[31m[GENE]\u001b[0m: Will generate \u001b[31m${JTORUN}\u001b[0m new files: $ODIR contains ${NFILES}/${NTARGETFILES} (${OUTFILESTUB}.*.root) files."
-fi
+TUNES["NEUT"]="BANFF_PRE BANFF_POST"
+TUNES["GENIE"]="2020"
 
-if [ $DO_SUBMIT -gt 0 ] && [ $JTORUN -gt 0 ]; then
-  CMD="--array=1-${JTORUN} $(readlink -f t2knovagen.sh) ${OPTARRAY[@]}"
-  echo "sbatch ${CMD}"
-  sbatch ${CMD}
+for tune in ${TUNES[${GENERATOR}]}; do
 
-  if [ "$?" == "1" ]; then
-    echo "Failed to submit job"
-    exit 1
+  JTORUN=$(( NTARGETFILES - NFILES ))
+
+  if [ ${JTORUN} -lt 1 ]; then 
+    echo -e "\u001b[32m[DONE]\u001b[0m: $ODIR contains ${NFILES}/${NTARGETFILES} (${OUTFILESTUB}.*.root) files."
+  else
+    echo -e "\u001b[31m[GENE]\u001b[0m: Will generate \u001b[31m${JTORUN}\u001b[0m new files: $ODIR contains ${NFILES}/${NTARGETFILES} (${OUTFILESTUB}.*.root) files."
   fi
 
-fi
+  if [ $DO_SUBMIT -gt 0 ] && [ $JTORUN -gt 0 ]; then
+    CMD="--array=1-${JTORUN} $(readlink -f t2knovagen.sh) ${OPTARRAY[@]}"
+    echo "sbatch ${CMD}"
+    sbatch ${CMD}
+
+    if [ "$?" == "1" ]; then
+      echo "Failed to submit job"
+      exit 1
+    fi
+
+    #If we have submitted for one tune, don't for the other
+    break;
+  fi
+
+done

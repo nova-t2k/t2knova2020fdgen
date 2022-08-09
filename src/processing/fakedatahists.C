@@ -23,14 +23,12 @@ enum FDS { kGenerated, kNDTuned, kMnv1Pi, kNonQE };
 
 SelectionHists<TH3F> *EnuPLepThetaLep;
 SelectionHists<TH3F> *EnuPtLepEAvHad;
-SelectionHists<TH1F> *Enu;
 TrueChannelHist<TH1F> *XSecs;
 FDS FDSSet = kGenerated;
 
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
           int tgta_select = 0) {
 
-  Enu = SelectionHistsFromTOML<TH1F>("Enu", plots_config);
   if (ist2k) {
     EnuPLepThetaLep =
         SelectionHistsFromTOML<TH3F>("EnuPLepThetaLep", plots_config);
@@ -73,11 +71,11 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
       w *= rdr.RWWeight();
 
       if (FDSSet == kMnv1Pi) {
-        if ((rdr.Mode() >= 11) && (rdr.Mode() <= 13)) {
+        if ((std::abs(rdr.Mode()) >= 11) && (std::abs(rdr.Mode()) <= 13)) {
           w *= GetMINERvASPPLowQ2SuppressionWeight(rdr.Q2());
         }
       } else if (FDSSet == kNonQE) {
-        if (rdr.Mode() == 1) {
+        if (std::abs(rdr.Mode()) == 1) {
           w *= UnWeightQ2BinWeights_T2K2020(rdr.Q2());
         } else if (std::find(sels.begin(), sels.end(), kCC0pi) != sels.end()) {
           w *= GetnonQEWeight(rdr.PDGNu(), rdr.GetQ2QE());
@@ -85,16 +83,16 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
       }
     }
 
+    int mode = bymode ? rdr.Mode() : 0;
+
     if (ist2k) {
-      EnuPLepThetaLep->Fill(w, sels, bymode ? rdr.Mode() : 0, rdr.Enu_true(),
-                            rdr.PLep(), rdr.AngLep_deg());
+      EnuPLepThetaLep->Fill(w, sels, mode, rdr.Enu_true(), rdr.PLep(),
+                            rdr.AngLep_deg());
     } else {
-      EnuPtLepEAvHad->Fill(w, sels, bymode ? rdr.Mode() : 0, rdr.Enu_true(),
+      EnuPtLepEAvHad->Fill(w, sels, mode, rdr.Enu_true(),
                            rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)),
                            rdr.Eav_NOvA());
     }
-
-    Enu->Fill(w, sels, bymode ? rdr.Mode() : 0, rdr.Enu_true());
 
     for (auto sel : sels) {
       XSecs->Fill(w, bymode ? rdr.Mode() : 0, sel);
@@ -222,11 +220,17 @@ int main(int argc, char const *argv[]) {
 
   if (ist2k) {
     EnuPLepThetaLep->Write(dout, true);
+    auto Enu = EnuPLepThetaLep->Transform<TH1D>(
+        [](TH3F const &in) -> TH1D { return TH1D(*in.ProjectionX()); });
+    Enu.SetName("Enu");
+    Enu.Write(dout, true);
   } else {
     EnuPtLepEAvHad->Write(dout, true);
+    auto Enu = EnuPtLepEAvHad->Transform<TH1D>(
+        [](TH3F const &in) -> TH1D { return TH1D(*in.ProjectionX()); });
+    Enu.SetName("Enu");
+    Enu.Write(dout, true);
   }
-
-  Enu->Write(dout, true);
 
   XSecs->Write(dout);
 

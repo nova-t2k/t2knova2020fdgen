@@ -25,7 +25,7 @@ for gen in ${GENERATORS[@]}; do
             continue
           fi
 
-          INPAT="${IDIR}/t2knova/${gen}/${det}/${mat}/${tune}/${spec}/t2knova.flattree.${gen}.${det}.${mat}.${spec}.*.root"
+          INPAT="${IDIR}/t2knova/${gen}/${det}/${mat}/${spec}/${tune}/t2knova.flattree.${gen}.${det}.${mat}.${spec}.*.root"
           NFILES=$(ls ${INPAT} | wc -l)
 
           echo "Found ${NFILES} matching ${INPAT}"

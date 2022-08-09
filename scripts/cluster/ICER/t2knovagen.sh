@@ -25,12 +25,6 @@ while [[ ${#} -gt 0 ]]; do
   key="$1"
   case $key in
 
-      -T|--tune)
-        TUNE="$2"
-        echo "[OPT]: Using Tune: ${TUNE}"
-        shift # past argument
-      ;;
-
       -t|--target)
         TARGET="$2"
         echo "[OPT]: Generating on ${TARGET} target"
@@ -80,7 +74,7 @@ while [[ ${#} -gt 0 ]]; do
   shift
 done
 
-if [[ -z ${TUNE} ]] || [[ -z ${PROBE} ]] || [[ -z ${TARGET} ]] || [[ -z ${GENERATOR} ]]; then
+if [[ -z ${PROBE} ]] || [[ -z ${TARGET} ]] || [[ -z ${GENERATOR} ]]; then
   echo "[ERROR]: Not all required options passed, each of: -T, -t, -p, and -g are required."
   exit 1
 fi
@@ -132,24 +126,33 @@ if [ "${GENERATOR}" == "NEUT" ]; then #ensure that the generation options match 
   OPTARRAY+=("NEUT-MDLQE=402")
 fi
 
-echo "Running: singularity run ${IMAGE} ${OPTARRAY[@]}"
+echo "Running: singularity run ${IMAGE} run ${IMAGE} nuis gen ${GENERATOR} ${OPTARRAY[@]}"
 singularity run ${IMAGE} nuis gen ${GENERATOR} ${OPTARRAY[@]} &> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log
 
 date
 
 T=$(( RANDOM % 10 )).$(( RANDOM % 1000 )); echo sleep $T; sleep $T
 
-FLATFILENAME=${OUTFILESTUB}.flattree.${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.root
+declare -A TUNES
 
-echo "Running: singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -P ${PROBE} -T ${TUNE} -t ${TARGET} -o ${FLATFILENAME}"
-singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -P ${PROBE} -T ${TUNE} -t ${TARGET} -o ${FLATFILENAME}  &>> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log
+TUNES["NEUT"]="BANFF_PRE BANFF_POST"
+TUNES["GENIE"]="2020"
+
+for tune in ${TUNES[${GENERATOR}]}; do
+
+  FLATFILENAME=${OUTFILESTUB}.${tune}.${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.root
+
+  echo "Running: singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -P ${PROBE} -T ${tune} -t ${TARGET} -o ${FLATFILENAME}"
+  singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -P ${PROBE} -T ${tune} -t ${TARGET} -o ${FLATFILENAME}  &>> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.${tune}.log
+
+  if [[ ! -e /mnt/research/NuInt/generation/${OUTDIR}/${tune} ]]; then
+    mkdir -p /mnt/research/NuInt/generation/${OUTDIR}/${tune}
+  fi
+
+  date
+
+  mv ${FLATFILENAME} *.${tune}.log /mnt/research/NuInt/generation/${OUTDIR}/${tune}/
+
+done
 
 cat *.card
-
-if [[ ! -e /mnt/research/NuInt/generation/${OUTDIR}/ ]]; then
-  mkdir -p /mnt/research/NuInt/generation/${OUTDIR}/
-fi
-
-date
-
-mv ${FLATFILENAME} *.log /mnt/research/NuInt/generation/${OUTDIR}/

@@ -167,9 +167,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   q0q3_high_outlier_high->SetZAxisTitle("Count with w >= 10");
 
   T2KNOvATruthTreeReader rdr(ttrdr);
-  if (!bymode) {
-    rdr.SetNoModeInfo();
-  }
+  int mode = bymode ? rdr.Mode() : 0;
 
   size_t nents = ttrdr.GetEntries(true);
   size_t ent_it = 0;
@@ -203,20 +201,18 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
 
     if (FDSSet != kGenerated) {
       w *= rdr.RWWeight();
-
       if (FDSSet == kMnv1Pi) {
-        if ((rdr.Mode() >= 11) && (rdr.Mode() <= 13)) {
+        if ((std::abs(rdr.Mode()) >= 11) && (std::abs(rdr.Mode()) <= 13)) {
           w *= GetMINERvASPPLowQ2SuppressionWeight(rdr.Q2());
         }
       } else if (FDSSet == kNonQE) {
-        if (rdr.Mode() == 1) {
+        if (std::abs(rdr.Mode()) == 1) {
           w *= UnWeightQ2BinWeights_T2K2020(rdr.Q2());
         } else if (std::find(sels.begin(), sels.end(), kCC0pi) != sels.end()) {
           w *= GetnonQEWeight(rdr.PDGNu(), rdr.GetQ2QE());
         }
       }
     }
-
 
     if (doosc && (std::abs(rdr.Mode()) < 30)) { // Oscillate CC events if
                                                 // enabled
@@ -279,63 +275,60 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     }
     w *= rw_w;
 
-    Enu->Fill(w, sels, rdr.Mode(), rdr.Enu_true());
+    Enu->Fill(w, sels, mode, rdr.Enu_true());
     double erec = EnuQErec(rdr.FSLepP4().E(), rdr.PLep(), rdr.CosLep(), 0,
                            rdr.PDGNu() > 0);
-    ERecQE->Fill(w, sels, rdr.Mode(), erec);
-    EnuERecQE->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), erec);
+    ERecQE->Fill(w, sels, mode, erec);
+    EnuERecQE->Fill(w, sels, mode, rdr.Enu_true(), erec);
 
     float ERecQEBias = (erec / rdr.Enu_true()) - 1;
-    EnuERecQEBias->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), ERecQEBias);
+    EnuERecQEBias->Fill(w, sels, mode, rdr.Enu_true(), ERecQEBias);
     float ERecAvBias =
         ((rdr.Eav_NOvA() + rdr.FSLepP4().E()) / rdr.Enu_true()) - 1;
-    EnuERecAvBias->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), ERecAvBias);
+    EnuERecAvBias->Fill(w, sels, mode, rdr.Enu_true(), ERecAvBias);
 
-    PLep->Fill(w, sels, rdr.Mode(), rdr.PLep());
-    ThetaLep->Fill(w, sels, rdr.Mode(), rdr.AngLep_deg());
-    CosThetaLep->Fill(w, sels, rdr.Mode(), rdr.CosLep());
-    PThetaLep->Fill(w, sels, rdr.Mode(), rdr.PLep(), rdr.AngLep_deg());
-    EAvHad->Fill(w, sels, rdr.Mode(), rdr.Eav_NOvA());
-    PtLep->Fill(w, sels, rdr.Mode(),
-                rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)));
-    Q2->Fill(w, sels, rdr.Mode(), rdr.Q2());
+    PLep->Fill(w, sels, mode, rdr.PLep());
+    ThetaLep->Fill(w, sels, mode, rdr.AngLep_deg());
+    CosThetaLep->Fill(w, sels, mode, rdr.CosLep());
+    PThetaLep->Fill(w, sels, mode, rdr.PLep(), rdr.AngLep_deg());
+    EAvHad->Fill(w, sels, mode, rdr.Eav_NOvA());
+    PtLep->Fill(w, sels, mode, rdr.PLep() * sqrt(1 - pow(rdr.CosLep(), 2)));
+    Q2->Fill(w, sels, mode, rdr.Q2());
 
-    q0->Fill(w, sels, rdr.Mode(), rdr.q0());
+    q0->Fill(w, sels, mode, rdr.q0());
     float yrecf = rdr.Eav_NOvA() / (rdr.Eav_NOvA() + rdr.FSLepP4().E());
-    yrec->Fill(w, sels, rdr.Mode(), yrecf);
-    Enuyrec->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), yrecf);
+    yrec->Fill(w, sels, mode, yrecf);
+    Enuyrec->Fill(w, sels, mode, rdr.Enu_true(), yrecf);
 
-    EnuQ2->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
-    q0q3_low->Fill(w, sels, rdr.Mode(), rdr.q3(), rdr.q0());
-    q0q3_high->Fill(w, sels, rdr.Mode(), rdr.q3(), rdr.q0());
-    EnuEAvHad->Fill(w, sels, rdr.Mode(), rdr.Enu_true(), rdr.Eav_NOvA());
-    hmfscpip->Fill(w, sels, rdr.Mode(), rdr.hmfscpip());
-    hmfspi0p->Fill(w, sels, rdr.Mode(), rdr.hmfspi0p());
-    ncpi->Fill(w, sels, rdr.Mode(), rdr.ncpi());
-    npi0->Fill(w, sels, rdr.Mode(), rdr.npi0());
-    hmfsprotonp->Fill(w, sels, rdr.Mode(), rdr.hmfsprotonp());
-    hmfsneutronp->Fill(w, sels, rdr.Mode(), rdr.hmfsneutronp());
-    nproton->Fill(w, sels, rdr.Mode(), rdr.nproton());
-    nneutron->Fill(w, sels, rdr.Mode(), rdr.nneutron());
-    EGamma->Fill(w, sels, rdr.Mode(), rdr.EGamma());
-    EGamma_DeExcite->Fill(w, sels, rdr.Mode(), rdr.EGamma());
+    EnuQ2->Fill(w, sels, mode, rdr.Enu_true(), rdr.Q2());
+    q0q3_low->Fill(w, sels, mode, rdr.q3(), rdr.q0());
+    q0q3_high->Fill(w, sels, mode, rdr.q3(), rdr.q0());
+    EnuEAvHad->Fill(w, sels, mode, rdr.Enu_true(), rdr.Eav_NOvA());
+    hmfscpip->Fill(w, sels, mode, rdr.hmfscpip());
+    hmfspi0p->Fill(w, sels, mode, rdr.hmfspi0p());
+    ncpi->Fill(w, sels, mode, rdr.ncpi());
+    npi0->Fill(w, sels, mode, rdr.npi0());
+    hmfsprotonp->Fill(w, sels, mode, rdr.hmfsprotonp());
+    hmfsneutronp->Fill(w, sels, mode, rdr.hmfsneutronp());
+    nproton->Fill(w, sels, mode, rdr.nproton());
+    nneutron->Fill(w, sels, mode, rdr.nneutron());
+    EGamma->Fill(w, sels, mode, rdr.EGamma());
+    EGamma_DeExcite->Fill(w, sels, mode, rdr.EGamma());
 
     for (auto sel : sels) {
-      XSecs->Fill(w, rdr.Mode(), sel);
+      XSecs->Fill(w, mode, sel);
     }
 
-    EvWeights->Fill(1, sels, rdr.Mode(), w);
+    EvWeights->Fill(1, sels, mode, w);
 
     if (rw_w <= 0.1) {
-      PThetaLep_outlier_low->Fill(1, sels, rdr.Mode(), rdr.PLep(),
-                                  rdr.AngLep_deg());
-      EnuQ2_outlier_low->Fill(1, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
-      q0q3_high_outlier_low->Fill(1, sels, rdr.Mode(), rdr.q3(), rdr.q0());
+      PThetaLep_outlier_low->Fill(1, sels, mode, rdr.PLep(), rdr.AngLep_deg());
+      EnuQ2_outlier_low->Fill(1, sels, mode, rdr.Enu_true(), rdr.Q2());
+      q0q3_high_outlier_low->Fill(1, sels, mode, rdr.q3(), rdr.q0());
     } else if (rw_w >= 10) {
-      PThetaLep_outlier_high->Fill(1, sels, rdr.Mode(), rdr.PLep(),
-                                   rdr.AngLep_deg());
-      EnuQ2_outlier_high->Fill(1, sels, rdr.Mode(), rdr.Enu_true(), rdr.Q2());
-      q0q3_high_outlier_high->Fill(1, sels, rdr.Mode(), rdr.q3(), rdr.q0());
+      PThetaLep_outlier_high->Fill(1, sels, mode, rdr.PLep(), rdr.AngLep_deg());
+      EnuQ2_outlier_high->Fill(1, sels, mode, rdr.Enu_true(), rdr.Q2());
+      q0q3_high_outlier_high->Fill(1, sels, mode, rdr.q3(), rdr.q0());
     }
 
     ent_it++;
@@ -392,7 +385,6 @@ void SayUsage(char const *argv[]) {
                "\n\t-o <out.root>            : Output file"
                "\n\t-M                       : Separate by Mode"
                "\n\t--oscillate              : Apply oscillation weights"
-               "\n\t--No-Tune                : Don't apply tune weights"
                "\n\t--From <BANFFPre|BANFFPost|Generated> : Weight as if "
                "Tuned/Not Tuned"
                "\n\t-a <[C|H|O|any]>         : Target descriptor"
@@ -403,6 +395,7 @@ void SayUsage(char const *argv[]) {
                "\n\t              * NOvA_to_T2KPre_ptlep"
                "\n\t              * NOvA_to_T2KMnv1Pi_ptlep"
                "\n\t              * NOvA_to_T2KNonQE_ptlep"
+               "\n\t-T <Generated|NDTuned|Mnv1Pi|NonQE> : Tune to Apply."
                "\n\t-d </sub/dir/to/use>   : Output sub directory"
                " input tree. \n"
             << std::endl;
@@ -461,18 +454,22 @@ void handleOpts(int argc, char const *argv[]) {
       std::string arg = std::string(argv[++opt]);
       if (arg == "Generated") {
         FDSSet = kGenerated;
+        std::cout << "Applying Generated Tune. " << std::endl;
       } else if (arg == "NDTuned") {
         FDSSet = kNDTuned;
+        std::cout << "Applying NDTuned Tune. " << std::endl;
       } else if (arg == "Mnv1Pi") {
         FDSSet = kMnv1Pi;
+        std::cout << "Applying Mnv1Pi Tune. " << std::endl;
       } else if (arg == "NonQE") {
         FDSSet = kNonQE;
+        std::cout << "Applying NonQE Tune. " << std::endl;
       } else {
         std::cout << "Invalid FDS selector passed: " << argv[4]
                   << ". Should be None/Mnv1Pi/NonQE." << std::endl;
         abort();
       }
-    }else if (std::string(argv[opt]) == "-W") {
+    } else if (std::string(argv[opt]) == "-W") {
       std::string arg = std::string(argv[++opt]);
       if (arg == "T2KND_to_NOvA") {
         wconfig = t2knova::kT2KND_to_NOvA;

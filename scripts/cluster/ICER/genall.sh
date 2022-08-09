@@ -57,11 +57,6 @@ NJOBS["NEUT_numub_ND280"]=200 #200
 NJOBS["NEUT_nue_ND280"]=200 #200
 NJOBS["NEUT_nueb_ND280"]=200 #200
 
-declare -A TUNES
-
-TUNES["NEUT"]="BANFF_PRE BANFF_POST"
-TUNES["GENIE"]="2020"
-
 declare -A DET_MATS
 DET_MATS["NOvAND"]="CH"
 DET_MATS["ND280"]="CH H2O"
@@ -70,7 +65,6 @@ for gen in ${GENERATORS[@]}; do
   for spec in ${SPECIES[@]}; do
     for det in ${DETECTORS[@]}; do
       for mat in ${DET_MATS[${det}]}; do
-        for tune in ${TUNES["${gen}"]}; do
 #          NJOBS["${gen}_${spec}_${det}"]=1
 
           ./genone.sh --nfiles ${NJOBS["${gen}_${spec}_${det}"]} \
@@ -80,11 +74,9 @@ for gen in ${GENERATORS[@]}; do
               -n ${NEVS["${gen}_${spec}_${det}"]} \
               -P ${spec} \
             -S ${DO_SUBMIT} \
-            -T  ${tune} \
-            --out-dir t2knova/${gen}/${det}/${mat}/${tune}/${spec} \
+            --out-dir t2knova/${gen}/${det}/${mat}/${spec} \
             --out-file-stub t2knova.flattree.${gen}.${det}.${mat}.${spec}
 
-        done
       done
     done
   done

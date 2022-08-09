@@ -1,21 +1,5 @@
 [FakeDataConfig]
 
-[FakeDataConfig.Enu]
-
-title = "Enu"
-selections = [ "CCInc", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0", 
-      "CCmultipi", "CCOther", "NCInc", "NC0pi", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", ]
-
-x_binning = [
-      "uniform",
-      [100, 0, 20]
-]
-
-axis_titles = [
-      "#it{E_{#nu}} (GeV)",
-      "GeV^{-1}"
-]
-
 [FakeDataConfig.EnuPLepThetaLep]
 
 title = "EnuPLepThetaLep"
