@@ -49,17 +49,18 @@ while [[ ${#} -gt 0 ]]; do
   shift
 done
 
-ODIR=/mnt/research/NuInt/generation/${OUTDIR}/
-mkdir -p ${ODIR}
-
-NFILES=$(find $ODIR -name "${OUTFILESTUB}.*.root" | wc -l)
-
 declare -A TUNES
 
 TUNES["NEUT"]="BANFF_PRE BANFF_POST"
 TUNES["GENIE"]="2020"
 
 for tune in ${TUNES[${GENERATOR}]}; do
+
+  ODIR=/mnt/research/NuInt/generation/${OUTDIR}/${tune}/
+  mkdir -p ${ODIR}
+
+  NFILES=$(find $ODIR -name "${OUTFILESTUB}.*.root" | wc -l)
+
 
   JTORUN=$(( NTARGETFILES - NFILES ))
 
