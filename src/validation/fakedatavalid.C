@@ -15,14 +15,11 @@
 #include "TStyle.h"
 #include "TTreeReader.h"
 
-#include "OscillationHelper.hxx"
-
 #include <cmath>
 
 using namespace t2knova;
 
 bool bymode = false;
-bool doosc = false;
 
 enum FDS { kGenerated, kNDTuned, kMnv1Pi, kNonQE };
 FDS FDSSet = kGenerated;
@@ -65,8 +62,6 @@ SelectionHists<TH1F> *nproton;
 SelectionHists<TH1F> *nneutron;
 SelectionHists<TH1F> *EGamma;
 SelectionHists<TH1F> *EGamma_DeExcite;
-
-OscillationHelper oh_disp, oh_app, oh_dispb, oh_appb;
 
 double const mass_proton = 0.938272;
 double const mass_neutron = 0.939565;
@@ -211,30 +206,6 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
         } else if (std::find(sels.begin(), sels.end(), kCC0pi) != sels.end()) {
           w *= GetnonQEWeight(rdr.PDGNu(), rdr.GetQ2QE());
         }
-      }
-    }
-
-    if (doosc && (std::abs(rdr.Mode()) < 30)) { // Oscillate CC events if
-                                                // enabled
-      switch (rdr.PDGNu()) {
-      case 14: {
-        w *= oh_disp.GetWeight(rdr.Enu_true());
-        break;
-      }
-      case -14: {
-        w *= oh_dispb.GetWeight(rdr.Enu_true());
-        break;
-      }
-      case 12: {
-        w *= oh_app.GetWeight(rdr.Enu_true());
-        break;
-      }
-      case -12: {
-        w *= oh_appb.GetWeight(rdr.Enu_true());
-        break;
-      }
-      default: {
-      }
       }
     }
 
@@ -432,8 +403,6 @@ void handleOpts(int argc, char const *argv[]) {
         abort();
       }
 
-    } else if (std::string(argv[opt]) == "--oscillate") {
-      doosc = true;
     } else if (std::string(argv[opt]) == "-a") {
       std::string arg = std::string(argv[++opt]);
       if (arg == "C") {
@@ -501,28 +470,6 @@ void handleOpts(int argc, char const *argv[]) {
 }
 
 int main(int argc, char const *argv[]) {
-
-  // Sin^2(Theta_12)
-  double s2th12 = 0.297;
-  // Sin^2(Theta_13)
-  double s2th13 = 0.0214;
-  // Sin^2(Theta_23)
-  double s2th23 = 0.526;
-  // Dm^2_21
-  double dm2_21 = 7.37E-5;
-  //|Dm^2_Atm|
-  double dm2_atm = 2.463E-3;
-  // dcp
-  double dcp = 0;
-  double osc_params[] = {s2th12, s2th13, s2th23, dm2_21, dm2_atm, dcp};
-  oh_disp.Setup_baseline(osc_params, 295);
-  oh_app.Setup_baseline(osc_params, 295);
-  oh_disp.SetOscillationChannel(14, 14);
-  oh_app.SetOscillationChannel(14, 12);
-  oh_dispb.Setup_baseline(osc_params, 295);
-  oh_appb.Setup_baseline(osc_params, 295);
-  oh_dispb.SetOscillationChannel(-14, -14);
-  oh_appb.SetOscillationChannel(-14, -12);
 
   gStyle->SetOptStat(false);
 
