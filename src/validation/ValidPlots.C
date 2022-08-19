@@ -83,6 +83,7 @@ struct hblob {
 
     std::string fromhist_name = "";
     std::string targethist_name = "";
+    std::string RWhist_name = "";
 
     std::string tgtspecvar_str =
         "/" + tgtstr + "/" + all_nuspecies[nuspec] + "/" + varname;
@@ -109,26 +110,32 @@ struct hblob {
       switch (tgttune) {
       case TargetTuneType::kGenerated: {
         targethist_name = "ND280/GENIE/Generated";
+        RWhist_name = "ND280/NEUT/ReWeighted_to_Generated";
         break;
       }
       case TargetTuneType::kTuned: {
         targethist_name = "ND280/GENIE/2020";
+        RWhist_name = "ND280/NEUT/ReWeighted_to_2020";
         break;
       }
       case TargetTuneType::kTuned_BANFFPre: {
         targethist_name = "ND280/NEUT/BANFF_PRE";
+        RWhist_name = "ND280/NEUT/ReWeighted_to_BANFF_PRE";
         break;
       }
       case TargetTuneType::kTuned_BANFFPost: {
         targethist_name = "ND280/NEUT/BANFF_POST";
+        RWhist_name = "ND280/NEUT/ReWeighted_to_BANFF_POST";
         break;
       }
       case TargetTuneType::kMnv1Pi: {
         targethist_name = "ND280/NEUT/Mnv1Pi";
+        RWhist_name = "ND280/NEUT/ReWeighted_to_Mnv1Pi";
         break;
       }
       case TargetTuneType::kNonQE: {
         targethist_name = "ND280/NEUT/NonQE";
+        RWhist_name = "ND280/NEUT/ReWeighted_to_NonQE";
         break;
       }
       }
@@ -156,23 +163,28 @@ struct hblob {
       switch (tgttune) {
       case TargetTuneType::kGenerated: {
         targethist_name = "NOvAND/NEUT/Generated";
+        RWhist_name = "NOvAND/GENIE/ReWeighted_to_Generated";
         break;
       }
       case TargetTuneType::kTuned_BANFFPre: {
         targethist_name = "NOvAND/NEUT/BANFF_PRE";
+        RWhist_name = "NOvAND/GENIE/ReWeighted_to_BANFF_PRE";
         break;
       }
       case TargetTuneType::kTuned:
       case TargetTuneType::kTuned_BANFFPost: {
         targethist_name = "NOvAND/NEUT/BANFF_POST";
+        RWhist_name = "NOvAND/GENIE/ReWeighted_to_BANFF_POST";
         break;
       }
       case TargetTuneType::kMnv1Pi: {
         targethist_name = "NOvAND/NEUT/Mnv1Pi";
+        RWhist_name = "NOvAND/GENIE/ReWeighted_to_Mnv1Pi";
         break;
       }
       case TargetTuneType::kNonQE: {
         targethist_name = "NOvAND/NEUT/NonQE";
+        RWhist_name = "NOvAND/GENIE/ReWeighted_to_NonQE";
         break;
       }
       }
@@ -193,17 +205,7 @@ struct hblob {
 
     std::vector<std::string> ReWeightHists;
 
-    if (det == kT2K) {
-      ReWeightHists = std::vector<std::string>{
-          std::string("ND280/NEUT/ReWeighted_to_2020") + tgtspecvar_str +
-              selmode_str,
-      };
-    } else {
-      ReWeightHists = std::vector<std::string>{
-          std::string("NOvAND/GENIE/ReWeighted_to_BANFF_POST") +
-              tgtspecvar_str + selmode_str,
-      };
-    }
+    ReWeightHists.push_back(RWhist_name + tgtspecvar_str + selmode_str);
 
     int i = 0;
     for (auto &n : ReWeightHists) {
@@ -219,27 +221,14 @@ struct hblob {
     }
 
     if (ReWeights.size() && ReWeights[0]) {
-      if (det == kT2K) {
-        std::string Outlier_high_name =
-            std::string("ND280/NEUT/ReWeighted_to_2020") + tgtspecvar_str +
-            "_outlier_high" + selmode_str;
-        std::string Outlier_low_name =
-            std::string("ND280/NEUT/ReWeighted_to_2020") + tgtspecvar_str +
-            "_outlier_low" + selmode_str;
 
-        Outlier_low = GetTH1(fin, Outlier_low_name, false);
-        Outlier_high = GetTH1(fin, Outlier_high_name, false);
-      } else {
-        std::string Outlier_high_name =
-            std::string("NOvAND/GENIE/ReWeighted_to_BANFF_POST") +
-            tgtspecvar_str + "_outlier_high" + selmode_str;
-        std::string Outlier_low_name =
-            std::string("NOvAND/GENIE/ReWeighted_to_BANFF_POST") +
-            tgtspecvar_str + "_outlier_low" + selmode_str;
+      std::string Outlier_high_name =
+          RWhist_name + tgtspecvar_str + "_outlier_high" + selmode_str;
+      std::string Outlier_low_name =
+          RWhist_name + tgtspecvar_str + "_outlier_low" + selmode_str;
 
-        Outlier_low = GetTH1(fin, Outlier_low_name, false);
-        Outlier_high = GetTH1(fin, Outlier_high_name, false);
-      }
+      Outlier_low = GetTH1(fin, Outlier_low_name, false);
+      Outlier_high = GetTH1(fin, Outlier_high_name, false);
     }
   }
 
@@ -390,6 +379,7 @@ struct hblob {
 
     std::string FromTitle = "";
     std::string TargetTitle = "";
+    std::string ReWeightTitle = "";
 
     if (_det == kT2K) {
 
@@ -412,31 +402,37 @@ struct hblob {
       switch (tgttune) {
       case TargetTuneType::kGenerated: {
         TargetTitle = "Untuned GENIE";
+        ReWeightTitle = "R/W to GENIE (E_{#nu}, p_{l}, #theta_{l})";
         break;
       }
       case TargetTuneType::kTuned: {
         TargetTitle = "NOvA2020";
+        ReWeightTitle = "R/W to NOvA2020 (E_{#nu}, p_{l}, #theta_{l})";
         break;
       }
       case TargetTuneType::kTuned_BANFFPre: {
         TargetTitle = "BANFF Prefit";
+        ReWeightTitle = "R/W to BANFFPre (E_{#nu}, p_{l}, #theta_{l})";
         break;
       }
       case TargetTuneType::kTuned_BANFFPost: {
         TargetTitle = "BANFF Postfit";
+        ReWeightTitle = "R/W to BANFFPost (E_{#nu}, p_{l}, #theta_{l})";
         break;
       }
       case TargetTuneType::kMnv1Pi: {
         TargetTitle = "T2K Mnv1Pi";
+        ReWeightTitle = "R/W to Mnv1Pi (E_{#nu}, p_{l}, #theta_{l})";
         break;
       }
       case TargetTuneType::kNonQE: {
         TargetTitle = "T2K NonQE";
+        ReWeightTitle = "R/W to NonQE (E_{#nu}, p_{l}, #theta_{l})";
         break;
       }
       }
 
-    } else {
+    } else { // novand
 
       switch (denom) {
       case ReWeightDenominator::kGenerated: {
@@ -452,29 +448,34 @@ struct hblob {
       switch (tgttune) {
       case TargetTuneType::kGenerated: {
         TargetTitle = "Untuned NEUT";
+        ReWeightTitle = "R/W to NEUT (E_{#nu} p_{T} EVisHad)";
         break;
       }
       case TargetTuneType::kTuned_BANFFPre: {
         TargetTitle = "BANFF Prefit";
+        ReWeightTitle = "R/W to BANFFPre (E_{#nu} p_{T} EVisHad)";
         break;
       }
       case TargetTuneType::kTuned:
       case TargetTuneType::kTuned_BANFFPost: {
         TargetTitle = "BANFF Postfit";
+        ReWeightTitle = "R/W to BANFFPost (E_{#nu} p_{T} EVisHad)";
         break;
       }
       case TargetTuneType::kMnv1Pi: {
         TargetTitle = "T2K Mnv1Pi";
+        ReWeightTitle = "R/W to Mnv1Pi (E_{#nu} p_{T} EVisHad)";
         break;
       }
       case TargetTuneType::kNonQE: {
         TargetTitle = "T2K NonQE";
+        ReWeightTitle = "R/W to NonQE (E_{#nu} p_{T} EVisHad)";
         break;
       }
       }
     }
 
-    TLegend *leg = new TLegend(0.125, 0.81, 0.925, 1);
+    TLegend *leg = new TLegend(0, 0.81, 0.8, 1);
     leg->SetNColumns(2);
     leg->SetTextSize(0.06);
     leg->SetBorderSize(0);
@@ -484,10 +485,7 @@ struct hblob {
     leg->AddEntry(Target.get(), TargetTitle.c_str(), "l");
 
     if (HaveReWeight) {
-      leg->AddEntry(ReWeights[0].get(),
-                    (_det == kT2K) ? "R/W to NOvA (E_{#nu}, p_{l}, #theta_{l})"
-                                   : "R/W to BANFF (Enu PtLep EVisHad)",
-                    "l");
+      leg->AddEntry(ReWeights[0].get(), ReWeightTitle.c_str(), "l");
     }
 
     leg->Draw();
@@ -1050,7 +1048,11 @@ void SayUsage(char const *argv[]) {
   std::cout << "[USAGE]: " << argv[0]
             << "\n"
                "\n\t-i <inp.root>            : Input file"
-               "\n\t--From <Tuned|Generated> : Weight as if Tuned/Not Tuned"
+               "\n\t--From <Tuned|Tuned_BANFFPre|Tuned_BANFFPost> : Weight as "
+               "if Tuned/Not Tuned"
+               "\n\t--To   "
+               "<Tuned|Generated|Tuned|Tuned_BANFFPre|Tuned_BANFFPost|Mnv1Pi|"
+               "NonQE> : Weight as if Tuned/Not Tuned"
                "\n\t--NOvAND"
             << std::endl;
 }
