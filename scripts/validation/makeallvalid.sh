@@ -1,5 +1,7 @@
 #!/bin/bash
 
+OUTDIR=FDSValid
+
 if [ "${1}" = "force" ]; then
     rm -rf ${OUTDIR}
 fi
