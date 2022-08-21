@@ -340,7 +340,7 @@ std::map<reweightconfig, std::string> inputhistnames_FromBANFF_POST = {
 std::map<reweightconfig, std::string> inputhistnames_FromBANFF_PRE = {
     {kT2KND_to_NOvA, "BANFF_PRE_to_2020/EnuPLepThetaLep"},
     {kT2KND_to_T2KNonQE, "BANFF_PRE_to_NonQE/EnuPLepThetaLep"},
-    {kT2KND_to_T2KMnv1Pi, "BANFF_PRE_to_NonQE/EnuPLepThetaLep"},
+    {kT2KND_to_T2KMnv1Pi, "BANFF_PRE_to_Mnv1Pi/EnuPLepThetaLep"},
     {kNOvA_to_T2KND_ptlep, "2020_to_BANFF_POST/EnuPtLepEAvHad"},
     {kNOvA_to_T2KPre_ptlep, "2020_to_BANFF_PRE/EnuPtLepEAvHad"},
     {kNOvA_to_T2KMnv1Pi_ptlep, "2020_to_Mnv1Pi/EnuPtLepEAvHad"},
