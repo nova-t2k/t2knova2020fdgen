@@ -73,6 +73,9 @@ template <typename T> inline size_t arrsize(T arr) { return arr.size(); }
 
 inline void LoadHists(std::string const &inputfile,
                       std::map<reweightconfig, std::string> const &inputhists) {
+
+  TDirectory *ogdir = gDirectory;
+
   std::unique_ptr<TFile> fin(new TFile(inputfile.c_str()));
   if (fin->IsZombie() || !fin->IsOpen()) {
     std::cout << "Failed to read \"" << inputfile << "\"" << std::endl;
@@ -125,7 +128,13 @@ inline void LoadHists(std::string const &inputfile,
     std::cout << "[ERROR]: Failed to find any histograms." << std::endl;
     abort();
   }
+  std::cout << "[INFO]: T2KNOvA loaded " << found << " histograms."
+            << std::endl;
   loaded = true;
+
+  if (ogdir) {
+    ogdir->cd();
+  }
 }
 
 inline double
