@@ -34,17 +34,17 @@ double GetFakeDataWeight_NOvAToT2KNonQE_PtLep(int nu_pdg, int lep_pdg, int tgta,
                                               double E_nu_GeV, double PtLep_GeV,
                                               double EVisHadronic_GeV,
                                               int PrimSel = -1);
-double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg, int tgta,
-                                     double E_nu_GeV, double PLep_GeV,
-                                     double ThetaLep, int PrimSel = -1);
+double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int tgta, double E_nu_GeV,
+                                     double PLep_GeV, double ThetaLep_GeV,
+                                     int PrimSel = -1);
 
-double GetFakeDataWeight_ND280ToT2KNonQE(int nu_pdg, int lep_pdg, int tgta,
-                                         double E_nu_GeV, double PLep_GeV,
-                                         double ThetaLep, int PrimSel = -1);
+double GetFakeDataWeight_ND280ToT2KNonQE(int nu_pdg, int tgta, double E_nu_GeV,
+                                         double PLep_GeV, double ThetaLep_GeV,
+                                         int PrimSel = -1);
 
-double GetFakeDataWeight_ND280ToT2KMnv1Pi(int nu_pdg, int lep_pdg, int tgta,
-                                          double E_nu_GeV, double PLep_GeV,
-                                          double ThetaLep, int PrimSel = -1);
+double GetFakeDataWeight_ND280ToT2KMnv1Pi(int nu_pdg, int tgta, double E_nu_GeV,
+                                          double PLep_GeV, double ThetaLep_GeV,
+                                          int PrimSel = -1);
 } // namespace t2knova
 
 namespace t2knova {
@@ -198,9 +198,9 @@ inline double GetFakeDataWeight_NOvAToT2KNonQE_PtLep(int nu_pdg, int lep_pdg,
                                            EVisHadronic_GeV, PrimSel);
 }
 
-inline double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg, int tgta,
+inline double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int tgta,
                                             double E_nu_GeV, double PLep_GeV,
-                                            double ThetaLep, int PrimSel) {
+                                            double ThetaLep_GeV, int PrimSel) {
   if (!loaded) {
     std::cout << "[ERROR]: Have not loaded t2knova reweight histogram ratios."
               << std::endl;
@@ -217,16 +217,17 @@ inline double GetFakeDataWeight_ND280ToNOvA(int nu_pdg, int lep_pdg, int tgta,
       rwhists[nuspec][kT2KND_to_NOvA][(tgta * 100) + PrimSel];
 
   if (rathist) {
-    return EvalHist3D(rathist, E_nu_GeV, PLep_GeV, ThetaLep, false);
+    return EvalHist3D(rathist, E_nu_GeV, PLep_GeV, ThetaLep_GeV, false);
   }
 
   return 1;
 }
 
-inline double GetFakeDataWeight_ND280ToT2KNonQE(int nu_pdg, int lep_pdg,
-                                                int tgta, double E_nu_GeV,
+inline double GetFakeDataWeight_ND280ToT2KNonQE(int nu_pdg, int tgta,
+                                                double E_nu_GeV,
                                                 double PLep_GeV,
-                                                double ThetaLep, int PrimSel) {
+                                                double ThetaLep_GeV,
+                                                int PrimSel) {
   if (!loaded) {
     std::cout << "[ERROR]: Have not loaded t2knova reweight histogram ratios."
               << std::endl;
@@ -243,16 +244,17 @@ inline double GetFakeDataWeight_ND280ToT2KNonQE(int nu_pdg, int lep_pdg,
       rwhists[nuspec][kT2KND_to_T2KNonQE][(tgta * 100) + PrimSel];
 
   if (rathist) {
-    return EvalHist3D(rathist, E_nu_GeV, PLep_GeV, ThetaLep, false);
+    return EvalHist3D(rathist, E_nu_GeV, PLep_GeV, ThetaLep_GeV, false);
   }
 
   return 1;
 }
 
-inline double GetFakeDataWeight_ND280ToT2KMnv1Pi(int nu_pdg, int lep_pdg,
-                                                 int tgta, double E_nu_GeV,
+inline double GetFakeDataWeight_ND280ToT2KMnv1Pi(int nu_pdg, int tgta,
+                                                 double E_nu_GeV,
                                                  double PLep_GeV,
-                                                 double ThetaLep, int PrimSel) {
+                                                 double ThetaLep_GeV,
+                                                 int PrimSel) {
   if (!loaded) {
     std::cout << "[ERROR]: Have not loaded t2knova reweight histogram ratios."
               << std::endl;
@@ -269,7 +271,7 @@ inline double GetFakeDataWeight_ND280ToT2KMnv1Pi(int nu_pdg, int lep_pdg,
       rwhists[nuspec][kT2KND_to_T2KMnv1Pi][(tgta * 100) + PrimSel];
 
   if (rathist) {
-    return EvalHist3D(rathist, E_nu_GeV, PLep_GeV, ThetaLep, false);
+    return EvalHist3D(rathist, E_nu_GeV, PLep_GeV, ThetaLep_GeV, false);
   }
 
   return 1;

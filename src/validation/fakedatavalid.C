@@ -213,16 +213,16 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     double rw_w = 1;
     if (weightconfig == t2knova::kT2KND_to_NOvA) {
       rw_w *= t2knova::GetFakeDataWeight_ND280ToNOvA(
-          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
-          rdr.AngLep_deg(), primary_selection);
+          rdr.PDGNu(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(), rdr.AngLep_deg(),
+          primary_selection);
     } else if (weightconfig == t2knova::kT2KND_to_T2KNonQE) {
       rw_w *= t2knova::GetFakeDataWeight_ND280ToT2KNonQE(
-          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
-          rdr.AngLep_deg(), primary_selection);
+          rdr.PDGNu(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(), rdr.AngLep_deg(),
+          primary_selection);
     } else if (weightconfig == t2knova::kT2KND_to_T2KMnv1Pi) {
       rw_w *= t2knova::GetFakeDataWeight_ND280ToT2KMnv1Pi(
-          rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(),
-          rdr.AngLep_deg(), primary_selection);
+          rdr.PDGNu(), rdr.tgta(), rdr.Enu_true(), rdr.PLep(), rdr.AngLep_deg(),
+          primary_selection);
     } else if (weightconfig == t2knova::kNOvA_to_T2KND_ptlep) {
       rw_w *= t2knova::GetFakeDataWeight_NOvAToT2KND_PtLep(
           rdr.PDGNu(), rdr.PDGLep(), rdr.tgta(), rdr.Enu_true(),
