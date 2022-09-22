@@ -145,7 +145,7 @@ for DET in ${DETECTORS[@]}; do
                     continue
                   fi
 
-                  if [ "${NUC}" != "any" ]
+                  if [ "${NUC}" != "any" ]; then
                     if [ "${DO_MAT_ELEMENTS}" != "1" ]; then
                       continue
                     fi
