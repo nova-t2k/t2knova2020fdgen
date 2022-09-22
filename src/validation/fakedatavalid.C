@@ -39,6 +39,7 @@ SelectionHists<TH1F> *EAvHad;
 SelectionHists<TH1F> *PtLep;
 SelectionHists<TH1F> *Q2;
 SelectionHists<TH1F> *q0;
+SelectionHists<TH1F> *q3;
 SelectionHists<TH1F> *yrec;
 SelectionHists<TH2F> *Enuyrec;
 SelectionHists<TH2F> *EnuQ2;
@@ -107,6 +108,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   EnuEAvHad = SelectionHistsFromTOML<TH2F>("EnuEAvHad", plots_config);
 
   q0 = SelectionHistsFromTOML<TH1F>("q0", plots_config);
+  q3 = SelectionHistsFromTOML<TH1F>("q3", plots_config);
   yrec = SelectionHistsFromTOML<TH1F>("yrec", plots_config);
   Enuyrec = SelectionHistsFromTOML<TH2F>("Enuyrec", plots_config);
 
@@ -267,6 +269,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     Q2->Fill(w, sels, mode, rdr.Q2());
 
     q0->Fill(w, sels, mode, rdr.q0());
+    q3->Fill(w, sels, mode, rdr.q3());
     float yrecf = rdr.Eav_NOvA() / (rdr.Eav_NOvA() + rdr.FSLepP4().E());
     yrec->Fill(w, sels, mode, yrecf);
     Enuyrec->Fill(w, sels, mode, rdr.Enu_true(), yrecf);
@@ -541,6 +544,7 @@ int main(int argc, char const *argv[]) {
   EnuEAvHad->Write(dout, true);
 
   q0->Write(dout, true);
+  q3->Write(dout, true);
   yrec->Write(dout, true);
   Enuyrec->Write(dout, true);
 

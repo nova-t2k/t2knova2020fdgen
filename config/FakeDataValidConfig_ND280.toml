@@ -70,7 +70,21 @@ x_binning = [
 
 axis_titles = [
       "q_{0} (GeV)",
-      "d#sigma/dq_{0} cm^{2} GeV^{-1} #it{c}"
+      "d#sigma/dq_{0} cm^{2} GeV^{-1}"
+]
+
+[FakeDataValidConfig.q3]
+title = "q3"
+selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+
+x_binning = [
+      "uniform",
+      [100,0,3]
+]
+
+axis_titles = [
+      "q_{3} (GeV/c)",
+      "d#sigma/dq_{3} cm^{2} GeV^{-1} #it{c}"
 ]
 
 [FakeDataValidConfig.yrec]

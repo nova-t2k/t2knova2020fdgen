@@ -27,6 +27,18 @@ struct nova_part {
   vect4 p;
 };
 
+enum class FSIModes {
+  kCC0Pi = 0,
+  kCC1Pi = 1,
+  kCCOth = 2,
+  kCCInc = 3,
+  kNCInc = 4,
+  kCC1cPi = 5,
+  kCC1Pi0 = 6,
+  kCCMultiPi = 7,
+  kNope = -5
+};
+
 class T2KNOvATruthTreeReader {
 public:
   int PDGLep() { return *_PDGLep; }
@@ -180,6 +192,63 @@ public:
 
     return eAvail;
   }
+
+  FSIModes NOvAFSIMode() {
+    bool first_lep = true;
+
+    int nfsipip = 0;
+    int nfsipim = 0;
+    int nfsipi0 = 0;
+    int nfsilep = 0;
+    int nfsiphn = 0;
+    int nfsinuc = 0;
+    int nfsioth = 0;
+    for (int i = 0; i < *_nfsp; ++i) {
+      nova_part particle(_pdg[i],
+                         std::array<float, 4>{_px[i], _py[i], _pz[i], _E[i]});
+
+      if (particle.pdg > 1000000000) {
+        return FSIModes::kNope; // COH interaction off of nuclei
+      }
+
+      if (particle.pdg == 211) {
+        nfsipip++;
+      } else if (particle.pdg == -211) {
+        nfsipim++;
+      } else if (particle.pdg == 111) {
+        nfsipi0++;
+      } else if (particle.pdg == 22) {
+        nfsiphn++;
+      } else if ((abs(particle.pdg) > 10 && abs(particle.pdg) < 17)) {
+        if (first_lep && !(abs(particle.pdg) & 1)) {
+          return FSIModes::kNCInc;
+        }
+        first_lep = false;
+        nfsilep++;
+      } else if (particle.pdg == 2112 || particle.pdg == 2212) {
+        nfsinuc++;
+      } else {
+        nfsioth++;
+      }
+    }
+
+    if (nfsilep > 1) {
+      nfsioth += nfsilep - 1;
+    }
+
+    if (nfsipip + nfsipim + nfsipi0 + nfsioth == 0) {
+      return FSIModes::kCC0Pi;
+    } else if (nfsipip + nfsipim == 1 && nfsipi0 + nfsioth == 0) {
+      return FSIModes::kCC1cPi;
+    } else if (nfsipi0 == 1 && nfsipip + nfsipim + nfsioth == 0) {
+      return FSIModes::kCC1Pi0;
+    } else if (nfsipip + nfsipim + nfsipi0 > 1 && nfsioth == 0) {
+      return FSIModes::kCCMultiPi;
+    } else {
+      return FSIModes::kCCOth;
+    }
+  }
+
   float Enu_true() { return *_Enu_true; }
   float PLep() { return *_PLep; }
   float Q2() { return *_Q2; }
@@ -287,8 +356,8 @@ public:
   }
 
 private:
-  // I know, we all hate it, but because of design of TTreeReader I really think
-  // having getters is easier
+  // I know, we all hate it, but because of design of TTreeReader I really
+  // think having getters is easier
   TTreeReaderValue<int> _PDGLep;
   TTreeReaderValue<int> _PDGNu;
   TTreeReaderValue<int> _Mode;
@@ -329,3 +398,44 @@ private:
 };
 
 } // namespace t2knova
+
+inline std::ostream &operator<<(std::ostream &os, t2knova::FSIModes m) {
+  switch (m) {
+  case t2knova::FSIModes::kCC0Pi: {
+    return os << "kCC0Pi";
+  }
+
+  case t2knova::FSIModes::kCC1Pi: {
+    return os << "kCC1Pi";
+  }
+
+  case t2knova::FSIModes::kCCOth: {
+    return os << "kCCOth";
+  }
+
+  case t2knova::FSIModes::kCCInc: {
+    return os << "kCCInc";
+  }
+
+  case t2knova::FSIModes::kNCInc: {
+    return os << "kNCInc";
+  }
+
+  case t2knova::FSIModes::kCC1cPi: {
+    return os << "kCC1cPi";
+  }
+
+  case t2knova::FSIModes::kCC1Pi0: {
+    return os << "kCC1Pi0";
+  }
+
+  case t2knova::FSIModes::kCCMultiPi: {
+    return os << "kCCMultiPi";
+  }
+
+  case t2knova::FSIModes::kNope: {
+    return os << "kNope";
+  }
+  }
+  return os;
+}

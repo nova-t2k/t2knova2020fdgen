@@ -149,7 +149,7 @@ inline std::unique_ptr<TH1> GetTH1(std::string const &fname,
                                    std::string const &name, bool quiet = true) {
   TDirectory *odir = gDirectory;
 
-  auto f = make_unique<TFile>(fname.c_str());
+  auto f = ::make_unique<TFile>(fname.c_str());
   std::unique_ptr<TH1> h = GetTH1(f, name, quiet);
 
   if (odir) {
