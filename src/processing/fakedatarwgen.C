@@ -56,15 +56,15 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
                  DoFDS ? std::vector<std::string>{ToNOvATUNE}
                        : std::vector<std::string>{ToNOvATUNE}) {
 
-              std::string FromT2KHistName = "NEUT/ND280/" + targetnuc + "/" +
-                                            species + "/" + FromT2KTUNE + "/" +
+              std::string FromT2KHistName = "ND280/NEUT/" + FromT2KTUNE + "/" +
+                                            targetnuc + "/" + species + "/" +
                                             proj + "_" + selection;
 
               std::unique_ptr<TH1> neut_nd280_EnuPLepThetaLep =
                   GetTH<TH1>(fin, FromT2KHistName);
               std::unique_ptr<TH1> genie_nd280 = GetTH<TH1>(
-                  fin, "GENIE/ND280/" + targetnuc + "/" + species + "/" +
-                           TOTUNE + "/" + proj + "_" + selection);
+                  fin, "ND280/GENIE/" + TOTUNE + "/" + targetnuc + "/" +
+                           species + "/" + proj + "_" + selection);
               if (neut_nd280_EnuPLepThetaLep && genie_nd280) { // ND280
                 neut_nd280_EnuPLepThetaLep->SetDirectory(nullptr);
                 genie_nd280->SetDirectory(nullptr);
@@ -97,15 +97,15 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
                 continue;
               }
 
-              std::string FromT2KHistName = "NEUT/ND280/" + targetnuc + "/" +
-                                            species + "/" + FromT2KTUNE + "/" +
+              std::string FromT2KHistName = "ND280/NEUT/" + FromT2KTUNE + "/" +
+                                            targetnuc + "/" + species + "/" +
                                             proj + "_" + selection;
 
               std::unique_ptr<TH1> neut_nd280_EnuPLepThetaLep =
                   GetTH<TH1>(fin, FromT2KHistName);
               std::unique_ptr<TH1> FDS_nd280 = GetTH<TH1>(
-                  fin, "NEUT/ND280/" + targetnuc + "/" + species + "/" +
-                           TOTUNE + "/" + proj + "_" + selection);
+                  fin, "ND280/NEUT/" + TOTUNE + "/" + targetnuc + "/" +
+                           species + "/" + proj + "_" + selection);
               if (neut_nd280_EnuPLepThetaLep && FDS_nd280) { // ND280
                 neut_nd280_EnuPLepThetaLep->SetDirectory(nullptr);
                 FDS_nd280->SetDirectory(nullptr);
@@ -147,14 +147,14 @@ int fakedatarwgen(std::string const &ifile, std::string const &ofile) {
                                                   FDSToTunes[1], FDSToTunes[2]}
                        : std::vector<std::string>{ToT2KTUNE}) {
 
-              std::string ToNOvAHistName = "NEUT/NOvAND/" + targetnuc + "/" +
-                                           species + "/" + TOTUNE + "/" + proj +
-                                           "_" + selection;
+              std::string ToNOvAHistName = "NOvAND/NEUT/" + TOTUNE + "/" +
+                                           targetnuc + "/" + species + "/" +
+                                           proj + "_" + selection;
               std::unique_ptr<TH1> neut_novand_plep =
                   GetTH<TH1>(fin, ToNOvAHistName);
               std::unique_ptr<TH1> genie_novand = GetTH<TH1>(
-                  fin, "GENIE/NOvAND/" + targetnuc + "/" + species + "/" +
-                           FromNOvATUNE + "/" + proj + "_" + selection);
+                  fin, "NOvAND/GENIE/" + FromNOvATUNE + "/" + targetnuc + "/" +
+                           species + "/" + proj + "_" + selection);
               if (neut_novand_plep && genie_novand) { // NOvAND
                 neut_novand_plep->SetDirectory(nullptr);
                 genie_novand->SetDirectory(nullptr);

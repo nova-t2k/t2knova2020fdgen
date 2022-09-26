@@ -24,45 +24,45 @@ bool bymode = false;
 enum FDS { kGenerated, kNDTuned, kMnv1Pi, kNonQE };
 FDS FDSSet = kGenerated;
 
-TrueChannelHist<TH1F> *XSecs;
-SelectionHists<TH1F> *EvWeights;
+TrueChannelHist<TH1D> *XSecs;
+SelectionHists<TH1D> *EvWeights;
 
-SelectionHists<TH1F> *Enu;
-SelectionHists<TH1F> *ERecQE;
-SelectionHists<TH1F> *PLep;
-SelectionHists<TH1F> *ThetaLep;
-SelectionHists<TH1F> *CosThetaLep;
-SelectionHists<TH2F> *PThetaLep;
-SelectionHists<TH2F> *PThetaLep_outlier_low;
-SelectionHists<TH2F> *PThetaLep_outlier_high;
-SelectionHists<TH1F> *EAvHad;
-SelectionHists<TH1F> *PtLep;
-SelectionHists<TH1F> *Q2;
-SelectionHists<TH1F> *q0;
-SelectionHists<TH1F> *q3;
-SelectionHists<TH1F> *yrec;
-SelectionHists<TH2F> *Enuyrec;
-SelectionHists<TH2F> *EnuQ2;
-SelectionHists<TH2F> *EnuQ2_outlier_low;
-SelectionHists<TH2F> *EnuQ2_outlier_high;
-SelectionHists<TH2F> *EnuERecQE;
-SelectionHists<TH2F> *EnuERecQEBias;
-SelectionHists<TH2F> *EnuERecAvBias;
-SelectionHists<TH2F> *q0q3_high_outlier_low;
-SelectionHists<TH2F> *q0q3_high_outlier_high;
-SelectionHists<TH2F> *q0q3_low;
-SelectionHists<TH2F> *q0q3_high;
-SelectionHists<TH2F> *EnuEAvHad;
-SelectionHists<TH1F> *hmfscpip;
-SelectionHists<TH1F> *hmfspi0p;
-SelectionHists<TH1F> *ncpi;
-SelectionHists<TH1F> *npi0;
-SelectionHists<TH1F> *hmfsprotonp;
-SelectionHists<TH1F> *hmfsneutronp;
-SelectionHists<TH1F> *nproton;
-SelectionHists<TH1F> *nneutron;
-SelectionHists<TH1F> *EGamma;
-SelectionHists<TH1F> *EGamma_DeExcite;
+SelectionHists<TH1D> *Enu;
+SelectionHists<TH1D> *ERecQE;
+SelectionHists<TH1D> *PLep;
+SelectionHists<TH1D> *ThetaLep;
+SelectionHists<TH1D> *CosThetaLep;
+SelectionHists<TH2D> *PThetaLep;
+SelectionHists<TH2D> *PThetaLep_outlier_low;
+SelectionHists<TH2D> *PThetaLep_outlier_high;
+SelectionHists<TH1D> *EAvHad;
+SelectionHists<TH1D> *PtLep;
+SelectionHists<TH1D> *Q2;
+SelectionHists<TH1D> *q0;
+SelectionHists<TH1D> *q3;
+SelectionHists<TH1D> *yrec;
+SelectionHists<TH2D> *Enuyrec;
+SelectionHists<TH2D> *EnuQ2;
+SelectionHists<TH2D> *EnuQ2_outlier_low;
+SelectionHists<TH2D> *EnuQ2_outlier_high;
+SelectionHists<TH2D> *EnuERecQE;
+SelectionHists<TH2D> *EnuERecQEBias;
+SelectionHists<TH2D> *EnuERecAvBias;
+SelectionHists<TH2D> *q0q3_high_outlier_low;
+SelectionHists<TH2D> *q0q3_high_outlier_high;
+SelectionHists<TH2D> *q0q3_low;
+SelectionHists<TH2D> *q0q3_high;
+SelectionHists<TH2D> *EnuEAvHad;
+SelectionHists<TH1D> *hmfscpip;
+SelectionHists<TH1D> *hmfspi0p;
+SelectionHists<TH1D> *ncpi;
+SelectionHists<TH1D> *npi0;
+SelectionHists<TH1D> *hmfsprotonp;
+SelectionHists<TH1D> *hmfsneutronp;
+SelectionHists<TH1D> *nproton;
+SelectionHists<TH1D> *nneutron;
+SelectionHists<TH1D> *EGamma;
+SelectionHists<TH1D> *EGamma_DeExcite;
 
 double const mass_proton = 0.938272;
 double const mass_neutron = 0.939565;
@@ -93,78 +93,77 @@ double EnuQErec(double elep, double plep, double costh, double binding,
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
           t2knova::reweightconfig weightconfig, int tgta_select = 0) {
 
-  Enu = SelectionHistsFromTOML<TH1F>("Enu", plots_config);
+  Enu = SelectionHistsFromTOML<TH1D>("Enu", plots_config);
 
-  ERecQE = SelectionHistsFromTOML<TH1F>("ERecQE", plots_config);
-  PLep = SelectionHistsFromTOML<TH1F>("PLep", plots_config);
-  Q2 = SelectionHistsFromTOML<TH1F>("Q2", plots_config);
-  EnuQ2 = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
-  EnuERecQE = SelectionHistsFromTOML<TH2F>("EnuERecQE", plots_config);
-  EnuERecQEBias = SelectionHistsFromTOML<TH2F>("EnuERecQEBias", plots_config);
-  EnuERecAvBias = SelectionHistsFromTOML<TH2F>("EnuERecAvBias", plots_config);
+  ERecQE = SelectionHistsFromTOML<TH1D>("ERecQE", plots_config);
+  PLep = SelectionHistsFromTOML<TH1D>("PLep", plots_config);
+  Q2 = SelectionHistsFromTOML<TH1D>("Q2", plots_config);
+  EnuQ2 = SelectionHistsFromTOML<TH2D>("EnuQ2", plots_config);
+  EnuERecQE = SelectionHistsFromTOML<TH2D>("EnuERecQE", plots_config);
+  EnuERecQEBias = SelectionHistsFromTOML<TH2D>("EnuERecQEBias", plots_config);
+  EnuERecAvBias = SelectionHistsFromTOML<TH2D>("EnuERecAvBias", plots_config);
 
-  q0q3_low = SelectionHistsFromTOML<TH2F>("q0q3_low", plots_config);
-  q0q3_high = SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
-  EnuEAvHad = SelectionHistsFromTOML<TH2F>("EnuEAvHad", plots_config);
+  q0q3_low = SelectionHistsFromTOML<TH2D>("q0q3_low", plots_config);
+  q0q3_high = SelectionHistsFromTOML<TH2D>("q0q3_high", plots_config);
+  EnuEAvHad = SelectionHistsFromTOML<TH2D>("EnuEAvHad", plots_config);
 
-  q0 = SelectionHistsFromTOML<TH1F>("q0", plots_config);
-  q3 = SelectionHistsFromTOML<TH1F>("q3", plots_config);
-  yrec = SelectionHistsFromTOML<TH1F>("yrec", plots_config);
-  Enuyrec = SelectionHistsFromTOML<TH2F>("Enuyrec", plots_config);
+  q0 = SelectionHistsFromTOML<TH1D>("q0", plots_config);
+  q3 = SelectionHistsFromTOML<TH1D>("q3", plots_config);
+  yrec = SelectionHistsFromTOML<TH1D>("yrec", plots_config);
+  Enuyrec = SelectionHistsFromTOML<TH2D>("Enuyrec", plots_config);
 
-  ThetaLep = SelectionHistsFromTOML<TH1F>("ThetaLep", plots_config);
-  CosThetaLep = SelectionHistsFromTOML<TH1F>("CosThetaLep", plots_config);
+  ThetaLep = SelectionHistsFromTOML<TH1D>("ThetaLep", plots_config);
+  CosThetaLep = SelectionHistsFromTOML<TH1D>("CosThetaLep", plots_config);
 
-  PThetaLep = SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
+  PThetaLep = SelectionHistsFromTOML<TH2D>("PThetaLep", plots_config);
 
-  EAvHad = SelectionHistsFromTOML<TH1F>("EAvHad", plots_config);
+  EAvHad = SelectionHistsFromTOML<TH1D>("EAvHad", plots_config);
 
-  PtLep = SelectionHistsFromTOML<TH1F>("PtLep", plots_config);
+  PtLep = SelectionHistsFromTOML<TH1D>("PtLep", plots_config);
 
-  hmfscpip = SelectionHistsFromTOML<TH1F>("hmfscpip", plots_config);
-  hmfspi0p = SelectionHistsFromTOML<TH1F>("hmfspi0p", plots_config);
-  ncpi = SelectionHistsFromTOML<TH1F>("ncpi", plots_config);
-  npi0 = SelectionHistsFromTOML<TH1F>("npi0", plots_config);
+  hmfscpip = SelectionHistsFromTOML<TH1D>("hmfscpip", plots_config);
+  hmfspi0p = SelectionHistsFromTOML<TH1D>("hmfspi0p", plots_config);
+  ncpi = SelectionHistsFromTOML<TH1D>("ncpi", plots_config);
+  npi0 = SelectionHistsFromTOML<TH1D>("npi0", plots_config);
 
-  hmfsprotonp = SelectionHistsFromTOML<TH1F>("hmfsprotonp", plots_config);
-  hmfsneutronp = SelectionHistsFromTOML<TH1F>("hmfsneutronp", plots_config);
-  nproton = SelectionHistsFromTOML<TH1F>("nproton", plots_config);
-  nneutron = SelectionHistsFromTOML<TH1F>("nneutron", plots_config);
+  hmfsprotonp = SelectionHistsFromTOML<TH1D>("hmfsprotonp", plots_config);
+  hmfsneutronp = SelectionHistsFromTOML<TH1D>("hmfsneutronp", plots_config);
+  nproton = SelectionHistsFromTOML<TH1D>("nproton", plots_config);
+  nneutron = SelectionHistsFromTOML<TH1D>("nneutron", plots_config);
 
-  EGamma = SelectionHistsFromTOML<TH1F>("EGamma", plots_config);
+  EGamma = SelectionHistsFromTOML<TH1D>("EGamma", plots_config);
   EGamma_DeExcite =
-      SelectionHistsFromTOML<TH1F>("EGamma_DeExcite", plots_config);
+      SelectionHistsFromTOML<TH1D>("EGamma_DeExcite", plots_config);
 
-  XSecs = new TrueChannelHist<TH1F>("SelectionXSecs", ";Selection;Rate",
+  XSecs = new TrueChannelHist<TH1D>("SelectionXSecs", ";Selection;Rate",
                                     AllSelectionList.size(), 0,
                                     AllSelectionList.size());
-  EvWeights = SelectionHistsFromTOML<TH1F>("EvWeights", plots_config);
+  EvWeights = SelectionHistsFromTOML<TH1D>("EvWeights", plots_config);
 
   PThetaLep_outlier_low =
-      SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
+      SelectionHistsFromTOML<TH2D>("PThetaLep", plots_config);
   PThetaLep_outlier_low->SetName("PThetaLep_outlier_low");
   PThetaLep_outlier_low->SetZAxisTitle("Count with w <= 0.1");
   PThetaLep_outlier_high =
-      SelectionHistsFromTOML<TH2F>("PThetaLep", plots_config);
+      SelectionHistsFromTOML<TH2D>("PThetaLep", plots_config);
   PThetaLep_outlier_high->SetName("PThetaLep_outlier_high");
   PThetaLep_outlier_high->SetZAxisTitle("Count with w >= 10");
-  EnuQ2_outlier_low = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
+  EnuQ2_outlier_low = SelectionHistsFromTOML<TH2D>("EnuQ2", plots_config);
   EnuQ2_outlier_low->SetName("EnuQ2_outlier_low");
   EnuQ2_outlier_low->SetZAxisTitle("Count with w <= 0.1");
-  EnuQ2_outlier_high = SelectionHistsFromTOML<TH2F>("EnuQ2", plots_config);
+  EnuQ2_outlier_high = SelectionHistsFromTOML<TH2D>("EnuQ2", plots_config);
   EnuQ2_outlier_high->SetName("EnuQ2_outlier_high");
   EnuQ2_outlier_high->SetZAxisTitle("Count with w >= 10");
   q0q3_high_outlier_low =
-      SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
+      SelectionHistsFromTOML<TH2D>("q0q3_high", plots_config);
   q0q3_high_outlier_low->SetName("q0q3_high_outlier_low");
   q0q3_high_outlier_low->SetZAxisTitle("Count with w <= 0.1");
   q0q3_high_outlier_high =
-      SelectionHistsFromTOML<TH2F>("q0q3_high", plots_config);
+      SelectionHistsFromTOML<TH2D>("q0q3_high", plots_config);
   q0q3_high_outlier_high->SetName("q0q3_high_outlier_high");
   q0q3_high_outlier_high->SetZAxisTitle("Count with w >= 10");
 
   T2KNOvATruthTreeReader rdr(ttrdr);
-  int mode = bymode ? rdr.Mode() : 0;
 
   size_t nents = ttrdr.GetEntries(true);
   size_t ent_it = 0;
@@ -173,6 +172,9 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   double EnuCut = toml::find<double>(plots_config, "EnuCut");
 
   while (ttrdr.Next()) {
+
+    int mode = bymode ? rdr.Mode() : 0;
+
     if (ent_it && !(ent_it % shout_it)) {
       std::cout << "[Read] " << ent_it << "/" << nents << "("
                 << (100 * ent_it / nents) << "%)" << std::endl;
@@ -180,10 +182,6 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
 
     if (tgta_select && (rdr.tgta() != tgta_select)) {
       ent_it++;
-      continue;
-    }
-
-    if (rdr.Enu_true() > EnuCut) {
       continue;
     }
 
@@ -510,7 +508,7 @@ int main(int argc, char const *argv[]) {
 
   TDirectory *dout = MakeDirectoryStructure(&fout, output_dir);
 
-  XSecs->Apply([](TH1F &h) {
+  XSecs->Apply([](TH1D &h) {
     for (int i = 0; i < SelectionList.size(); ++i) {
       h.GetXaxis()->SetBinLabel(i + 1, SelectionList[i].c_str());
     }

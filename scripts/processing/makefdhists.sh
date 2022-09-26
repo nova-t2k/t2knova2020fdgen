@@ -55,13 +55,14 @@ for gen in ${GENERATORS[@]}; do
 
             for tgtel in ${TGTEL["${det}_${mat}"]}; do
 
+
               CMD="bin/fakedatahists.exe -i flattrees/t2knova.flattree.${gen}.${det}.${mat}.${tune}.${spec}.root \
                                          -H config/FakeDataConfig.toml \
                                          -e ${det} \
                                          --FDS ${fds} \
                                          -o FDSInputs/FakeDataHists_${spec}_${tgtel}.root \
                                          -a ${tgtel} \
-                                         -d ${gen}/${det}/${tgtel}/${spec}/${LASTDIRNAME}"
+                                         -d ${det}/${gen}/${LASTDIRNAME}/${tgtel}/${spec}"
               echo $CMD
               ${CMD} &
             done
@@ -72,7 +73,7 @@ for gen in ${GENERATORS[@]}; do
                                        --FDS ${fds} \
                                        -o FDSInputs/FakeDataHists_${spec}.root \
                                        -a any \
-                                       -d ${gen}/${det}/${mat}/${spec}/${LASTDIRNAME}"
+                                       -d ${det}/${gen}/${LASTDIRNAME}/${mat}/${spec}"
             echo $CMD
             ${CMD} &
 

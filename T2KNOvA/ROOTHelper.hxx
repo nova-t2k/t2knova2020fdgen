@@ -330,6 +330,15 @@ void ScrubLowStatsBins(std::unique_ptr<TH2> &num, std::unique_ptr<TH2> &denom,
   }
 }
 
+template <typename T>
+std::unique_ptr<T> Clone(std::unique_ptr<T> &o, std::string name = "") {
+  std::unique_ptr<T> c(static_cast<T *>(
+      o->Clone(name.length() ? name.c_str()
+                             : (std::string(o->GetName()) + "_c").c_str())));
+  c->SetDirectory(nullptr);
+  return c;
+}
+
 void ScrubLowStatsBins(std::unique_ptr<TH1> &num, std::unique_ptr<TH1> &denom,
                        std::unique_ptr<TH1> &ratio,
                        double frac_error_threshold) {

@@ -246,7 +246,7 @@ static std::vector<selection> ReWeightSelectionList = {
     kNC0pi, kNC1cpi, kNC1pi0, kNCmultipi, kNCOther};
 #else
 static std::vector<selection> ReWeightSelectionList = {
-    kCC0pi,  kCC0pi_QE,  kCC0pi_2p2h, kCC0pi_Other, kCC1cpi,
+    kCC0pi_QE,  kCC0pi_2p2h, kCC0pi_Other, kCC1cpi,
     kCC1pi0, kCCmultipi, kCCOther,    kNC0pi,       kNC1cpi,
     kNC1pi0, kNCmultipi, kNCOther};
 #endif

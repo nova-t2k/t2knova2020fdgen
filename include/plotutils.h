@@ -75,24 +75,71 @@ void StyleTH1Fill(std::unique_ptr<TH1> &h, int color, int style = 1001,
   h->SetFillColorAlpha(color, alpha);
 }
 
-double GetMinimumTH1(TH1 const & h){
+double GetMinimumTH1(TH1 const &h) {
   double min = -std::numeric_limits<double>::min();
-  
-  for (int i = 0; i < h.GetXaxis()->GetNbins(); ++i){
-    min = std::min(min, h.GetBinContent(i+1));
+
+  for (int i = 0; i < h.GetXaxis()->GetNbins(); ++i) {
+    min = std::min(min, h.GetBinContent(i + 1));
   }
 
   return min;
 }
 
-double GetMaximumTH1(TH1 const & h){
+double GetMaximumTH1(TH1 const &h) {
   double max = -std::numeric_limits<double>::max();
-  
-  for (int i = 0; i < h.GetXaxis()->GetNbins(); ++i){
-    max = std::max(max,h.GetBinContent(i+1));
+
+  for (int i = 0; i < h.GetXaxis()->GetNbins(); ++i) {
+    max = std::max(max, h.GetBinContent(i + 1));
   }
 
   return max;
+}
+
+template <typename T>
+std::enable_if_t<std::is_base_of_v<TH1, T>, double>
+GetMaximumTH1s(std::vector<std::unique_ptr<T>> &hs) {
+  double max = -std::numeric_limits<double>::max();
+
+  for (auto &h : hs) {
+    if (!h) {
+      continue;
+    }
+    max = std::max(max, GetMaximumTH1(*h));
+  }
+
+  return max;
+}
+
+template <typename T>
+std::enable_if_t<std::is_base_of_v<TH1, T>, double>
+GetMinimumTH1s(std::vector<std::unique_ptr<T>> &hs) {
+  double min = std::numeric_limits<double>::min();
+
+  for (auto &h : hs) {
+    if (!h) {
+      continue;
+    }
+    min = std::min(min, GetMinimumTH1(*h));
+  }
+
+  return min;
+}
+
+template <typename T>
+std::enable_if_t<std::is_base_of_v<TH1, T>, void>
+DrawTH1s(std::vector<std::unique_ptr<T>> &hs, std::string opts = "",
+         bool first = true, bool setrange = true) {
+  for (auto &h : hs) {
+    if (!h) {
+      continue;
+    }
+    if (first && setrange) {
+      h->GetYaxis()->SetRangeUser(0, GetMaximumTH1s(hs) * 1.05);
+    }
+    std::string dopt = std::string(!first ? "SAME" : "") + opts;
+    h->DrawClone(dopt.c_str());
+    first = false;
+  }
 }
 
 double
@@ -285,32 +332,6 @@ void ScaleTH1s(std::vector<std::unique_ptr<TH1>> &hs, double s,
     rhs.push_back(h);
   }
   ScaleTH1s(rhs, s, width_scale);
-}
-
-double GetMaximumTH1s(std::vector<std::unique_ptr<TH1>> &hs) {
-  std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> rhs;
-  for (auto &h : hs) {
-    rhs.push_back(h);
-  }
-  return GetMaximumTH1s(rhs);
-}
-
-
-double GetMinimumTH1s(std::vector<std::unique_ptr<TH1>> &hs) {
-  std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> rhs;
-  for (auto &h : hs) {
-    rhs.push_back(h);
-  }
-  return GetMinimumTH1s(rhs);
-}
-
-void DrawTH1s(std::vector<std::unique_ptr<TH1>> &hs, std::string opts = "",
-              bool first = true) {
-  std::vector<std::reference_wrapper<std::unique_ptr<TH1>>> rhs;
-  for (auto &h : hs) {
-    rhs.push_back(h);
-  }
-  DrawTH1s(rhs, opts, first);
 }
 
 TCanvas *MakeCanvas(double mt = 0.03, double ml = 0.15, double mr = 0.03,

@@ -3,7 +3,7 @@
 [FakeDataConfig.EnuPLepThetaLep]
 
 title = "EnuPLepThetaLep"
-selections = [ "CCInc", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0", 
+selections = [ "CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0", 
       "CCmultipi", "CCOther", "NCInc", "NC0pi", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", ]
 
 x_binning = [
@@ -38,7 +38,7 @@ axis_titles = [
 [FakeDataConfig.EnuPtLepEAvHad]
 
 title = "EnuPtLepEAvHad"
-selections = [ "CCInc", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0",
+selections = [ "CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0",
       "CCmultipi", "CCOther", "NCInc", "NC0pi", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", ]
 
 x_binning = [
@@ -61,4 +61,20 @@ axis_titles = [
       "#it{p}^{T}_{lep} (GeV/#it{c})",
       "#it{E}_{Had}^{Vis} (GeV)",
       "GeV^{-4} #it{c}"
+]
+
+[FakeDataConfig.Enu]
+
+title = "Enu"
+selections = [ "CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1cpi", "CC1pi0",
+      "CCmultipi", "CCOther", "NCInc", "NC0pi", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", ]
+
+x_binning = [
+      "uniform",
+      [100, 0, 20]
+]
+
+axis_titles = [
+      "#it{E}_{#nu} (GeV)",
+      "d#sigma/d#it{E}_{#nu}cm^{2} GeV^{-1}"
 ]

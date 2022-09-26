@@ -1,3 +1,5 @@
+#define T2KNOVARW_MERGED_CC0PI
+
 #include "ChannelHistCollections.h"
 
 #include "T2KNOvA/ROOTHelper.hxx"
@@ -19,11 +21,15 @@ bool bymode = false;
 
 using namespace t2knova;
 
+bool HasSel(std::vector<int> const &sels, int sel_to_check) {
+  return (std::find(sels.begin(), sels.end(), sel_to_check) != sels.end());
+}
+
 enum FDS { kGenerated, kNDTuned, kMnv1Pi, kNonQE };
 
-SelectionHists<TH3F> *EnuPLepThetaLep;
-SelectionHists<TH3F> *EnuPtLepEAvHad;
-TrueChannelHist<TH1F> *XSecs;
+SelectionHists<TH3D> *EnuPLepThetaLep;
+SelectionHists<TH3D> *EnuPtLepEAvHad;
+TrueChannelHist<TH1D> *XSecs;
 FDS FDSSet = kGenerated;
 
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
@@ -31,13 +37,13 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config, bool ist2k,
 
   if (ist2k) {
     EnuPLepThetaLep =
-        SelectionHistsFromTOML<TH3F>("EnuPLepThetaLep", plots_config);
+        SelectionHistsFromTOML<TH3D>("EnuPLepThetaLep", plots_config);
   } else {
     EnuPtLepEAvHad =
-        SelectionHistsFromTOML<TH3F>("EnuPtLepEAvHad", plots_config);
+        SelectionHistsFromTOML<TH3D>("EnuPtLepEAvHad", plots_config);
   }
 
-  XSecs = new TrueChannelHist<TH1F>("SelectionXSecs", ";Selection;Rate",
+  XSecs = new TrueChannelHist<TH1D>("SelectionXSecs", ";Selection;Rate",
                                     AllSelectionList.size(), 0,
                                     AllSelectionList.size());
 
@@ -110,14 +116,14 @@ int tgta_select = 0;
 void SayUsage(char const *argv[]) {
   std::cout << "[USAGE]: " << argv[0]
             << "\n"
-               "\t-i <inp.root>          : Input file"
-               "\t-H <config.toml>       : RWHist config file"
-               "\t-o <out.root>          : Output file"
-               "\t--FDS <None|Mnv1Pi|NonQE> : Additional FDS weights to apply"
-               "\t-M                     : Separate by Mode"
-               "\t-a <[C|H|O|any]>       : Target descriptor"
-               "\t-e <[ND280|NOvAND]>    : Experiment"
-               "\t-d </sub/dir/to/use>   : Output sub directory"
+               "\n\t-i <inp.root>          : Input file"
+               "\n\t-H <config.toml>       : RWHist config file"
+               "\n\t-o <out.root>          : Output file"
+               "\n\t--FDS <None|Mnv1Pi|NonQE> : Additional FDS weights to apply"
+               "\n\t-M                     : Separate by Mode"
+               "\n\t-a <[C|H|O|any]>       : Target descriptor"
+               "\n\t-e <[ND280|NOvAND]>    : Experiment"
+               "\n\t-d </sub/dir/to/use>   : Output sub directory"
                " input tree. \n"
             << std::endl;
 }
@@ -173,7 +179,7 @@ void handleOpts(int argc, char const *argv[]) {
         FDSSet = kNonQE;
       } else {
         std::cout << "Invalid FDS selector passed: " << argv[4]
-                  << ". Should be None/Mnv1Pi/NonQE." << std::endl;
+                  << ". Should be Generated/NDTuned/Mnv1Pi/NonQE." << std::endl;
         abort();
       }
     } else if (std::string(argv[opt]) == "-d") {
@@ -212,7 +218,7 @@ int main(int argc, char const *argv[]) {
 
   TDirectory *dout = MakeDirectoryStructure(&fout, output_dir);
 
-  XSecs->Apply([](TH1F &h) {
+  XSecs->Apply([](TH1D &h) {
     for (int i = 0; i < SelectionList.size(); ++i) {
       h.GetXaxis()->SetBinLabel(i + 1, SelectionList[i].c_str());
     }
@@ -221,13 +227,13 @@ int main(int argc, char const *argv[]) {
   if (ist2k) {
     EnuPLepThetaLep->Write(dout, true);
     auto Enu = EnuPLepThetaLep->Transform<TH1D>(
-        [](TH3F const &in) -> TH1D { return TH1D(*in.ProjectionX()); });
+        [](TH3D const &in) -> TH1D { return TH1D(*in.ProjectionX()); });
     Enu.SetName("Enu");
     Enu.Write(dout, true);
   } else {
     EnuPtLepEAvHad->Write(dout, true);
     auto Enu = EnuPtLepEAvHad->Transform<TH1D>(
-        [](TH3F const &in) -> TH1D { return TH1D(*in.ProjectionX()); });
+        [](TH3D const &in) -> TH1D { return TH1D(*in.ProjectionX()); });
     Enu.SetName("Enu");
     Enu.Write(dout, true);
   }
