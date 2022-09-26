@@ -200,12 +200,9 @@ template <typename TH> struct SelectionHists {
   void Fill(double w, std::vector<int> const &Selections, int TrueChannel,
             XY... xy) {
     for (int sel : Selections) {
-      // std::cout << "sel: " << t2knova::SelectionList[sel] << " " << (Hists.count(sel) ? "have":"don't have") << " histo";
       if (Hists.count(sel)) {
-        // std::cout << ": " << Hists[sel].fName;
         Hists[sel].Fill(w, TrueChannel, xy...);
       }
-      // std::cout << "." << std::endl;
     }
   }
 

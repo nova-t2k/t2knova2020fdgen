@@ -1,5 +1,3 @@
-#define T2KNOVARW_MERGED_CC0PI
-
 #include "ChannelHistCollections.h"
 
 #include "T2KNOvA/ROOTHelper.hxx"
