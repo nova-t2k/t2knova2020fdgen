@@ -5,7 +5,40 @@ EnuCut = 8.0
 [FakeDataValidConfig.Enu]
 
 title = "Enu"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
+
 
 x_binning = [
       "var",
@@ -26,7 +59,27 @@ axis_titles = [
 [FakeDataValidConfig.ERecQE]
 
 title = "ERecQE"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "var",
@@ -47,7 +100,39 @@ axis_titles = [
 [FakeDataValidConfig.Q2]
 
 title = "Q2"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -61,7 +146,39 @@ axis_titles = [
 
 [FakeDataValidConfig.q0]
 title = "q0"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -75,7 +192,39 @@ axis_titles = [
 
 [FakeDataValidConfig.q3]
 title = "q3"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -89,7 +238,27 @@ axis_titles = [
 
 [FakeDataValidConfig.yrec]
 title = "yrec"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -103,7 +272,27 @@ axis_titles = [
 
 [FakeDataValidConfig.Enuyrec]
 title = "Enuyrec"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 y_binning = [
       "uniform",
@@ -130,7 +319,27 @@ axis_titles = [
 [FakeDataValidConfig.PLep]
 
 title = "PLep"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -145,7 +354,7 @@ axis_titles = [
 [FakeDataValidConfig.q0q3_low]
 
 title = "q0q3_low"
-selections = ["CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "NC1pi0" ]
+selections = ["CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "NC1pi0", "NOvAFSIMode_CC0Pi", ]
 
 x_binning = [
       "uniform",
@@ -166,7 +375,39 @@ axis_titles = [
 [FakeDataValidConfig.q0q3_high]
 
 title = "q0q3_high"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -187,7 +428,27 @@ axis_titles = [
 [FakeDataValidConfig.ThetaLep]
 
 title = "ThetaLep"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -202,7 +463,27 @@ axis_titles = [
 [FakeDataValidConfig.CosThetaLep]
 
 title = "CosThetaLep"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -217,7 +498,27 @@ axis_titles = [
 [FakeDataValidConfig.PThetaLep]
 
 title = "PThetaLep"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 y_binning = [
       "uniform",
@@ -238,7 +539,39 @@ axis_titles = [
 [FakeDataValidConfig.EnuQ2]
 
 title = "EnuQ2"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "var",
@@ -263,7 +596,27 @@ axis_titles = [
 [FakeDataValidConfig.EnuERecQE]
 
 title = "EnuERecQE"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "var",
@@ -292,7 +645,27 @@ axis_titles = [
 [FakeDataValidConfig.EnuERecQEBias]
 
 title = "EnuERecQEBias"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "var",
@@ -314,7 +687,27 @@ axis_titles = [
 [FakeDataValidConfig.EnuERecAvBias]
 
 title = "EnuERecAvBias"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", "NCInc", "NCInc_RW", "NC0pi", "NC1Gamma", "NCDeExciteGamma", "NCNGamma", "NC1cpi", "NC1pi0", "NCmultipi", "NCOther", "NCOther_QE", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "var",
@@ -338,25 +731,42 @@ axis_titles = [
       "d#sigma/d#it{E}_{#nu}#it{E}_{Rec. Bias}^{Had. Av.} cm^{2} GeV^{-1}"
 ]
 
-[FakeDataValidConfig.EvWeights]
-
-title = "EvWeights"
-selections = ["CCInc", "CCInc_RW", "CC0pi", "CC0pi_QE", "CC0pi_2p2h", "CC0pi_Other", "CC1Gamma", "CCDeExciteGamma", "CCNGamma", "CC1cpi", "CC1pi0", "CCmultipi", "CCOther", "CCOther_QE", ]
-
-x_binning = [
-      "uniform",
-      [100,0,10]
-]
-
-axis_titles = [
-      "Event Weight",
-      "Count (A.U.)"
-]
-
 [FakeDataValidConfig.hmfscpip]
 
 title = "hmfscpip"
-selections = [ "CCInc", "NCInc", "CCInc_RW", "NCInc_RW", "CC1cpi", "CCmultipi", "CCOther", "NC1cpi", "NCmultipi", "NCOther", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -371,7 +781,39 @@ axis_titles = [
 [FakeDataValidConfig.hmfspi0p]
 
 title = "hmfspi0p"
-selections = [ "CCInc", "NCInc", "CCInc_RW", "NCInc_RW", "CC1pi0", "CCmultipi", "CCOther", "NC1pi0", "NCmultipi", "NCOther", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -386,7 +828,39 @@ axis_titles = [
 [FakeDataValidConfig.ncpi]
 
 title = "ncpi"
-selections = [ "CCInc", "NCInc", "CCInc_RW", "NCInc_RW", "CC1cpi", "CCmultipi", "CCOther", "NC1cpi", "NCmultipi", "NCOther", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -401,8 +875,39 @@ axis_titles = [
 [FakeDataValidConfig.npi0]
 
 title = "npi0"
-selections = [ "CCInc", "NCInc", "CCInc_RW", "NCInc_RW", "CC1pi0", "CCmultipi", "CCOther", "NC1pi0", "NCmultipi", "NCOther", ]
-
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 x_binning = [
       "uniform",
       [5, 0, 5]
@@ -416,8 +921,39 @@ axis_titles = [
 [FakeDataValidConfig.hmfsprotonp]
 
 title = "hmfsprotonp"
-selections = [ "CCInc", "NCInc", "CCInc_RW", "NCInc_RW", "CC1cpi", "CCmultipi", "CCOther", "NC1cpi", "NCmultipi", "NCOther", ]
-
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 x_binning = [
       "uniform",
       [50,1E-8,1.5]
@@ -431,8 +967,39 @@ axis_titles = [
 [FakeDataValidConfig.hmfsneutronp]
 
 title = "hmfsneutronp"
-selections = [ "CCInc", "NCInc", "CCInc_RW", "NCInc_RW", "CC1pi0", "CCmultipi", "CCOther", "NC1pi0", "NCmultipi", "NCOther", ]
-
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 x_binning = [
       "uniform",
       [50,1E-8,1.5]
@@ -446,7 +1013,39 @@ axis_titles = [
 [FakeDataValidConfig.nproton]
 
 title = "nproton"
-selections = [ "CCInc", "NCInc", "CCInc_RW", "NCInc_RW", "CC1cpi", "CCmultipi", "CCOther", "NC1cpi", "NCmultipi", "NCOther", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -461,7 +1060,39 @@ axis_titles = [
 [FakeDataValidConfig.nneutrons]
 
 title = "nneutrons"
-selections = [ "CCInc", "NCInc", "CCInc_RW", "NCInc_RW", "CC1pi0", "CCmultipi", "CCOther", "NC1pi0", "NCmultipi", "NCOther", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
@@ -476,7 +1107,39 @@ axis_titles = [
 [FakeDataValidConfig.EGamma]
 
 title = "EGamma"
-selections = [ "CCInc", "CCInc_RW", "NCInc", "NCInc_RW", "CC1Gamma", "CCNGamma", "CCOther", "NC1Gamma", "NCNGamma", "NCOther", ]
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NCInc",
+  "NCInc_RW",
+  "NC0pi",
+  "NC1Gamma",
+  "NCDeExciteGamma",
+  "NCNGamma",
+  "NC1cpi",
+  "NC1pi0",
+  "NCmultipi",
+  "NCOther",
+  "NCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_NCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",

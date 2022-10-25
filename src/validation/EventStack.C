@@ -4,13 +4,13 @@
 
 using namespace t2knova;
 
-std::map<FSIModes, std::vector<selection>> MappedModes = {
-    {FSIModes::kCC0Pi, {kCC0pi}},
-    {FSIModes::kCC1cPi, {kCC1cpi}},
-    {FSIModes::kCC1Pi0, {kCC1pi0}},
-    {FSIModes::kCCMultiPi, {kCCmultipi}},
-    {FSIModes::kCCOth, {kCCOther}},
-    {FSIModes::kNCInc, {kNC0pi, kNC1cpi, kNC1pi0, kNCmultipi, kNCOther}},
+std::map<selection, std::vector<selection>> MappedModes = {
+    {kNOvAFSIMode_CC0Pi, {kCC0pi}},
+    {kNOvAFSIMode_CC1cPi, {kCC1cpi}},
+    {kNOvAFSIMode_CC1Pi0, {kCC1pi0}},
+    {kNOvAFSIMode_CCMultiPi, {kCCmultipi}},
+    {kNOvAFSIMode_CCOth, {kCCOther}},
+    {kNOvAFSIMode_NCInc, {kNC0pi, kNC1cpi, kNC1pi0, kNCmultipi, kNCOther}},
 };
 
 int main(int argc, char const *argv[]) {

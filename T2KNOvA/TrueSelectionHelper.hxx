@@ -35,6 +35,7 @@ struct FSParticleSummary {
   int NOtherBaryons;
   int NOther;
   int NNuclear;
+  int NOvAFSIMode;
 
   int GetNExoticHadrons() {
     int count = 0;
@@ -80,9 +81,12 @@ struct FSParticleSummary {
 
 static std::set<int> UnknownParticles;
 
-inline FSParticleSummary
-T2KNOvAFlatTreeToFSParticleSummary(int NFSP, int *FSPDG, float *FSE_GeV) {
+inline FSParticleSummary T2KNOvAFlatTreeToFSParticleSummary(int NFSP,
+                                                            int *FSPDG,
+                                                            float *FSE_GeV,
+                                                            int NOvAFSIMode) {
   FSParticleSummary fsps;
+  fsps.NOvAFSIMode = NOvAFSIMode;
 
 #ifdef DEBUG_FSP_LOOP
   std::cout << "NFSP: " << NFSP << std::endl;
@@ -222,6 +226,15 @@ T2KNOvAFlatTreeToFSParticleSummary(int NFSP, int *FSPDG, float *FSE_GeV) {
   SEL_X(NCOther)                                                               \
   SEL_X(NCOther_QE)                                                            \
   SEL_X(NuEElastic)                                                            \
+  SEL_X(NOvAFSIMode_CC0Pi)                                                     \
+  SEL_X(NOvAFSIMode_CC1Pi)                                                     \
+  SEL_X(NOvAFSIMode_CCOth)                                                     \
+  SEL_X(NOvAFSIMode_CCInc)                                                     \
+  SEL_X(NOvAFSIMode_NCInc)                                                     \
+  SEL_X(NOvAFSIMode_CC1cPi)                                                    \
+  SEL_X(NOvAFSIMode_CC1Pi0)                                                    \
+  SEL_X(NOvAFSIMode_CCMultiPi)                                                 \
+  SEL_X(NOvAFSIMode_Nope)                                                      \
   SEL_X(NoPrimarySel)
 
 #define X_CATNAME(A, B) A##B
@@ -246,13 +259,14 @@ static std::vector<selection> ReWeightSelectionList = {
     kNC0pi, kNC1cpi, kNC1pi0, kNCmultipi, kNCOther};
 #else
 static std::vector<selection> ReWeightSelectionList = {
-    kCC0pi_QE,  kCC0pi_2p2h, kCC0pi_Other, kCC1cpi,
-    kCC1pi0, kCCmultipi, kCCOther,    kNC0pi,       kNC1cpi,
-    kNC1pi0, kNCmultipi, kNCOther};
+    kCC0pi_QE, kCC0pi_2p2h, kCC0pi_Other, kCC1cpi, kCC1pi0,    kCCmultipi,
+    kCCOther,  kNC0pi,      kNC1cpi,      kNC1pi0, kNCmultipi, kNCOther};
 #endif
 
 inline std::vector<int> GetSelections(FSParticleSummary fsps, int mode = 0) {
   std::vector<int> sels = std::vector<int>{fsps.IsCC ? kCCInc : kNCInc};
+
+  sels.push_back(fsps.NOvAFSIMode);
 
   const double kEGammaDeExciteCut = 10 * 1E-3;
 

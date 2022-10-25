@@ -27,18 +27,6 @@ struct nova_part {
   vect4 p;
 };
 
-enum class FSIModes {
-  kCC0Pi = 0,
-  kCC1Pi = 1,
-  kCCOth = 2,
-  kCCInc = 3,
-  kNCInc = 4,
-  kCC1cPi = 5,
-  kCC1Pi0 = 6,
-  kCCMultiPi = 7,
-  kNope = -5
-};
-
 class T2KNOvATruthTreeReader {
 public:
   int PDGLep() { return *_PDGLep; }
@@ -193,7 +181,7 @@ public:
     return eAvail;
   }
 
-  FSIModes NOvAFSIMode() {
+  selection NOvAFSIMode() {
     bool first_lep = true;
 
     int nfsipip = 0;
@@ -208,7 +196,7 @@ public:
                          std::array<float, 4>{_px[i], _py[i], _pz[i], _E[i]});
 
       if (particle.pdg > 1000000000) {
-        return FSIModes::kNope; // COH interaction off of nuclei
+        return kNOvAFSIMode_Nope; // COH interaction off of nuclei
       }
 
       if (particle.pdg == 211) {
@@ -221,7 +209,7 @@ public:
         nfsiphn++;
       } else if ((abs(particle.pdg) > 10 && abs(particle.pdg) < 17)) {
         if (first_lep && !(abs(particle.pdg) & 1)) {
-          return FSIModes::kNCInc;
+          return kNOvAFSIMode_NCInc;
         }
         first_lep = false;
         nfsilep++;
@@ -237,15 +225,15 @@ public:
     }
 
     if (nfsipip + nfsipim + nfsipi0 + nfsioth == 0) {
-      return FSIModes::kCC0Pi;
+      return kNOvAFSIMode_CC0Pi;
     } else if (nfsipip + nfsipim == 1 && nfsipi0 + nfsioth == 0) {
-      return FSIModes::kCC1cPi;
+      return kNOvAFSIMode_CC1cPi;
     } else if (nfsipi0 == 1 && nfsipip + nfsipim + nfsioth == 0) {
-      return FSIModes::kCC1Pi0;
+      return kNOvAFSIMode_CC1Pi0;
     } else if (nfsipip + nfsipim + nfsipi0 > 1 && nfsioth == 0) {
-      return FSIModes::kCCMultiPi;
+      return kNOvAFSIMode_CCMultiPi;
     } else {
-      return FSIModes::kCCOth;
+      return kNOvAFSIMode_CCOth;
     }
   }
 
@@ -342,16 +330,17 @@ public:
   }
 
   std::vector<int> GetSelections() {
-    return t2knova::GetSelections(
-        T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress(),
-                                           (float *)_E.GetAddress()),
-        *_Mode);
+    return t2knova::GetSelections(T2KNOvAFlatTreeToFSParticleSummary(
+                                      *_nfsp, (int *)_pdg.GetAddress(),
+                                      (float *)_E.GetAddress(), NOvAFSIMode()),
+                                  *_Mode);
   }
 
   int GetPrimarySelection() {
     return t2knova::GetPrimarySelection(
         T2KNOvAFlatTreeToFSParticleSummary(*_nfsp, (int *)_pdg.GetAddress(),
-                                           (float *)_E.GetAddress()),
+                                           (float *)_E.GetAddress(),
+                                           NOvAFSIMode()),
         *_Mode);
   }
 
@@ -398,44 +387,3 @@ private:
 };
 
 } // namespace t2knova
-
-inline std::ostream &operator<<(std::ostream &os, t2knova::FSIModes m) {
-  switch (m) {
-  case t2knova::FSIModes::kCC0Pi: {
-    return os << "kCC0Pi";
-  }
-
-  case t2knova::FSIModes::kCC1Pi: {
-    return os << "kCC1Pi";
-  }
-
-  case t2knova::FSIModes::kCCOth: {
-    return os << "kCCOth";
-  }
-
-  case t2knova::FSIModes::kCCInc: {
-    return os << "kCCInc";
-  }
-
-  case t2knova::FSIModes::kNCInc: {
-    return os << "kNCInc";
-  }
-
-  case t2knova::FSIModes::kCC1cPi: {
-    return os << "kCC1cPi";
-  }
-
-  case t2knova::FSIModes::kCC1Pi0: {
-    return os << "kCC1Pi0";
-  }
-
-  case t2knova::FSIModes::kCCMultiPi: {
-    return os << "kCCMultiPi";
-  }
-
-  case t2knova::FSIModes::kNope: {
-    return os << "kNope";
-  }
-  }
-  return os;
-}

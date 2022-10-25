@@ -25,7 +25,6 @@ enum FDS { kGenerated, kNDTuned, kMnv1Pi, kNonQE };
 FDS FDSSet = kGenerated;
 
 TrueChannelHist<TH1D> *XSecs;
-SelectionHists<TH1D> *EvWeights;
 
 SelectionHists<TH1D> *Enu;
 SelectionHists<TH1D> *ERecQE;
@@ -138,7 +137,6 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   XSecs = new TrueChannelHist<TH1D>("SelectionXSecs", ";Selection;Rate",
                                     AllSelectionList.size(), 0,
                                     AllSelectionList.size());
-  EvWeights = SelectionHistsFromTOML<TH1D>("EvWeights", plots_config);
 
   PThetaLep_outlier_low =
       SelectionHistsFromTOML<TH2D>("PThetaLep", plots_config);
@@ -290,8 +288,6 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     for (auto sel : sels) {
       XSecs->Fill(w, mode, sel);
     }
-
-    EvWeights->Fill(1, sels, mode, w);
 
     if (rw_w <= 0.1) {
       PThetaLep_outlier_low->Fill(1, sels, mode, rdr.PLep(), rdr.AngLep_deg());
@@ -558,8 +554,6 @@ int main(int argc, char const *argv[]) {
 
   EGamma->Write(dout, true);
   EGamma_DeExcite->Write(dout, true);
-
-  EvWeights->Write(dout, true);
 
   fout.Close();
 }
