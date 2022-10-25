@@ -1102,7 +1102,7 @@ selections = [
   "NOvAFSIMode_NCInc",
   "NOvAFSIMode_CC1cPi",
   "NOvAFSIMode_CC1Pi0",
-  "NOvAFSIMode_CCMultiPi 
+  "NOvAFSIMode_CCMultiPi" ]
 
 x_binning = [
       "uniform",
