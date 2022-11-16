@@ -131,7 +131,6 @@ if [ "${GENERATOR}" == "GENIE" ]; then
   OPTARRAY+=("Default+MEC")
 fi
 
-
 T=$(( RANDOM % 10 )).$(( RANDOM % 1000 )); echo sleep $T; sleep $T
 
 echo "Running: singularity run ${IMAGE} run ${IMAGE} nuis gen ${GENERATOR} ${OPTARRAY[@]}"
@@ -149,6 +148,8 @@ TUNES["GENIE"]="2020"
 for tune in ${TUNES[${GENERATOR}]}; do
 
   FLATFILENAME=${OUTFILESTUB}.${tune}.${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.root
+
+  T=$(( RANDOM % 10 )).$(( RANDOM % 1000 )); echo sleep $T; sleep $T
 
   echo "Running: singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -P ${PROBE} -T ${tune} -t ${TARGET} -o ${FLATFILENAME}"
   singularity run ${IMAGE} anaev.sh -g ${GENERATOR} -i ${OUTFILENAME} -P ${PROBE} -T ${tune} -t ${TARGET} -o ${FLATFILENAME}  &>> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.${tune}.log
