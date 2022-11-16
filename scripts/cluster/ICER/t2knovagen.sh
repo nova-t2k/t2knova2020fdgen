@@ -126,12 +126,20 @@ if [ "${GENERATOR}" == "NEUT" ]; then #ensure that the generation options match 
   OPTARRAY+=("NEUT-MDLQE=402")
 fi
 
+if [ "${GENERATOR}" == "GENIE" ]; then
+  OPTARRAY+=("--event-generator-list")
+  OPTARRAY+=("Default+MEC")
+fi
+
+
+T=$(( RANDOM % 10 )).$(( RANDOM % 1000 )); echo sleep $T; sleep $T
+
 echo "Running: singularity run ${IMAGE} run ${IMAGE} nuis gen ${GENERATOR} ${OPTARRAY[@]}"
 singularity run ${IMAGE} nuis gen ${GENERATOR} ${OPTARRAY[@]} &> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log
 
-date
+cp job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log ${OUTFILENAME} /mnt/research/NuInt/generation/${OUTDIR}/${tune}/
 
-T=$(( RANDOM % 10 )).$(( RANDOM % 1000 )); echo sleep $T; sleep $T
+date
 
 declare -A TUNES
 
