@@ -81,10 +81,10 @@ struct FSParticleSummary {
 
 static std::set<int> UnknownParticles;
 
-inline FSParticleSummary T2KNOvAFlatTreeToFSParticleSummary(int NFSP,
-                                                            int *FSPDG,
-                                                            float *FSE_GeV,
-                                                            int NOvAFSIMode) {
+template <typename T>
+inline FSParticleSummary
+T2KNOvAFlatTreeToFSParticleSummary(int NFSP, int *FSPDG, T *FSE_GeV,
+                                   int NOvAFSIMode) {
   FSParticleSummary fsps;
   fsps.NOvAFSIMode = NOvAFSIMode;
 
