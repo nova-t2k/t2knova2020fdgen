@@ -1,9 +1,9 @@
 #!/bin/bash --login
 ########## SBATCH Lines for Resource Request ##########
  
-#SBATCH --time=02:00:00 
+#SBATCH --time=03:00:00 
 #SBATCH --mem-per-cpu=2G
-#SBATCH --job-name t2knovagengen
+#SBATCH --job-name t2knovagen
  
 ########## Command Lines for Job Running ##########
 
@@ -129,6 +129,8 @@ fi
 if [ "${GENERATOR}" == "GENIE" ]; then
   OPTARRAY+=("--event-generator-list")
   OPTARRAY+=("Default+MEC")
+  OPTARRAY+=("--message-thresholds")
+  OPTARRAY+=("/mnt/ufs18/home-050/picker24/projects/t2knova/t2knova2020fdgen/Messenger_laconic.xml")
 fi
 
 T=$(( RANDOM % 10 )).$(( RANDOM % 1000 )); echo sleep $T; sleep $T
@@ -136,7 +138,7 @@ T=$(( RANDOM % 10 )).$(( RANDOM % 1000 )); echo sleep $T; sleep $T
 echo "Running: singularity run ${IMAGE} run ${IMAGE} nuis gen ${GENERATOR} ${OPTARRAY[@]}"
 singularity run ${IMAGE} nuis gen ${GENERATOR} ${OPTARRAY[@]} &> job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log
 
-cp job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log ${OUTFILENAME} /mnt/research/NuInt/generation/${OUTDIR}/${tune}/
+cp job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log /mnt/research/NuInt/generation/${OUTDIR}/
 
 date
 
@@ -160,8 +162,9 @@ for tune in ${TUNES[${GENERATOR}]}; do
 
   date
 
-  mv ${FLATFILENAME} *.${tune}.log /mnt/research/NuInt/generation/${OUTDIR}/${tune}/
+  cp ${FLATFILENAME} job_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.${tune}.log /mnt/research/NuInt/generation/${OUTDIR}/${tune}/
 
 done
 
+#mv ${OUTFILENAME} /mnt/research/NuInt/generation/${OUTDIR}/
 cat *.card

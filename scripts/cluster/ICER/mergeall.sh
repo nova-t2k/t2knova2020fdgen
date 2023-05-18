@@ -3,7 +3,9 @@
 IDIR=/mnt/research/NuInt/generation/
 
 GENERATORS=( NEUT GENIE )
+GENERATORS=( GENIE )
 SPECIES=( numu numub nue nueb )
+#SPECIES=( numu )
 DETECTORS=( NOvAND ND280 )
 
 declare -A DET_MATS

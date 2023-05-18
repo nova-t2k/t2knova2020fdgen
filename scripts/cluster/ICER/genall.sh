@@ -6,7 +6,9 @@ set -e
 DO_SUBMIT=1
 
 GENERATORS=( NEUT GENIE )
+#GENERATORS=( GENIE )
 SPECIES=( numu numub nue nueb )
+#SPECIES=( nue nueb )
 DETECTORS=( NOvAND ND280 )
 
 declare -A FLUXES
@@ -39,12 +41,12 @@ NEVS["NEUT_nue_ND280"]=200000
 NEVS["NEUT_nueb_ND280"]=200000
 
 declare -A NJOBS
-NJOBS["GENIE_numu_NOvAND"]=200
+NJOBS["GENIE_numu_NOvAND"]=200 #200
 NJOBS["GENIE_numub_NOvAND"]=200
 NJOBS["GENIE_nue_NOvAND"]=200
 NJOBS["GENIE_nueb_NOvAND"]=200
 NJOBS["GENIE_numu_ND280"]=200
-NJOBS["GENIE_numub_ND280"]=400
+NJOBS["GENIE_numub_ND280"]=400 #400
 NJOBS["GENIE_nue_ND280"]=400
 NJOBS["GENIE_nueb_ND280"]=400
 
@@ -65,7 +67,7 @@ for gen in ${GENERATORS[@]}; do
   for spec in ${SPECIES[@]}; do
     for det in ${DETECTORS[@]}; do
       for mat in ${DET_MATS[${det}]}; do
-#          NJOBS["${gen}_${spec}_${det}"]=1
+          #NJOBS["${gen}_${spec}_${det}"]=150
 
           ./genone.sh --nfiles ${NJOBS["${gen}_${spec}_${det}"]} \
             -G ${gen} \
