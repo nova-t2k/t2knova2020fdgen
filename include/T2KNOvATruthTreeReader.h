@@ -173,6 +173,10 @@ public:
                (muon_energy - pfslep.Vect().Mag() * pfslep.Vect().CosTheta());
   }
 
+  float FSSumTProt(){
+    
+  }
+
   std::string PrintStack() {
     std::stringstream ss;
     ss << "NFSP: " << (*_nfsp) << "\n";

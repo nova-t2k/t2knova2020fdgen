@@ -731,6 +731,47 @@ axis_titles = [
       "d#sigma/d#it{E}_{#nu}#it{E}_{Rec. Bias}^{Had. Av.} cm^{2} GeV^{-1}"
 ]
 
+[FakeDataValidConfig.q0_QEEAvBias]
+
+title = "q0_QEEAvBias"
+selections = [
+  "CCInc",
+  "CCInc_RW",
+  "CC0pi",
+  "CC0pi_QE",
+  "CC0pi_2p2h",
+  "CC0pi_Other",
+  "CC1Gamma",
+  "CCDeExciteGamma",
+  "CCNGamma",
+  "CC1cpi",
+  "CC1pi0",
+  "CCmultipi",
+  "CCOther",
+  "CCOther_QE",
+  "NOvAFSIMode_CC0Pi",
+  "NOvAFSIMode_CCOth",
+  "NOvAFSIMode_CCInc",
+  "NOvAFSIMode_CC1cPi",
+  "NOvAFSIMode_CC1Pi0",
+  "NOvAFSIMode_CCMultiPi" ]
+
+y_binning = [
+      "uniform",
+      [50,0,0.7]
+]
+
+x_binning = [
+      "uniform",
+      [100,-1,3]
+]
+
+axis_titles = [
+      "#it{E}_{Rec. Bias}^{Had. Av.} = (E^{Av.}/q_{0}^{QE}) - 1",
+      "#it{q}_{0}^{QE} (GeV)",
+      "d#sigma/d#it{E}_{Rec. Bias}^{Had. Av.}#it{q}_{0}^{QE} cm^{2} GeV^{-1}"
+]
+
 [FakeDataValidConfig.hmfscpip]
 
 title = "hmfscpip"

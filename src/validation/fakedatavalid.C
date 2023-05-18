@@ -47,6 +47,7 @@ SelectionHists<TH2D> *EnuQ2_outlier_high;
 SelectionHists<TH2D> *EnuERecQE;
 SelectionHists<TH2D> *EnuERecQEBias;
 SelectionHists<TH2D> *EnuERecAvBias;
+SelectionHists<TH2D> *q0_QEEAvBias;
 SelectionHists<TH2D> *q0q3_high_outlier_low;
 SelectionHists<TH2D> *q0q3_high_outlier_high;
 SelectionHists<TH2D> *q0q3_low;
@@ -63,32 +64,6 @@ SelectionHists<TH1D> *nneutron;
 SelectionHists<TH1D> *EGamma;
 SelectionHists<TH1D> *EGamma_DeExcite;
 
-double const mass_proton = 0.938272;
-double const mass_neutron = 0.939565;
-
-double EnuQErec(double elep, double plep, double costh, double binding,
-                bool neutrino) {
-
-  const double V = binding;       // binding potential
-  const double mn = mass_neutron; // neutron mass
-  const double mp = mass_proton;  // proton mass
-
-  double mN_eff = mn - V;
-  double mN_oth = mp;
-
-  if (!neutrino) {
-    mN_eff = mp - V;
-    mN_oth = mn;
-  }
-
-  double el = elep;
-  double pl = plep;                         // momentum of lepton
-  double ml = std::sqrt(el * el - pl * pl); // lepton mass
-
-  return (2 * mN_eff * el - ml * ml + mN_oth * mN_oth - mN_eff * mN_eff) /
-         (2 * (mN_eff - el + pl * costh));
-};
-
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
           t2knova::reweightconfig weightconfig, int tgta_select = 0) {
 
@@ -101,6 +76,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   EnuERecQE = SelectionHistsFromTOML<TH2D>("EnuERecQE", plots_config);
   EnuERecQEBias = SelectionHistsFromTOML<TH2D>("EnuERecQEBias", plots_config);
   EnuERecAvBias = SelectionHistsFromTOML<TH2D>("EnuERecAvBias", plots_config);
+  q0_QEEAvBias = SelectionHistsFromTOML<TH2D>("q0_QEEAvBias", plots_config);
 
   q0q3_low = SelectionHistsFromTOML<TH2D>("q0q3_low", plots_config);
   q0q3_high = SelectionHistsFromTOML<TH2D>("q0q3_high", plots_config);
@@ -245,16 +221,18 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     w *= rw_w;
 
     Enu->Fill(w, sels, mode, rdr.Enu_true());
-    double erec = EnuQErec(rdr.FSLepP4().E(), rdr.PLep(), rdr.CosLep(), 0,
-                           rdr.PDGNu() > 0);
-    ERecQE->Fill(w, sels, mode, erec);
-    EnuERecQE->Fill(w, sels, mode, rdr.Enu_true(), erec);
+    ERecQE->Fill(w, sels, mode, rdr.GetTrueEnuQE());
+    EnuERecQE->Fill(w, sels, mode, rdr.Enu_true(), rdr.GetTrueEnuQE());
 
-    float ERecQEBias = (erec / rdr.Enu_true()) - 1;
+    float ERecQEBias = (rdr.GetTrueEnuQE() / rdr.Enu_true()) - 1;
     EnuERecQEBias->Fill(w, sels, mode, rdr.Enu_true(), ERecQEBias);
     float ERecAvBias =
         ((rdr.Eav_NOvA() + rdr.FSLepP4().E()) / rdr.Enu_true()) - 1;
     EnuERecAvBias->Fill(w, sels, mode, rdr.Enu_true(), ERecAvBias);
+
+    float q0_QE = rdr.GetTrueEnuQE() - rdr.FSLepP4().E();
+    float EAvBias = (rdr.Eav_NOvA() / q0_QE) - 1;
+    q0_QEEAvBias->Fill(w, sels, mode,  EAvBias, q0_QE);
 
     PLep->Fill(w, sels, mode, rdr.PLep());
     ThetaLep->Fill(w, sels, mode, rdr.AngLep_deg());
@@ -531,6 +509,7 @@ int main(int argc, char const *argv[]) {
   EnuERecQE->Write(dout, true);
   EnuERecQEBias->Write(dout, true);
   EnuERecAvBias->Write(dout, true);
+  q0_QEEAvBias->Write(dout, true);
   q0q3_low->Write(dout, true);
   q0q3_high->Write(dout, true);
   q0q3_high_outlier_low->Write(dout, true);

@@ -22,12 +22,16 @@ bool isgst = false;
 
 SelectionHists<TH1D> *Enu;
 SelectionHists<TH1D> *PLep;
+SelectionHists<TH1D> *q0;
+SelectionHists<TH1D> *q3;
 
 void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
           int tgta_select = 0) {
 
   Enu = SelectionHistsFromTOML<TH1D>("Enu", plots_config);
   PLep = SelectionHistsFromTOML<TH1D>("PLep", plots_config);
+  q0 = SelectionHistsFromTOML<TH1D>("q0", plots_config);
+  q3 = SelectionHistsFromTOML<TH1D>("q3", plots_config);
 
   std::unique_ptr<T2KNOvATruthTreeReader> rdr_nuis(
       isgst ? nullptr : new T2KNOvATruthTreeReader(ttrdr));
@@ -40,7 +44,7 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
   double EnuCut = toml::find<double>(plots_config, "EnuCut");
 
   while (ttrdr.Next()) {
-    
+
     int mode = bymode ? (isgst ? rdr_gst->Mode() : rdr_nuis->Mode()) : 0;
 
     if (ent_it && !(ent_it % shout_it)) {
@@ -65,9 +69,16 @@ void Fill(TTreeReader &ttrdr, toml::value const &plots_config,
     int primary_selection = (isgst ? rdr_gst->GetPrimarySelection()
                                    : rdr_nuis->GetPrimarySelection());
 
-    Enu->Fill(1.0, sels, mode,
-              (isgst ? rdr_gst->Enu_true() : rdr_nuis->Enu_true()));
+    double Enu_gev = (isgst ? rdr_gst->Enu_true() : rdr_nuis->Enu_true());
+    Enu->Fill(1.0, sels, mode, Enu_gev);
     PLep->Fill(1.0, sels, mode, (isgst ? rdr_gst->PLep() : rdr_nuis->PLep()));
+
+    TLorentzVector fslep4 = (isgst ? rdr_gst->FSLepP4() : rdr_nuis->FSLepP4());
+    TLorentzVector isnup4 = TLorentzVector(0, 0, Enu_gev, Enu_gev);
+    TLorentzVector fourmomtransfer = (isnup4 - fslep4);
+
+    q0->Fill(1.0, sels, mode, fourmomtransfer.E());
+    q3->Fill(1.0, sels, mode, fourmomtransfer.Vect().Mag());
 
     ent_it++;
   }
@@ -162,6 +173,8 @@ int main(int argc, char const *argv[]) {
 
   Enu->Write(dout, true);
   PLep->Write(dout, true);
+  q0->Write(dout, true);
+  q3->Write(dout, true);
 
   fout.Close();
 }

@@ -1028,6 +1028,7 @@ void ValidPlots(std::string const &finname, bool DoT2K) {
                    //  "q0q3_high",
                    "CosThetaLep", "hmfscpip", "hmfspi0p", "ncpi", "npi0",
                    // "EGamma", "EGamma_DeExcite"
+                   "yrec"
                }) {
 
             hblob::LoadAndPrint(fin, kNOvAND, t2k_proj, nuspec, tgtstr,
